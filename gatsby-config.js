@@ -16,7 +16,7 @@ module.exports = {
       }
     ],
     sidebarConfig: {
-      forcedNavOrder: ['/'],
+      forcedNavOrder: ['/','service_list','help'],
       ignoreIndex: false
     }
   },

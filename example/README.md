@@ -1,1 +1,0 @@
-# Gatsby Theme Document Example
