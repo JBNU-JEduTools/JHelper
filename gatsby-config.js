@@ -2,6 +2,7 @@ module.exports = {
   siteMetadata: {
     title: `Document by Code Bushi`,
     name: `Code Bushi`,
+    pathPrefix:"/manual-src/public/",
     siteUrl: `https://codebushi.com`,
     description: `This is my description that will be used in the meta tags and important for search results`,
     social: [
