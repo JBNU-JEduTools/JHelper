@@ -1,8 +1,8 @@
 module.exports = {
+  pathPrefix:`/document`,
   siteMetadata: {
     title: `Document by Code Bushi`,
     name: `Code Bushi`,
-    pathPrefix:'/document',
     siteUrl: `https://codebushi.com`,
     description: `This is my description that will be used in the meta tags and important for search results`,
     social: [
