@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 const ListItem = ({ location, item }) => {
-  return <ListItemLink to={location.pathname + item.url}>{item.title}</ListItemLink>;
+  return <ListItemLink to={'./' + item.url}>{item.title}</ListItemLink>;
 };
 
 const ListItemLink = styled(Link)`
