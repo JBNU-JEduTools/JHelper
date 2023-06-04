@@ -52,6 +52,7 @@
     "lodash": "^4.17.15",
     "prop-types": "^15.7.2",
     "react-helmet": "^5.2.1",
+    "remark-mdx": "^2.3.0",
     "theme-ui": "^0.3.1"
   }
 }
