@@ -13,10 +13,12 @@ git clone https://github.com/codebushi/gatsby-theme-document-example
 
 # 컨트리뷰션 가이드라인
 
-## A.Github Action 자동배포를 위한, 시크릿 설정
-* https://github.com/settings/profile
- 
-추후 보강
+ ## A. 컨트리뷰션 방법
+ 1. 해당 리포지토리를 Fork한다. 
+ 2. main브랜치에서 내용을 수정한다. 
+    * 소스코드를 수정했을 시, 빌드 테스트까지 수행한다.
+ 3. 해당 레포지토리에서 Pull Request를 요청한다.
+
 
 ## B.문서 추가시 참고할 내용
 
@@ -37,6 +39,19 @@ git clone https://github.com/codebushi/gatsby-theme-document-example
 만약 도메인을 연결해 루트경로에서 서비스할 수 있게된다면 아래 항목을 수정해야 합니다.
 * package.json > yarn run build > build:ghpage > PREFIX_PATHS=true gatsby build 항목을 gatsby build 로 변경
 * gatsby-config.js > pathPrefix 항목 삭제
+
+
+## C.[관리자]Github Action 자동배포를 위한, 시크릿 설정
+
+**개인용 PAT 만들기**
+* https://github.com/settings/profile > Developer Settins
+* Personal Access Token (classic) > Generate New Token 선택
+* repo 권한체크해서 생성하기. (값 복사, 추후 사용) 
+
+**문서화 레포지토리에 PAT 등록**
+* 문서화 레포지토리 > Settings
+* Secrets And Variables > Actions
+* 앞서 만든 개인 PAT 추가
 
 # 릴리즈
 
