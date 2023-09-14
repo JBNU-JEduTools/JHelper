@@ -7,7 +7,7 @@ import ButtonCollapse from '../ButtonCollapse';
 const NavItem = ({ items, url = '', title = '' }) => {
   const state = useContext(GlobalStateContext);
   const dispatch = useContext(GlobalDispatchContext);
-  const isCollapsed = state.collapsed[url];
+  const isCollapsed = url ? state.collapsed[url] !== true : false;
   const hasChildren = items && items.length > 0;
   return (
     <StyledNavItem>
