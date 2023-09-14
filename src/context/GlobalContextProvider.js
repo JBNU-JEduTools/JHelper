@@ -4,7 +4,11 @@ export const GlobalStateContext = React.createContext();
 export const GlobalDispatchContext = React.createContext();
 
 const initialState = {
-  collapsed: {}
+  collapsed: {
+    '/JCode': false,
+    '/JStackOverflow': false,
+    '/JHelper': false,
+  }
 };
 
 function reducer(state, action) {
