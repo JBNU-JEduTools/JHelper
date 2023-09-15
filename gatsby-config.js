@@ -21,13 +21,6 @@ module.exports = {
     }
   },
   plugins: [
-    		{
-      resolve: `gatsby-plugin-canonical-urls`,
-      options: {
-        siteUrl: `https://jbnu-jedutools.github.io/JHelper`,
-        stripQueryString: true,
-      },
-    },
     {
       resolve: 'gatsby-source-filesystem',
       options: {
