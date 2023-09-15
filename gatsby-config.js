@@ -11,8 +11,8 @@ module.exports = {
         url: `https://github.com/codebushi`
       },
       {
-        name: `twitter`,
-        url: `https://twitter.com/HuntaroSan`
+        name: `kakao`,
+        url: `https://open.kakao.com/o/gNqEqr6c`
       }
     ],
     sidebarConfig: {
