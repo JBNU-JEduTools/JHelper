@@ -52,8 +52,8 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `Document`,
-        short_name: `Document`,
+        name: `JHelper`,
+        short_name: `JHelper`,
         start_url: `/`,
         background_color: `#182952`,
         theme_color: `#a2466c`,
