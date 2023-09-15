@@ -1,5 +1,5 @@
 module.exports = {
-  pathPrefix:`/document`,
+  pathPrefix:`/JHelper`,
   siteMetadata: {
     title: `Document by Code Bushi`,
     name: `Code Bushi`,
@@ -16,7 +16,7 @@ module.exports = {
       }
     ],
     sidebarConfig: {
-      forcedNavOrder: ['/','/JCode','/JStackOverflow','/JHelper','help'],
+      forcedNavOrder: ['/','/JCode','/JStackOverflow','/J-Helper','help'],
       ignoreIndex: false
     }
   },
