@@ -3,7 +3,7 @@ import { graphql, useStaticQuery } from 'gatsby';
 import React from 'react';
 import Github from './icons/Github';
 import Icon from './icons/Icon';
-import Twitter from './icons/Twitter';
+import Kakao from './icons/Kakao';
 
 const socialQuery = graphql`
   {
@@ -23,7 +23,7 @@ const socialQuery = graphql`
 `;
 
 const icons = {
-  twitter: <Twitter />,
+  kakao: <Kakao />,
   github: <Github />
 };
 
