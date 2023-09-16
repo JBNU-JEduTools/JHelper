@@ -1,14 +1,14 @@
 module.exports = {
-  pathPrefix:`/JHelper`,
+  pathPrefix:``,
   siteMetadata: {
-    title: `Document by Code Bushi`,
-    name: `Code Bushi`,
-    siteUrl: `https://codebushi.com`,
+    title: `Document Of J-Edutools`,
+    name: `JHelper`,
+    siteUrl: `https://jbnu-jedutools.github.io/`,
     description: `This is my description that will be used in the meta tags and important for search results`,
     social: [
       {
         name: `github`,
-        url: `https://github.com/codebushi`
+        url: `https://github.com/JBNU-JEduTools/JHelper`
       },
       {
         name: `kakao`,
