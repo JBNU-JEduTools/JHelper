@@ -17,7 +17,7 @@
   "scripts": {
     "develop": "gatsby develop",
     "build":"gatsby build",
-    "build:ghpage": "rm -rf ./docs && PREFIX_PATHS=true gatsby build && mv ./public ./docs"
+    "build:ghpage": "rm -rf ./docs && PREFIX_PATHS= gatsby build && mv ./public ./docs"
   },
   "peerDependencies": {
     "gatsby": "^2.23.3",
