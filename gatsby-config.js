@@ -1,8 +1,8 @@
 module.exports = {
   pathPrefix:``,
   siteMetadata: {
-    title: `Document by Code Bushi`,
-    name: `Code Bushi`,
+    title: `Document Of J-Edutools`,
+    name: `JHelper`,
     siteUrl: `https://jbnu-jedutools.github.io/`,
     description: `This is my description that will be used in the meta tags and important for search results`,
     social: [
