@@ -108,6 +108,6 @@ git push origin document-002
 * 앞서 만든 개인 PAT 추가
 
 **주의사항 : Token이 기간이 지나면 만료가 되니 주기적으로 교체해 줄 것**
-* 최근 교체 : 2023.08.23(Thu), Seoul Time = UTC +09:00
+* 최근 교체 : 2023.11.01(Wed), Seoul Time = UTC +09:00
 * 유효 기간 : 90 Days
-* 다음 교체 일자 : 2023.10.31(Tue), Seoul Time = UTC +09:00
+* 다음 교체 일자 : 2023.01.30(Tue), Seoul Time = UTC +09:00
