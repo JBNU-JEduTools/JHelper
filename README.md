@@ -1,10 +1,10 @@
 # JEdutools Documentation
 
-전북대학교 운영체제 연구실에서 서비스하는 JBNU Edu Tools의 통합 문서입니다.
+전북대학교 SW교육도구모음 JEduTools의 통합 문서입니다.
 
 ### 원본 프로젝트
 
-JEdutools 문서화 프로젝트는 codebushi의 gatsby-theme-document-example를 수정해 사용하고 있습니다.
+JEduTools 도움말 프로젝트는 codebushi의 gatsby-theme-document-example를 수정해 사용하고 있습니다.
 ```
 git clone https://github.com/codebushi/gatsby-theme-document-example
 ```
