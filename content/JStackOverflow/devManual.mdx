@@ -4,7 +4,43 @@ description: 'This is the meta description for this page'
 slug: 'JStackOverflow/3DevManual'
 ---
 
-- [설치 및 운영 매뉴얼](https://jbnu-jedutools.github.io/document/JStackOverflow/3DevManual/Installation)
-  - JStackOverflow 설치 및 운영 관련 매뉴얼
-- [Troubleshooting](https://jbnu-jedutools.github.io/document/JStackOverflow/3DevManual/Troubleshooting)
-  - JStackOverflow 운영 중 발생한 오류 해결 과정 기록
+## 설치하기
+```bash
+# 요구사항
+Ubuntu 22.04 LTS
+node v18.16.0
+npm v9.5.1
+mongodb v5.0.18
+```
+
+1. [JCloud](http://jcloud.jbnu.ac.kr/auth/login/?next=/)에서 사이트 운영에 사용할 인스턴스를 생성합니다.
+2. PuTTY 또는 XShell 과 같은 SSH 도구를 통해 JCloud 인스턴스에 접속합니다.
+3. [Nodebb 공식 설치 가이드](https://docs.nodebb.org/installing/os/ubuntu/)를 참고하여 Nodebb를 인스턴스에 설치합니다.
+    - JStackOverflow는 오픈소스 프로젝트 [Nodebb](https://github.com/NodeBB/NodeBB)를 기반으로 만들어졌습니다.
+      - ※ 2023년 8월 기준 현재까지 공개된 nodebb의 최신버전은 3.x 버전이므로,  github repository에서 clone 받을 시 document에서 안내하는 명령어 대신 아래 명령어를 사용하여 최신 버전을 설치해주세요.
+      - `git clone -b v3.x https://github.com/NodeBB/NodeBB.git nodebb`
+      - 설치 중 `./nodebb setup` 명령어 실행 시 사이트 관리자 계정(admin)의 username과 password를 설정할 수 있습니다. admin 계정으로만 admin panel에 접근할 수 있으므로, 주의해서 메모해놓도록 합니다.
+4. 설치 및 실행이 완료되었다면, `./nodebb log` 명령어를 통해 로그를 확인할 수 있습니다.
+
+## 인스턴스 재시작시 자동으로 실행되도록 설정
+- 간혹 JCloud 인스턴스가 꺼지는 경우가 발생할 수 있습니다.
+- crontab을 이용해 인스턴스가 재시작 되더라도 nodebb가 자동으로 실행되도록 설정할 수 있습니다.
+  ```bash
+  $ mkdir ./nodebb/shell # 스크립트를 저장할 디렉토리 생성
+  $ sudo vi ./nodebb/shell/nodebb-autostart.sh # 자동 실행 스크립트 생성
+  ```
+  ```bash
+  #!/bin/bash
+  /usr/bin/systemctl restart mongod && /home/ubuntu/nodebb/nodebb start
+  ```
+  ```bash
+  $ sudo chmod +x ./nodebb/shell/nodebb-autostart.sh # 자동 실행 스크립트 권한 변경
+  $ sudo crontab -e # 크론탭 설정 시작
+  ```
+  ```bash
+  @reboot
+  /home/ubuntu/nodebb/shell/nodebb-autostart.sh
+  ```
+
+## 문서 기여하기
+- [컨트리뷰션 가이드](https://github.com/JBNU-JEduTools/document/blob/main/CONTRIBUTING.md)를 참고해 JEduTools 서비스의 문서화에 기여하실 수 있습니다.
