@@ -1,5 +1,5 @@
 module.exports = {
-  pathPrefix:`JHelper`,
+  pathPrefix:``,
   siteMetadata: {
     title: `Document Of JEdutools`,
     name: `JHelper`,
