@@ -3,7 +3,7 @@ module.exports = {
   siteMetadata: {
     title: `Document Of JEdutools`,
     name: `JHelper`,
-    siteUrl: `https://jbnu-jedutools.github.io`,
+    siteUrl: `https://jbnu-jedutools.github.io/JHelper`,
     description: `This is my description that will be used in the meta tags and important for search results`,
     social: [
       {
