@@ -19,4 +19,4 @@ V1.0.0 (Released 23.06.04)
 5. 4번으로 인해 우측 문서 바로가기 동작 안하는문제 수정
 
 v1.0.1(Released 24.01.19)
-1. URL changed to jedutools.jbnu.ac.kr
+1. URL changed to "jedutools.jbnu.ac.kr"
