@@ -54,7 +54,7 @@ module.exports = {
       options: {
         name: `JHelper`,
         short_name: `JHelper`,
-        start_url: `/JHelper`,
+        start_url: `/`,
         background_color: `#182952`,
         theme_color: `#a2466c`,
         display: `standalone`,
