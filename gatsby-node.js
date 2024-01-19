@@ -54,8 +54,8 @@ exports.onCreateNode = ({ node, getNode, actions, reporter }) => {
       slugValue = '';
     }
 
-    if (value.startsWith('/JHelper/')) {
-      value = value.replace('/JHelper', '');
+    if (slugValue.startsWith('/JHelper/')) {
+      slugValue = slugValue.replace('/JHelper', '');
     }
 
     createNodeField({
