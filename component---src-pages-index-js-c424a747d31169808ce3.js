@@ -1,2 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[2],{RXBc:function(e,c,t){"use strict";t.r(c);var n=t("q1tI"),i=t("Wbzz"),a=t("qKvR");c.default=()=>(Object(n.useEffect)(()=>{Object(i.navigate)("",{replace:!0})},[]),Object(a.d)("div",null,"Redirecting..."))}}]);
-//# sourceMappingURL=component---src-pages-index-js-c424a747d31169808ce3.js.map
