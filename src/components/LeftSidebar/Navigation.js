@@ -31,9 +31,9 @@ const calculateTreeData = (edges, sidebarConfig) => {
         }
       }
     ) => {
-      const parts = slug.split('/');
+      const parts = slug.split('/').filter(Boolean);
       let { items: prevItems } = accu;
-      for (const part of parts.slice(1, -1)) {
+      for (const part of parts.slice(0, -1)) {
         let tmp = prevItems.find(({ label }) => label === part);
         if (tmp) {
           if (!tmp.items) {
@@ -47,8 +47,12 @@ const calculateTreeData = (edges, sidebarConfig) => {
       }
       const existingItem = prevItems.find(({ label }) => label === parts[parts.length - 1]);
       if (existingItem) {
-        existingItem.url = slug;
-        existingItem.title = title;
+           if (slug.includes('/JHelper/')) {
+              existingItem.url = slug.replace('/JHelper', '');
+           } else {
+              existingItem.url = slug;
+           }
+            existingItem.title = title;
       } else {
         prevItems.push({
           label: parts[parts.length - 1],
