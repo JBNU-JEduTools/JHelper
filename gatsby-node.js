@@ -38,26 +38,27 @@ exports.onCreateNode = ({ node, getNode, actions, reporter }) => {
 
   if (node.internal.type === `Mdx`) {
     const parent = getNode(node.parent);
-    const title = node.frontmatter.title || startCase(parent.name)
+    const title = node.frontmatter.title || startCase(parent.name);
 
-    let value =  node.frontmatter.slug;
-    if(!value && parent.relativePath){
-      value = parent.relativePath.replace(parent.ext, '');
+    let slugValue = node.frontmatter.slug;
+    if (!slugValue && parent.relativePath) {
+      slugValue = parent.relativePath.replace(parent.ext, '');
+      slugValue = slugValue.replace('/JHelper/', '/');
     }
-    
-    if (!value) {
-      reporter.panic(`Can not create node with title: ${title} there is no relative path or frontmatter to set the "slug" field`);
+
+    if (!slugValue) {
+      reporter.panic(`Cannot create node with title: ${title}, there is no relative path or frontmatter to set the "slug" field`);
       return;
     }
 
-    if (value === 'index') {
-      value = '';
+    if (slugValue === 'index') {
+      slugValue = '';
     }
 
     createNodeField({
       name: `slug`,
       node,
-      value: `/${value}`
+      value: `/${slugValue}`
     });
 
     createNodeField({
