@@ -43,7 +43,6 @@ exports.onCreateNode = ({ node, getNode, actions, reporter }) => {
     let slugValue = node.frontmatter.slug;
     if (!slugValue && parent.relativePath) {
       slugValue = parent.relativePath.replace(parent.ext, '');
-      slugValue = slugValue.replace('/JHelper/', '/');
     }
 
     if (!slugValue) {
@@ -53,6 +52,10 @@ exports.onCreateNode = ({ node, getNode, actions, reporter }) => {
 
     if (slugValue === 'index') {
       slugValue = '';
+    }
+
+    if (value.startsWith('/JHelper/')) {
+      value = value.replace('/JHelper', '');
     }
 
     createNodeField({
