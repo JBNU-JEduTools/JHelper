@@ -79,7 +79,6 @@ const calculateTreeData = (edges, sidebarConfig) => {
       }
       prevItems = tmp.items;
     }
-    // sort items alphabetically.
     prevItems.forEach(item => {
       item.items = item.items.sort(function(a, b) {
         if (a.label < b.label) return -1;
@@ -91,6 +90,15 @@ const calculateTreeData = (edges, sidebarConfig) => {
     accu.items.unshift(prevItems.splice(index, 1)[0]);
     return accu;
   }, tree);
+};
+
+const filterTreeData = (items) => {
+  return items.filter(item => item.url !== '/').map(item => {
+    if (item.items) {
+      item.items = filterTreeData(item.items);
+    }
+    return item;
+  });
 };
 
 const Navigation = () => {
@@ -122,9 +130,12 @@ const Navigation = () => {
   `);
   const { allSite, allMdx } = result;
   const { sidebarConfig } = allSite.edges[0].node.siteMetadata;
+
   const [treeData] = useState(() => {
-    return calculateTreeData(allMdx.edges, sidebarConfig);
+    const unfilteredTreeData = calculateTreeData(allMdx.edges, sidebarConfig);
+    return { items: filterTreeData(unfilteredTreeData.items) };
   });
+  
   return (
     <NavList>
       <NavItem {...treeData} />
