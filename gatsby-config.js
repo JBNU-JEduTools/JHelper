@@ -16,7 +16,7 @@ module.exports = {
       }
     ],
     sidebarConfig: {
-      forcedNavOrder: ['/','/JCode','/JStackOverflow','/JHelper'],
+      forcedNavOrder: ['/JCode','/JStackOverflow','/JHelper'],
       ignoreIndex: false
     }
   },
