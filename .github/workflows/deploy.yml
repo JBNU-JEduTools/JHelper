@@ -27,7 +27,7 @@ jobs:
         env:
           NODE_ENV: production
       - name: Create CNAME
-        run: echo "https://jedutools.jbnu.ac.kr/JHelper" > ./docs/CNAME
+        run: echo "jedutools.jbnu.ac.kr" > ./docs/CNAME
       - uses: peaceiris/actions-gh-pages@v2
         env:
           GITHUB_TOKEN: ${{ secrets.JHELPER_TOKEN }}
