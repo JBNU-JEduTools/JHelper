@@ -30,6 +30,6 @@ jobs:
         run: echo "jedutools.jbnu.ac.kr" > ./docs/CNAME
       - uses: peaceiris/actions-gh-pages@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.JHELPER_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.JHELPERTOKEN }}
           PUBLISH_BRANCH: gh-pages
           PUBLISH_DIR: ./docs
