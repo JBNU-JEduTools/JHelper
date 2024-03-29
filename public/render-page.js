@@ -1,12 +1,12 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("C:\\Users\\default.DESKTOP-6VELVF4\\Documents\\GitHub\\JHelper\\node_modules\\@reach\\router\\index.js"), require("fs"), require("C:\\Users\\default.DESKTOP-6VELVF4\\Documents\\GitHub\\JHelper\\node_modules\\lodash\\merge.js"), require("path"), require("react"), require("react-dom/server"), require("react-helmet"));
+		module.exports = factory(require("/workspaces/JHelper/node_modules/@reach/router/index.js"), require("fs"), require("/workspaces/JHelper/node_modules/lodash/merge.js"), require("path"), require("react"), require("react-dom/server"), require("react-helmet"));
 	else if(typeof define === 'function' && define.amd)
-		define("lib", ["C:\\Users\\default.DESKTOP-6VELVF4\\Documents\\GitHub\\JHelper\\node_modules\\@reach\\router\\index.js", "fs", "C:\\Users\\default.DESKTOP-6VELVF4\\Documents\\GitHub\\JHelper\\node_modules\\lodash\\merge.js", "path", "react", "react-dom/server", "react-helmet"], factory);
+		define("lib", ["/workspaces/JHelper/node_modules/@reach/router/index.js", "fs", "/workspaces/JHelper/node_modules/lodash/merge.js", "path", "react", "react-dom/server", "react-helmet"], factory);
 	else if(typeof exports === 'object')
-		exports["lib"] = factory(require("C:\\Users\\default.DESKTOP-6VELVF4\\Documents\\GitHub\\JHelper\\node_modules\\@reach\\router\\index.js"), require("fs"), require("C:\\Users\\default.DESKTOP-6VELVF4\\Documents\\GitHub\\JHelper\\node_modules\\lodash\\merge.js"), require("path"), require("react"), require("react-dom/server"), require("react-helmet"));
+		exports["lib"] = factory(require("/workspaces/JHelper/node_modules/@reach/router/index.js"), require("fs"), require("/workspaces/JHelper/node_modules/lodash/merge.js"), require("path"), require("react"), require("react-dom/server"), require("react-helmet"));
 	else
-		root["lib"] = factory(root["C:\\Users\\default.DESKTOP-6VELVF4\\Documents\\GitHub\\JHelper\\node_modules\\@reach\\router\\index.js"], root["fs"], root["C:\\Users\\default.DESKTOP-6VELVF4\\Documents\\GitHub\\JHelper\\node_modules\\lodash\\merge.js"], root["path"], root["react"], root["react-dom/server"], root["react-helmet"]);
+		root["lib"] = factory(root["/workspaces/JHelper/node_modules/@reach/router/index.js"], root["fs"], root["/workspaces/JHelper/node_modules/lodash/merge.js"], root["path"], root["react"], root["react-dom/server"], root["react-helmet"]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE__reach_router__, __WEBPACK_EXTERNAL_MODULE_fs__, __WEBPACK_EXTERNAL_MODULE_lodash_merge__, __WEBPACK_EXTERNAL_MODULE_path__, __WEBPACK_EXTERNAL_MODULE_react__, __WEBPACK_EXTERNAL_MODULE_react_dom_server__, __WEBPACK_EXTERNAL_MODULE_react_helmet__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -124,7 +124,7 @@ var plugins = [{
     "remarkPlugins": [],
     "rehypePlugins": [],
     "mediaTypes": ["text/markdown", "text/x-markdown"],
-    "root": "C:\\Users\\default.DESKTOP-6VELVF4\\Documents\\GitHub\\JHelper"
+    "root": "/workspaces/JHelper"
   }
 }, {
   plugin: __webpack_require__(/*! ./node_modules/gatsby-plugin-manifest/gatsby-ssr */ "./node_modules/gatsby-plugin-manifest/gatsby-ssr.js"),
@@ -1682,7 +1682,7 @@ __webpack_require__.r(__webpack_exports__);
 
 function toPropertyKey(t) {
   var i = Object(_toPrimitive_js__WEBPACK_IMPORTED_MODULE_1__["default"])(t, "string");
-  return "symbol" == Object(_typeof_js__WEBPACK_IMPORTED_MODULE_0__["default"])(i) ? i : String(i);
+  return "symbol" == Object(_typeof_js__WEBPACK_IMPORTED_MODULE_0__["default"])(i) ? i : i + "";
 }
 
 /***/ }),
@@ -1794,7 +1794,7 @@ function _interopRequireWildcard(e, r) {
       __proto__: null
     },
     a = Object.defineProperty && Object.getOwnPropertyDescriptor;
-  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+  for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) {
     var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
     i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
   }
@@ -41948,9 +41948,9 @@ const systemFonts = '-apple-system, BlinkMacSystemFont, San Francisco, Helvetica
 /***/ }),
 
 /***/ "@reach/router":
-/*!*************************************************************************************************************************!*\
-  !*** external "C:\\Users\\default.DESKTOP-6VELVF4\\Documents\\GitHub\\JHelper\\node_modules\\@reach\\router\\index.js" ***!
-  \*************************************************************************************************************************/
+/*!**************************************************************************!*\
+  !*** external "/workspaces/JHelper/node_modules/@reach/router/index.js" ***!
+  \**************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
@@ -41970,9 +41970,9 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_fs__;
 /***/ }),
 
 /***/ "lodash/merge":
-/*!*****************************************************************************************************************!*\
-  !*** external "C:\\Users\\default.DESKTOP-6VELVF4\\Documents\\GitHub\\JHelper\\node_modules\\lodash\\merge.js" ***!
-  \*****************************************************************************************************************/
+/*!*******************************************************************!*\
+  !*** external "/workspaces/JHelper/node_modules/lodash/merge.js" ***!
+  \*******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
