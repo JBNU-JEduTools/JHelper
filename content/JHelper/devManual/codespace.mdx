@@ -1,0 +1,54 @@
+---
+title: 'Codespace 매뉴얼'
+description: 'This is the meta description for this page'
+slug: 'J-Helper/2devManual/1Codespace'
+--- 
+
+일부 로컬 환경에서는 개발환경이 구성되지 않는 경우가 있습니다. 이때 codespace를 활용하여 ubuntu환경을 생성하고 원격으로 작업을 수행할 수 있습니다.
+
+## 1. 기존 저장소 Fork
+
+JHelper 저장소를 포크하여 개인 저장소로 복제합니다.
+
+<img src="../Images/codespace-1.png"/>
+
+## 2. codespace 생성
+
+아래의 사진과 같이 codespace를 생성하면 웹 기반의 Visual Studio Code 환경에 자동으로 접속됩니다.
+
+<img src="../Images/codespace-2.png"/>
+
+
+## 3. 개발환경 설정
+
+터미널을 열고 다음 명령어를 사용하여 필요한 의존성을 설치합니다.
+
+```bash
+yarn install
+```
+<img src="../Images/codespace-3.png"/>
+
+
+## 4. 작업내용 미리보기
+
+작업 내용을 미리 보려면 다음 명령어를 실행하세요.
+
+```bash
+yarn run develop
+```
+
+codespace는 원격 개발환경이므로 localhost로 접근할 수 없음에 주의해야합니다. 아래의 포트 패널에서 8000 포트의 주소를 확인하여 미리보기 페이지로 접속할 수 있습니다.
+
+<img src="../Images/codespace-4.png"/>
+
+
+## 5. 작업 내용 저장
+
+문서의 추가/삭제나 저장에 관한 부분은 <a href='/J-Helper/2devManual'>개발자 매뉴얼</a>을 참고하여 수행할 수 있습니다.
+개발자 매뉴얼에 따라 작업을 저장하고 PR을 생성하면 관리자가 반영할 것 입니다.
+
+## 6. codespace 삭제
+
+개인계정에 할당된 codespace는 월별 사용량이 정해져 있으므로 작업을 완료한 이후에는 다음과 같이 codespace를 삭제합니다.
+
+<img src="../Images/codespace-5.png"/>
