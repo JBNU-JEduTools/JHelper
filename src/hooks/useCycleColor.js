@@ -8,9 +8,13 @@ function useCycleColor() {
   const [colorMode, setColorMode] = useColorMode();
 
   const cycleColorMode = () => {
-    const i = modes.indexOf(colorMode) + 1;
-    const n = (i) % modes.length;
-    setColorMode(modes[n]);
+      var i = modes.indexOf(colorMode);
+      console.log(i);
+      if(i === -1) i = 1;
+      if(i === 4) i = 1;
+      else i += 1;
+      const n = (i) % modes.length;
+      setColorMode(modes[n]);
   };
   return { cycleColorMode };
 }
