@@ -9,7 +9,7 @@ function useCycleColor() {
 
   const cycleColorMode = () => {
     const i = modes.indexOf(colorMode);
-    const n = (i + 2) % modes.length;
+    const n = (i + 1) % modes.length;
     setColorMode(modes[n]);
   };
 
