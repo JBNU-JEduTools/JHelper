@@ -1,12 +1,12 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("/workspaces/JHelper/node_modules/@reach/router/index.js"), require("fs"), require("/workspaces/JHelper/node_modules/lodash/merge.js"), require("path"), require("react"), require("react-dom/server"), require("react-helmet"));
+		module.exports = factory(require("C:\\github\\jhelper\\JHelper\\node_modules\\@reach\\router\\index.js"), require("fs"), require("C:\\github\\jhelper\\JHelper\\node_modules\\lodash\\merge.js"), require("path"), require("react"), require("react-dom/server"), require("react-helmet"));
 	else if(typeof define === 'function' && define.amd)
-		define("lib", ["/workspaces/JHelper/node_modules/@reach/router/index.js", "fs", "/workspaces/JHelper/node_modules/lodash/merge.js", "path", "react", "react-dom/server", "react-helmet"], factory);
+		define("lib", ["C:\\github\\jhelper\\JHelper\\node_modules\\@reach\\router\\index.js", "fs", "C:\\github\\jhelper\\JHelper\\node_modules\\lodash\\merge.js", "path", "react", "react-dom/server", "react-helmet"], factory);
 	else if(typeof exports === 'object')
-		exports["lib"] = factory(require("/workspaces/JHelper/node_modules/@reach/router/index.js"), require("fs"), require("/workspaces/JHelper/node_modules/lodash/merge.js"), require("path"), require("react"), require("react-dom/server"), require("react-helmet"));
+		exports["lib"] = factory(require("C:\\github\\jhelper\\JHelper\\node_modules\\@reach\\router\\index.js"), require("fs"), require("C:\\github\\jhelper\\JHelper\\node_modules\\lodash\\merge.js"), require("path"), require("react"), require("react-dom/server"), require("react-helmet"));
 	else
-		root["lib"] = factory(root["/workspaces/JHelper/node_modules/@reach/router/index.js"], root["fs"], root["/workspaces/JHelper/node_modules/lodash/merge.js"], root["path"], root["react"], root["react-dom/server"], root["react-helmet"]);
+		root["lib"] = factory(root["C:\\github\\jhelper\\JHelper\\node_modules\\@reach\\router\\index.js"], root["fs"], root["C:\\github\\jhelper\\JHelper\\node_modules\\lodash\\merge.js"], root["path"], root["react"], root["react-dom/server"], root["react-helmet"]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE__reach_router__, __WEBPACK_EXTERNAL_MODULE_fs__, __WEBPACK_EXTERNAL_MODULE_lodash_merge__, __WEBPACK_EXTERNAL_MODULE_path__, __WEBPACK_EXTERNAL_MODULE_react__, __WEBPACK_EXTERNAL_MODULE_react_dom_server__, __WEBPACK_EXTERNAL_MODULE_react_helmet__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -104,6 +104,13 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ (function(module, exports, __webpack_require__) {
 
 var plugins = [{
+  plugin: __webpack_require__(/*! ./node_modules/gatsby-plugin-google-fonts/gatsby-ssr */ "./node_modules/gatsby-plugin-google-fonts/gatsby-ssr.js"),
+  options: {
+    "plugins": [],
+    "fonts": ["Inter:400,500,600,700"],
+    "display": "swap"
+  }
+}, {
   plugin: __webpack_require__(/*! ./node_modules/gatsby-plugin-mdx/gatsby-ssr */ "./node_modules/gatsby-plugin-mdx/gatsby-ssr.js"),
   options: {
     "plugins": [],
@@ -124,7 +131,7 @@ var plugins = [{
     "remarkPlugins": [],
     "rehypePlugins": [],
     "mediaTypes": ["text/markdown", "text/x-markdown"],
-    "root": "/workspaces/JHelper"
+    "root": "C:\\github\\jhelper\\JHelper"
   }
 }, {
   plugin: __webpack_require__(/*! ./node_modules/gatsby-plugin-manifest/gatsby-ssr */ "./node_modules/gatsby-plugin-manifest/gatsby-ssr.js"),
@@ -1562,11 +1569,9 @@ const wrapRootElement = ({
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-function _assertThisInitialized(self) {
-  if (self === void 0) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-  return self;
+function _assertThisInitialized(e) {
+  if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  return e;
 }
 module.exports = _assertThisInitialized, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
@@ -1584,20 +1589,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return _defineProperty; });
 /* harmony import */ var _toPropertyKey_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./toPropertyKey.js */ "./node_modules/@babel/runtime/helpers/esm/toPropertyKey.js");
 
-function _defineProperty(obj, key, value) {
-  key = Object(_toPropertyKey_js__WEBPACK_IMPORTED_MODULE_0__["default"])(key);
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-  return obj;
+function _defineProperty(e, r, t) {
+  return (r = Object(_toPropertyKey_js__WEBPACK_IMPORTED_MODULE_0__["default"])(r)) in e ? Object.defineProperty(e, r, {
+    value: t,
+    enumerable: !0,
+    configurable: !0,
+    writable: !0
+  }) : e[r] = t, e;
 }
+
 
 /***/ }),
 
@@ -1613,11 +1613,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return _inheritsLoose; });
 /* harmony import */ var _setPrototypeOf_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./setPrototypeOf.js */ "./node_modules/@babel/runtime/helpers/esm/setPrototypeOf.js");
 
-function _inheritsLoose(subClass, superClass) {
-  subClass.prototype = Object.create(superClass.prototype);
-  subClass.prototype.constructor = subClass;
-  Object(_setPrototypeOf_js__WEBPACK_IMPORTED_MODULE_0__["default"])(subClass, superClass);
+function _inheritsLoose(t, o) {
+  t.prototype = Object.create(o.prototype), t.prototype.constructor = t, Object(_setPrototypeOf_js__WEBPACK_IMPORTED_MODULE_0__["default"])(t, o);
 }
+
 
 /***/ }),
 
@@ -1631,13 +1630,12 @@ function _inheritsLoose(subClass, superClass) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return _setPrototypeOf; });
-function _setPrototypeOf(o, p) {
-  _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) {
-    o.__proto__ = p;
-    return o;
-  };
-  return _setPrototypeOf(o, p);
+function _setPrototypeOf(t, e) {
+  return _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) {
+    return t.__proto__ = e, t;
+  }, _setPrototypeOf(t, e);
 }
+
 
 /***/ }),
 
@@ -1664,6 +1662,7 @@ function toPrimitive(t, r) {
   return ("string" === r ? String : Number)(t);
 }
 
+
 /***/ }),
 
 /***/ "./node_modules/@babel/runtime/helpers/esm/toPropertyKey.js":
@@ -1684,6 +1683,7 @@ function toPropertyKey(t) {
   var i = Object(_toPrimitive_js__WEBPACK_IMPORTED_MODULE_1__["default"])(t, "string");
   return "symbol" == Object(_typeof_js__WEBPACK_IMPORTED_MODULE_0__["default"])(i) ? i : i + "";
 }
+
 
 /***/ }),
 
@@ -1707,6 +1707,7 @@ function _typeof(o) {
   }, _typeof(o);
 }
 
+
 /***/ }),
 
 /***/ "./node_modules/@babel/runtime/helpers/extends.js":
@@ -1717,18 +1718,13 @@ function _typeof(o) {
 /***/ (function(module, exports) {
 
 function _extends() {
-  module.exports = _extends = Object.assign ? Object.assign.bind() : function (target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i];
-      for (var key in source) {
-        if (Object.prototype.hasOwnProperty.call(source, key)) {
-          target[key] = source[key];
-        }
-      }
+  return module.exports = _extends = Object.assign ? Object.assign.bind() : function (n) {
+    for (var e = 1; e < arguments.length; e++) {
+      var t = arguments[e];
+      for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]);
     }
-    return target;
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
-  return _extends.apply(this, arguments);
+    return n;
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports, _extends.apply(null, arguments);
 }
 module.exports = _extends, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
@@ -1742,10 +1738,8 @@ module.exports = _extends, module.exports.__esModule = true, module.exports["def
 /***/ (function(module, exports, __webpack_require__) {
 
 var setPrototypeOf = __webpack_require__(/*! ./setPrototypeOf.js */ "./node_modules/@babel/runtime/helpers/setPrototypeOf.js");
-function _inheritsLoose(subClass, superClass) {
-  subClass.prototype = Object.create(superClass.prototype);
-  subClass.prototype.constructor = subClass;
-  setPrototypeOf(subClass, superClass);
+function _inheritsLoose(t, o) {
+  t.prototype = Object.create(o.prototype), t.prototype.constructor = t, setPrototypeOf(t, o);
 }
 module.exports = _inheritsLoose, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
@@ -1758,9 +1752,9 @@ module.exports = _inheritsLoose, module.exports.__esModule = true, module.export
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : {
-    "default": obj
+function _interopRequireDefault(e) {
+  return e && e.__esModule ? e : {
+    "default": e
   };
 }
 module.exports = _interopRequireDefault, module.exports.__esModule = true, module.exports["default"] = module.exports;
@@ -1811,17 +1805,14 @@ module.exports = _interopRequireWildcard, module.exports.__esModule = true, modu
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-function _objectWithoutPropertiesLoose(source, excluded) {
-  if (source == null) return {};
-  var target = {};
-  var sourceKeys = Object.keys(source);
-  var key, i;
-  for (i = 0; i < sourceKeys.length; i++) {
-    key = sourceKeys[i];
-    if (excluded.indexOf(key) >= 0) continue;
-    target[key] = source[key];
+function _objectWithoutPropertiesLoose(r, e) {
+  if (null == r) return {};
+  var t = {};
+  for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
+    if (-1 !== e.indexOf(n)) continue;
+    t[n] = r[n];
   }
-  return target;
+  return t;
 }
 module.exports = _objectWithoutPropertiesLoose, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
@@ -1834,12 +1825,10 @@ module.exports = _objectWithoutPropertiesLoose, module.exports.__esModule = true
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-function _setPrototypeOf(o, p) {
-  module.exports = _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) {
-    o.__proto__ = p;
-    return o;
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
-  return _setPrototypeOf(o, p);
+function _setPrototypeOf(t, e) {
+  return module.exports = _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) {
+    return t.__proto__ = e, t;
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports, _setPrototypeOf(t, e);
 }
 module.exports = _setPrototypeOf, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
@@ -1855,11 +1844,11 @@ module.exports = _setPrototypeOf, module.exports.__esModule = true, module.expor
 function _typeof(o) {
   "@babel/helpers - typeof";
 
-  return (module.exports = _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+  return module.exports = _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
     return typeof o;
   } : function (o) {
     return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports), _typeof(o);
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports, _typeof(o);
 }
 module.exports = _typeof, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
@@ -8209,6 +8198,48 @@ function parsePath(path) {
 
 /***/ }),
 
+/***/ "./node_modules/gatsby-plugin-google-fonts/gatsby-ssr.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/gatsby-plugin-google-fonts/gatsby-ssr.js ***!
+  \***************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _react = __webpack_require__(/*! react */ "react");
+var _react2 = _interopRequireDefault(_react);
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    default: obj
+  };
+}
+var format = function format(string) {
+  return string.split(' ').map(function (s) {
+    return s.replace(/^\w/, function (s) {
+      return s.toUpperCase();
+    });
+  }).join(' ');
+};
+var getFonts = function getFonts(options) {
+  return options.fonts.map(format).join('|').replace(/ /g, '+');
+};
+function getDisplay(options) {
+  return options.display ? '&display=' + options.display : '';
+}
+exports.onRenderBody = function (_ref, options) {
+  var setHeadComponents = _ref.setHeadComponents;
+  var link = 'https://fonts.googleapis.com/css?family=' + getFonts(options) + getDisplay(options);
+  setHeadComponents([_react2.default.createElement('link', {
+    key: 'fonts',
+    href: link,
+    rel: 'stylesheet'
+  })]);
+};
+
+/***/ }),
+
 /***/ "./node_modules/gatsby-plugin-manifest/common.js":
 /*!*******************************************************!*\
   !*** ./node_modules/gatsby-plugin-manifest/common.js ***!
@@ -8338,7 +8369,7 @@ exports.onRenderBody = function (_ref, _ref2) {
   if (srcIconExists) {
     if (insertFaviconLinkTag) {
       _common.favicons.forEach(function (favicon) {
-        headComponents.push( /*#__PURE__*/React.createElement("link", {
+        headComponents.push(/*#__PURE__*/React.createElement("link", {
           key: "gatsby-plugin-manifest-icon-link-png",
           rel: "icon",
           href: withPrefix((0, _common.addDigestToPath)(favicon.src, cacheDigest, cacheBusting)),
@@ -8346,7 +8377,7 @@ exports.onRenderBody = function (_ref, _ref2) {
         }));
       });
       if (icon === null || icon === void 0 ? void 0 : icon.endsWith(".svg")) {
-        headComponents.push( /*#__PURE__*/React.createElement("link", {
+        headComponents.push(/*#__PURE__*/React.createElement("link", {
           key: "gatsby-plugin-manifest-icon-link-svg",
           rel: "icon",
           href: withPrefix((0, _common.addDigestToPath)("favicon.svg", cacheDigest, cacheBusting)),
@@ -8356,7 +8387,7 @@ exports.onRenderBody = function (_ref, _ref2) {
     }
   } // Add manifest link tag.
 
-  headComponents.push( /*#__PURE__*/React.createElement("link", {
+  headComponents.push(/*#__PURE__*/React.createElement("link", {
     key: "gatsby-plugin-manifest-link",
     rel: "manifest",
     href: (0, _gatsby.withPrefix)("/" + manifestFileName),
@@ -8364,7 +8395,7 @@ exports.onRenderBody = function (_ref, _ref2) {
   })); // The user has an option to opt out of the theme_color meta tag being inserted into the head.
 
   if (theme_color && insertMetaTag) {
-    headComponents.push( /*#__PURE__*/React.createElement("meta", {
+    headComponents.push(/*#__PURE__*/React.createElement("meta", {
       key: "gatsby-plugin-manifest-meta",
       name: "theme-color",
       content: theme_color
@@ -8372,7 +8403,7 @@ exports.onRenderBody = function (_ref, _ref2) {
   }
   if (legacy) {
     icons.forEach(function (icon) {
-      headComponents.push( /*#__PURE__*/React.createElement("link", {
+      headComponents.push(/*#__PURE__*/React.createElement("link", {
         key: "gatsby-plugin-manifest-apple-touch-icon-" + icon.sizes,
         rel: "apple-touch-icon",
         sizes: icon.sizes,
@@ -41948,9 +41979,9 @@ const systemFonts = '-apple-system, BlinkMacSystemFont, San Francisco, Helvetica
 /***/ }),
 
 /***/ "@reach/router":
-/*!**************************************************************************!*\
-  !*** external "/workspaces/JHelper/node_modules/@reach/router/index.js" ***!
-  \**************************************************************************/
+/*!***************************************************************************************!*\
+  !*** external "C:\\github\\jhelper\\JHelper\\node_modules\\@reach\\router\\index.js" ***!
+  \***************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
@@ -41970,9 +42001,9 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_fs__;
 /***/ }),
 
 /***/ "lodash/merge":
-/*!*******************************************************************!*\
-  !*** external "/workspaces/JHelper/node_modules/lodash/merge.js" ***!
-  \*******************************************************************/
+/*!*******************************************************************************!*\
+  !*** external "C:\\github\\jhelper\\JHelper\\node_modules\\lodash\\merge.js" ***!
+  \*******************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 

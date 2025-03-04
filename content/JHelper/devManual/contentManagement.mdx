@@ -1,0 +1,119 @@
+---
+title: '콘텐츠 관리 가이드'
+description: 'JEduTools 매뉴얼 페이지에 새로운 항목 추가 및 관리 방법'
+slug: 'JHelper/2devManual/contentManagement'
+---
+
+# JEduTools 콘텐츠 관리 가이드
+
+JEduTools 매뉴얼 페이지에 새로운 서비스를 추가하거나 기존 서비스를 제거할 때 수정해야 하는 내용과 절차를 안내합니다.
+
+## 새로운 서비스 추가하기
+
+새로운 서비스(예: JCloud)를 JEduTools 매뉴얼에 추가하려면 다음 단계를 수행해야 합니다:
+
+### 1. content 디렉토리에 새 폴더 생성
+
+```bash
+mkdir -p content/서비스명/images
+```
+
+예: `mkdir -p content/JCloud/images`
+
+### 2. 메인 문서 파일 생성
+
+서비스 디렉토리에 메인 문서 파일을 생성합니다. 파일 이름은 일반적으로 `서비스명Home.mdx` 또는 `서비스명.mdx` 형식으로 지정합니다.
+
+```
+content/서비스명/서비스명Home.mdx
+```
+
+이 파일에는 다음과 같은 프론트매터(frontmatter)가 포함되어야 합니다:
+
+```yaml
+---
+title: '서비스명 사용 가이드'
+description: '서비스에 대한 간략한 설명'
+slug: '서비스명/1Home'
+---
+```
+
+slug는 실제 URL 경로를 지정합니다. 일반적으로 `서비스명/1Home`과 같이 숫자를 사용하여 정렬 순서를 지정할 수 있습니다.
+
+### 3. gatsby-config.js 파일 수정
+
+네비게이션 메뉴 순서를 설정하기 위해 `gatsby-config.js` 파일의 `forcedNavOrder` 배열을 수정합니다:
+
+```js
+sidebarConfig: {
+  forcedNavOrder: ['/서비스명', '기존서비스1', '기존서비스2'],
+  ignoreIndex: false
+}
+```
+
+예를 들어, JCloud를 추가하는 경우:
+```js
+forcedNavOrder: ['/JCloud', '/JCode', '/JHelper']
+```
+
+### 4. index.mdx 파일 수정
+
+홈페이지의 서비스 목록 표에 새 서비스를 추가합니다:
+
+```markdown
+| 이름      | 소개          | 링크   | 도움말 | GitHub 저장소 |
+|-----------|--------------|:------:|:------:|:-------------:|
+| 서비스명  | 서비스 설명   | [Click](서비스URL) | [Manual](/서비스slug) | [repo](repo주소) |
+```
+
+예를 들어:
+```markdown
+| JCloud | 전북대학교 클라우드 시스템 | [Click](http://jcloud.jbnu.ac.kr) | [Manual](/JCloud/1Home) | [repo](https://github.com/JBNU-JEduTools/JCloud) |
+```
+
+### 5. architecture.md 파일 업데이트
+
+`architecture.md` 파일의 디렉토리 구조 섹션에 새 서비스 폴더를 추가합니다:
+
+```
+content/
+├── 서비스명/        # 서비스명 관련 문서
+```
+
+## 기존 서비스 제거하기
+
+서비스를 제거할 때는 위 단계의 역순으로 진행합니다:
+
+1. `gatsby-config.js` 파일의 `forcedNavOrder` 배열에서 서비스 제거
+2. `index.mdx` 파일에서 해당 서비스 항목 제거
+3. `architecture.md` 파일에서 디렉토리 구조 업데이트
+4. (선택 사항) `content/서비스명` 디렉토리 삭제
+
+## 서비스 문서 구조화 요령
+
+복잡한 서비스 문서는 다음과 같이 구조화하는 것이 좋습니다:
+
+```
+content/
+└── 서비스명/
+    ├── 서비스명Home.mdx       # 메인 문서
+    ├── userManual/            # 사용자 매뉴얼
+    │   ├── userGuide.mdx
+    │   └── troubleshooting.mdx
+    ├── devManual/             # 개발자 매뉴얼
+    │   ├── setupGuide.mdx
+    │   └── apiReference.mdx
+    └── images/                # 문서에 사용되는 이미지
+```
+
+각 문서 파일의 slug에 숫자 접두사를 사용하여 정렬 순서를 조정할 수 있습니다:
+- `서비스명/1Home`
+- `서비스명/2userManual/1userGuide`
+- `서비스명/2userManual/2troubleshooting`
+- `서비스명/3devManual/1setupGuide`
+
+## 주의사항
+
+- 모든 이미지는 해당 서비스의 `images` 폴더에 저장합니다.
+- 다른 문서로 연결되는 내부 링크는 slug를 사용합니다: `[링크텍스트](/서비스명/페이지slug)`
+- 문서 추가 후 로컬에서 빌드하여 오류가 없는지 확인합니다: `yarn run develop` 

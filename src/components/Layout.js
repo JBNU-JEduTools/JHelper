@@ -39,6 +39,8 @@ const SiteWrapper = styled.div`
 const SiteContentWrapper = styled.div`
   flex-grow: 1;
   min-width: 20rem;
+  display: flex;
+  justify-content: center;
 `;
 
 const SiteContent = styled.main`
@@ -46,11 +48,12 @@ const SiteContent = styled.main`
   transition: 0.25s var(--ease-in-out-quad);
   opacity: ${p => (p.navOpen ? 0.3 : 1)};
   transform: ${p => (p.navOpen ? `translateX(16rem)` : null)};
+  width: 100%;
   ${mediaqueries.desktop_up`
     transform: translateX(0);
     opacity: 1;
     padding: 7rem 3rem 3rem;
-    max-width: 50rem;
+    max-width: 65rem;
   `};
 `;
 
