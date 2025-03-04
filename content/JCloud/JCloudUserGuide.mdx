@@ -1,0 +1,43 @@
+---
+title: 'JCloud 사용 가이드'
+description: 'This is the meta description for this page'
+slug: 'JCloud/1UserGuide'
+---
+
+### 동영상: ["JEduTools 소개 및 사용법: JCloud(1)"@Youtube](https://youtu.be/5YYMlnuHTKc?si=rljtPM3UdLAxPrOV&t=824)
+### 슬라이드: [GitHub -> Download raw file](https://github.com/JBNU-JEduTools/JEduTools/blob/main/slides/JEduTools2.pptx)
+
+### 0. **사용 등록**
+  - 수업 활용: 교수님 신청으로 일괄 등록. (1차: 개강 시, 2차: 수강정정 종료 후, 3차: 수강확정 후 (1/4선))
+  - 개인 활용: 별도 신청 (추후 링크 제공)
+
+### 1. **[jcloud.jbnu.ac.kr](http://jcloud.jbnu.ac.kr) 접속 후, 로그인**
+- 전북대 구성원: 학교 구글 계정으로 통합 로그인: [참고](http://jedutools.jbnu.ac.kr)
+  - 통합로그인의 경우, 암호 변경 불필요
+- 외부 구성원: "keystone credentials" 를 이용해 별도 발급한 계정으로 로그인
+  - 첫 로그인 후, 암호 변경 필수!
+### 2. **Keypair 만들기 (처음 한 번)**
+   - **키페어 이름:** “학번-key”  
+   - **타입:** SSH key  
+   - Create Key Pair 클릭 시 자동으로 pem 파일 다운로드됨  
+     - pem 파일은 반드시 개인 메일로 전송해 안전하게 관리 (다시 찾을 수 있는 방법 없음)
+
+### 3. **인스턴스 만들기 **
+- 인스턴스 메뉴에서 "인스턴스 시작" 버튼 클릭 *(아래 설정을 참고하여 진행)*
+  - **인스턴스 이름:** 본인 ID (번호를 붙여도 됨)
+  - **가용 구역:** “Any~”
+  - **부팅 소스:** 수업에서 지정한 이미지 선택 (새로운 볼륨 “아니오”)
+  - **Flavor:** 수업에서 지정한 flavor 선택
+  - **Networks:** 각 프로젝트 별 생성된 internal network 사용 **(do_not_use는 사용 금지)**
+  - **키페어:** 미리 생성해둔 키페어 선택
+  - 기타 옵션은 기본 설정 사용  
+  - 마지막 “시작” 버튼 클릭하면, 인스턴스 생성 시작.
+- **인스턴스 생성 확인:**  
+  - Power state가 **Running**으로 변경되면 부팅 시작  
+  - Running 상태 후 1-2분 후에 SSH로 접속하여 확인
+
+### 5. **내가 뭘 한거지?**
+- 학교 안에 내 컴퓨터가 한 대 생긴 것과 같음!  
+  (예: 2개의 CPU, 2GB 메모리, 20GB SSD를 가진 가상머신에 Ubuntu 기반 이미지가 설치됨)  
+- 부팅 완료까지 약 1-2분 소요  
+  - 많은 인원이 함께 진행할 경우 약간 더 오래 걸릴 수 있음

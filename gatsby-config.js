@@ -16,11 +16,20 @@ module.exports = {
       }
     ],
     sidebarConfig: {
-      forcedNavOrder: ['/JCode','/JStackOverflow','/JHelper'],
+      forcedNavOrder: ['/JCloud', '/Litmus', '/JCode',  '/JHelper', '/Portal'],
       ignoreIndex: false
     }
   },
   plugins: [
+    {
+      resolve: `gatsby-plugin-google-fonts`,
+      options: {
+        fonts: [
+          `Inter\:400,500,600,700`
+        ],
+        display: 'swap'
+      }
+    },
     {
       resolve: 'gatsby-source-filesystem',
       options: {

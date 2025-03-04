@@ -43,7 +43,7 @@ const StyledHeader = styled.header`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1rem;
+  padding: 0.5rem 1rem;
   z-index: 5;
   background: ${p => p.theme.colors.background};
   transition: all 0.25s var(--ease-in-out-quad);
@@ -54,9 +54,8 @@ const StyledHeader = styled.header`
     top: 0;
     left: 0;
     right: 0;
-    padding: 1rem 1.2rem;
+    padding: 0.0rem 1.5rem;
     transform: translateX(0);
-
   `};
 `;
 

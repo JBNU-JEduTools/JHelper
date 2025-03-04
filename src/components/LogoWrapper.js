@@ -12,9 +12,14 @@ const LogoWrapper = () => (
 );
 
 const StyledLogoWrapper = styled.div`
+  display: flex;
+  align-items: center;
   p {
-    margin: 0;
-    font-size: 1.6rem;
+    margin: 1rem 0.5rem;
+    font-size: 30px;
+    line-height: 1;
+    font-weight: bold;
+    font-family: 'Inter', ${p => p.theme.fonts.body};
   }
 `;
 
