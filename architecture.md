@@ -19,6 +19,7 @@ JEduTools는 전북대학교의 SW 교육을 위한 도구 모음입니다. 이 
 │   ├── index.mdx        # 홈페이지 콘텐츠
 │   ├── JHelper/         # JHelper 관련 문서
 │   ├── JCode/           # JCode 관련 문서
+│   ├── JFlow/           # JFlow 관련 문서
 │   ├── JCloud/          # JCloud 관련 문서
 │   ├── JIGSSO/          # JIGSSO 관련 문서
 │   ├── Litmus/          # Litmus 관련 문서
