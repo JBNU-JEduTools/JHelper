@@ -61,7 +61,7 @@ slug: 'JFlow/2JenkinsGuide'
 
 >    - `Generic-Webhook-Trigger` : 웹훅에 사용할 트리거입니다. **(반드시 사용합니다.)**
 
->    - `Token` : 웹훅에 사용할 토큰입니다. `사용자명-서비스` 구조로 고유하도록 작성합니다.
+>    - `Token` : 웹훅에 사용할 토큰입니다. `사용자명-서비스` 구조로 **고유하도록** 작성합니다.
 
   <img src="./images/jenkins/4.png" width="1000px" height="auto"/> <br/><br/><br/>    
 
@@ -94,7 +94,7 @@ slug: 'JFlow/2JenkinsGuide'
 
 **1. 기본 구조**
 
-```groovy
+```shell
 pipeline {
     agent any
     
@@ -138,36 +138,35 @@ pipeline {
 
 **3. 예시 Jenkinsfile**
 
-```groovy
+```shell
 // Jenkins 파이프라인의 시작을 선언합니다.
 pipeline {
     // Kubernetes 에이전트를 설정합니다.
     agent {
         kubernetes {
-            // 'docker-agent' 라벨을 가진 Pod을 생성합니다.
-            label 'docker-agent'
-            // 기본 컨테이너를 'docker'로 지정합니다.
-            defaultContainer 'docker'
+            // 'kaniko-agent' 라벨을 가진 Pod을 생성합니다. 
+            // 관리자가 사전에 생성한 Pod-Template을 사용합니다.
+            label 'kaniko-agent'
+            // 기본 컨테이너를 'kaniko'로 지정합니다.
+            defaultContainer 'kaniko'
         }
     }
 
     // 파이프라인에서 사용할 환경 변수들을 정의합니다.
     environment {
         // Harbor 레지스트리 관련 설정입니다.
+        // 수정해주세요
         REGISTRY = 'harbor.jbnu.ac.kr'
-        HARBOR_PROJECT = 'test'
-        IMAGE_NAME = 'test-nginx'
-        // 도커 이미지의 전체 경로를 설정합니다.
+        HARBOR_PROJECT = '<사용자 이름>'
+        IMAGE_NAME = '<이미지 이름>'
         DOCKER_IMAGE = "${REGISTRY}/${HARBOR_PROJECT}/${IMAGE_NAME}"
-        // Harbor 인증 정보의 ID를 설정합니다.
         DOCKER_CREDENTIALS_ID = 'harbor-credentials'
-        // SonarQube 인증 토큰을 Jenkins 크레덴셜에서 가져옵니다.
         SONAR_TOKEN = credentials("sonarqube-credentials")
+        HARBOR_CREDENTIALS = credentials("${DOCKER_CREDENTIALS_ID}")
     }
 
     // 파이프라인의 각 단계를 정의합니다.
     stages {
-        // 소스 코드를 체크아웃하는 단계입니다.
         stage('Checkout') {
             steps {
                 checkout scm
@@ -177,83 +176,71 @@ pipeline {
         // SonarQube를 사용하여 코드 품질을 분석하는 단계입니다.
         stage('SonarQube Analysis') {
             steps {
-                // sonar-scanner 컨테이너에서 실행합니다.
                 container('sonar-scanner') {
-                    // SonarQube 환경 설정을 적용합니다.
                     withSonarQubeEnv('sonarqube') {
                         // sonar-scanner 명령어를 실행하여 코드 분석을 수행합니다.
                         sh """
-                         sonar-scanner \\
-                         -Dsonar.projectKey=test-nginx \\
-                         -Dsonar.projectName=test-nginx \\
-                         -Dsonar.sources=. \\
-                         -Dsonar.exclusions=**/node_modules/** \\
-                         -Dsonar.login=${SONAR_TOKEN}
+                            sonar-scanner \\
+                            -Dsonar.projectKey=${HARBOR_PROJECT}-${IMAGE_NAME} \\
+                            -Dsonar.projectName=${HARBOR_PROJECT}-${IMAGE_NAME} \\
+                            -Dsonar.sources=. \\
+                            -Dsonar.exclusions=**/node_modules/** \\
+                            -Dsonar.login=${SONAR_TOKEN}
                         """
                     }
                 }
             }
         }
 
-        // 도커 이미지를 빌드하는 단계입니다.
-        stage('Docker Build') {
+        // Docker 설정 파일을 생성합니다. 
+        stage('Create Docker Config') {
             steps {
                 script {
-                    // 도커 데몬이 준비될 때까지 최대 2분간 대기합니다.
-                    timeout(time: 2, unit: 'MINUTES') {
-                        sh '''#!/bin/sh
-                            until docker info >/dev/null 2>&1; do
-                                echo "Waiting for docker daemon..."
-                                sleep 2
-                            done
-                        '''
-                    }
-
-                    // 도커 이미지를 빌드합니다.
+                    // Kaniko가 사용할 Docker 설정 파일을 생성합니다.
                     sh """
-                        docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .
+                        mkdir -p /home/jenkins/agent/.docker
+                        echo '{"auths":{"${REGISTRY}":{"username":"${HARBOR_CREDENTIALS_USR}","password":"${HARBOR_CREDENTIALS_PSW}"}}}' > /home/jenkins/agent/.docker/config.json
+                        cat /home/jenkins/agent/.docker/config.json
+                        cp /home/jenkins/agent/.docker/config.json /home/jenkins/agent/config.json
                     """
+                    
+                    // Kaniko가 사용할 볼륨에 Docker 설정 파일을 복사합니다.
+                    container('kaniko') {
+                        sh """
+                            mkdir -p /kaniko/.docker
+                            cp /home/jenkins/agent/config.json /kaniko/.docker/config.json
+                            ls -la /kaniko/.docker
+                        """
+                    }
                 }
             }
         }
 
-        // 빌드된 도커 이미지를 Harbor 레지스트리에 푸시하는 단계입니다.
-        stage('Docker Push') {
+        // Kaniko를 사용하여 도커 이미지를 빌드하고 푸시하는 단계입니다.
+        stage('Build and Push with Kaniko') {
             steps {
-                script {
-                    // Harbor 레지스트리 인증 정보를 사용하여 이미지를 푸시합니다.
-                    withDockerRegistry([credentialsId: DOCKER_CREDENTIALS_ID, url: "https://${REGISTRY}"]) {
-                        sh """
-                            docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
-                        """
-                    }
+                container('kaniko') {
+                    sh """
+                        /kaniko/executor \\
+                        --context=\$(pwd) \\
+                        --destination=${DOCKER_IMAGE}:${BUILD_NUMBER} \\
+                        --cleanup
+                    """
                 }
             }
         }
     }
 
-    // 파이프라인 실행 후 수행할 작업들을 정의합니다.
     post {
-        // 파이프라인이 성공적으로 완료된 경우
         success {
             echo 'Successfully built and pushed the image!'
         }
-        // 파이프라인이 실패한 경우
         failure {
             echo 'Failed to build or push the image'
         }
-        // 성공/실패 여부와 관계없이 항상 실행
         always {
-            script {
-                try {
-                    // 로컬에 있는 도커 이미지를 제거합니다.
-                    sh """
-                        docker rmi ${DOCKER_IMAGE}:${BUILD_NUMBER} || true
-                    """
-                } catch (Exception e) {
-                    echo "Failed to remove docker image: ${e.message}"
-                }
-            }
+            deleteDir()
+            echo "Cleaning up pod resources"
         }
     }
 }
@@ -263,9 +250,12 @@ pipeline {
 
 **4. Custom PodTemplate  사용**
 > - 관리자가 설정해놓은 Pod Template이 아닌 Custom Template이 필요하다면, 아래와 같이 직접 설정할 수 있습니다. <br/>
-> **(최대 사용량은`CPU 4코어 / 메모리 8GB`**이므로, 리소스 요청 시 주의 바랍니다. **(초과 시 Pod가 실행되지 않습니다.))**
 
-```groovy
+> - **(최대 사용량은`CPU 8코어 / 메모리 16GB`**이므로, 리소스 요청 시 주의 바랍니다. **(초과 시 Pod가 실행되지 않습니다.))** <br/>
+
+> - **(권한 상승 및 루트 파일 시스템 작성은 차단되어 있습니다. (권한 상승 요청 시, Pod가 실행되지 않습니다.))**
+
+```shell
 // Jenkins 파이프라인의 시작을 선언합니다.
 pipeline {
     // Kubernetes 에이전트를 설정합니다.
@@ -277,55 +267,50 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
-  # Docker in Docker(dind) 컨테이너 설정
-  - name: docker
-    image: docker:dind
-    securityContext:
-      privileged: true    // 특권 모드로 실행하여 Docker 데몬 실행 권한을 부여합니다.
-    env:
-    - name: DOCKER_TLS_CERTDIR
-      value: ""          // TLS 인증서 디렉토리를 비활성화합니다.
-    volumeMounts:
-    - mountPath: /var/run
-      name: docker-sock  // Docker 소켓을 마운트합니다.
-    - mountPath: /var/lib/docker
-      name: docker-volume // Docker 이미지와 컨테이너 데이터를 저장할 볼륨을 마운트합니다.
+  # Kaniko 컨테이너 설정 (Docker 대신 사용)
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:debug
+    command:
+    - /busybox/sh
+    - -c
+    args:
+    - /busybox/cat
     tty: true
+    volumeMounts:
+    - name: kaniko-config
+      mountPath: /kaniko/.docker
   # SonarQube 스캐너 컨테이너 설정
   - name: sonar-scanner
     image: sonarsource/sonar-scanner-cli:latest
     command:
     - cat
     tty: true
-  # 볼륨 정의
   volumes:
-  - name: docker-sock    // Docker 소켓을 위한 임시 볼륨
+  - name: kaniko-config
     emptyDir: {}
-  - name: docker-volume  // Docker 데이터를 위한 임시 볼륨
+  - name: docker-volume 
     emptyDir: {}
 """
-            // 기본 컨테이너를 'docker'로 지정합니다.
-            defaultContainer 'docker'
+            // 기본 컨테이너를 kaniko로 지정합니다.
+            defaultContainer 'kaniko'
         }
     }
 
     // 파이프라인에서 사용할 환경 변수들을 정의합니다.
     environment {
         // Harbor 레지스트리 관련 설정입니다.
+        // 수정해주세요
         REGISTRY = 'harbor.jbnu.ac.kr'
-        HARBOR_PROJECT = 'test'
-        IMAGE_NAME = 'test-nginx'
-        // 도커 이미지의 전체 경로를 설정합니다.
+        HARBOR_PROJECT = '<사용자 이름>'
+        IMAGE_NAME = '<이미지 이름>'
         DOCKER_IMAGE = "${REGISTRY}/${HARBOR_PROJECT}/${IMAGE_NAME}"
-        // Harbor 인증 정보의 ID를 설정합니다.
         DOCKER_CREDENTIALS_ID = 'harbor-credentials'
-        // SonarQube 인증 토큰을 Jenkins 크레덴셜에서 가져옵니다.
         SONAR_TOKEN = credentials("sonarqube-credentials")
+        HARBOR_CREDENTIALS = credentials("${DOCKER_CREDENTIALS_ID}")
     }
 
     // 파이프라인의 각 단계를 정의합니다.
     stages {
-        // 소스 코드를 체크아웃하는 단계입니다.
         stage('Checkout') {
             steps {
                 checkout scm
@@ -335,15 +320,13 @@ spec:
         // SonarQube를 사용하여 코드 품질을 분석하는 단계입니다.
         stage('SonarQube Analysis') {
             steps {
-                // sonar-scanner 컨테이너에서 실행합니다.
                 container('sonar-scanner') {
-                    // SonarQube 환경 설정을 적용합니다.
                     withSonarQubeEnv('sonarqube') {
                         // sonar-scanner 명령어를 실행하여 코드 분석을 수행합니다.
                         sh """
                             sonar-scanner \\
-                            -Dsonar.projectKey=test-nginx \\
-                            -Dsonar.projectName=test-nginx \\
+                            -Dsonar.projectKey=${HARBOR_PROJECT}-${IMAGE_NAME} \\
+                            -Dsonar.projectName=${HARBOR_PROJECT}-${IMAGE_NAME} \\
                             -Dsonar.sources=. \\
                             -Dsonar.exclusions=**/node_modules/** \\
                             -Dsonar.login=${SONAR_TOKEN}
@@ -353,65 +336,55 @@ spec:
             }
         }
 
-        // 도커 이미지를 빌드하는 단계입니다.
-        stage('Docker Build') {
+        // Docker 설정 파일을 생성합니다.
+        stage('Create Docker Config') {
             steps {
                 script {
-                    // 도커 데몬이 준비될 때까지 최대 2분간 대기합니다.
-                    timeout(time: 2, unit: 'MINUTES') {
-                        sh '''#!/bin/sh
-                            until docker info >/dev/null 2>&1; do
-                                echo "Waiting for docker daemon..."
-                                sleep 2
-                            done
-                        '''
-                    }
-
-                    // 도커 이미지를 빌드합니다.
+                    // Kaniko가 사용할 Docker 설정 파일을 생성합니다.
                     sh """
-                        docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .
+                        mkdir -p /home/jenkins/agent/.docker
+                        echo '{"auths":{"${REGISTRY}":{"username":"${HARBOR_CREDENTIALS_USR}","password":"${HARBOR_CREDENTIALS_PSW}"}}}' > /home/jenkins/agent/.docker/config.json
+                        cat /home/jenkins/agent/.docker/config.json
+                        cp /home/jenkins/agent/.docker/config.json /home/jenkins/agent/config.json
                     """
-                }
-            }
-        }
-
-        // 빌드된 도커 이미지를 Harbor 레지스트리에 푸시하는 단계입니다.
-        stage('Docker Push') {
-            steps {
-                script {
-                    // Harbor 레지스트리 인증 정보를 사용하여 이미지를 푸시합니다.
-                    withDockerRegistry([credentialsId: DOCKER_CREDENTIALS_ID, url: "https://${REGISTRY}"]) {
+                    
+                    // Kaniko가 사용할 볼륨에 Docker 설정 파일을 복사합니다.
+                    container('kaniko') {
                         sh """
-                            docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
+                            mkdir -p /kaniko/.docker
+                            cp /home/jenkins/agent/config.json /kaniko/.docker/config.json
+                            ls -la /kaniko/.docker
                         """
                     }
                 }
             }
         }
+
+        // Kaniko를 사용하여 도커 이미지를 빌드하고 푸시하는 단계입니다.
+        stage('Build and Push with Kaniko') {
+            steps {
+                container('kaniko') {
+                    sh """
+                        /kaniko/executor \\
+                        --context=\$(pwd) \\
+                        --destination=${DOCKER_IMAGE}:${BUILD_NUMBER} \\
+                        --cleanup
+                    """
+                }
+            }
+        }
     }
 
-    // 파이프라인 실행 후 수행할 작업들을 정의합니다.
     post {
-        // 파이프라인이 성공적으로 완료된 경우
         success {
             echo 'Successfully built and pushed the image!'
         }
-        // 파이프라인이 실패한 경우
         failure {
             echo 'Failed to build or push the image'
         }
-        // 성공/실패 여부와 관계없이 항상 실행
         always {
-            script {
-                try {
-                    // 로컬에 있는 도커 이미지를 제거합니다.
-                    sh """
-                        docker rmi ${DOCKER_IMAGE}:${BUILD_NUMBER} || true
-                    """
-                } catch (Exception e) {
-                    echo "Failed to remove docker image: ${e.message}"
-                }
-            }
+            deleteDir()
+            echo "Cleaning up pod resources"
         }
     }
 }
@@ -473,14 +446,27 @@ spec:
 
 ## 6. 주의 사항
 
+<br/>
+
 **1. Webhook 설정**
 
 > - Webhook은 반드시 `generic-webhook-trigger`를 사용해야 합니다.
 
 > - `generic-webhook-trigger`의 `token`을 반드시 `사용자명-서비스`로 사용해야 합니다. (토큰은 고유해야 합니다.)
 
+<br/>
+
+**2. Build 기록 관련**
+
+> - **`빌드 이력`은 최대 14일** 까지 보관됩니다.
+
+> - **`최대 보관 갯수`는 10개**로 제한됩니다.
+
 
 ## 7. 기타 사항
+
+<br/>
+
 **1. 팀 프로젝트**
 - 팀 프로젝트를 위해 `팀 단위의 프로젝트` 필요 시, 관리자에게 문의 바랍니다.
 
