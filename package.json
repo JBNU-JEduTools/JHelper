@@ -17,6 +17,7 @@
   "scripts": {
     "develop": "gatsby develop",
     "build": "gatsby build",
+    "clean": "gatsby clean",
     "build:ghpage": "rm -rf ./docs && PREFIX_PATHS=true gatsby build && mv ./public ./docs"
   },
   "peerDependencies": {},
