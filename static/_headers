@@ -1,5 +1,7 @@
+# 모든 리소스에 최고 수준 보안 적용
 /*
   ! Access-Control-Allow-Origin
+  ! Server
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   X-XSS-Protection: 1; mode=block
