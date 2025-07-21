@@ -1,0 +1,26 @@
+# _headers 파일 내용
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; connect-src 'self' https:; frame-ancestors 'self'
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# CORS 정책 수정 - 모든 JSON 파일
+/page-data/*
+  Access-Control-Allow-Origin: https://jhelper.jbnu.ac.kr
+
+/app-data.json  
+  Access-Control-Allow-Origin: https://jhelper.jbnu.ac.kr
+
+/manifest.webmanifest
+  Access-Control-Allow-Origin: https://jhelper.jbnu.ac.kr
+
+# 캐시 제어 - 민감한 파일들
+/page-data/*
+  Cache-Control: private, no-cache, no-store, must-revalidate
+  Pragma: no-cache
+
+/*.json
+  Cache-Control: private, no-cache, no-store, must-revalidate
+  Pragma: no-cache
