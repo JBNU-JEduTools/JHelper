@@ -32,15 +32,13 @@ Litmus 서비스는 JEduTools와 연동되어 있습니다. 두 단계의 회원
 
 회원가입 이후 jbnualps@jbnu.ac.kr로 연락주시면 교수자 권한 설정을 도와드리겠습니다.
 
-ALPS | Email: jbnualps@jbnu.ac.kr
-
 ### (2) 로그인
 
-회원가입을 마쳤다면, 아래 두 가지 방법으로 로그인할 수 있습니다.
+두 가지 방법으로 로그인할 수 있습니다.
 
-1. **기본 로그인**: Litmus 가입 시 설정했던 ID와 비밀번호를 입력하여 로그인합니다.
+1. **기본 로그인**: Litmus 가입 시 설정했던 ID와 PW를 입력하여 로그인합니다.
 
-2. **JEduTools 통합 로그인**: JEduTools 계정을 통해 통합 로그인합니다. 이 경우, 별도의 ID/PW 입력 없이 바로 Litmus에 접속할 수 있습니다.
+2. **JEduTools 통합 로그인**: JEduTools 계정을 통해 통합 로그인합니다.
 
 <div style={{ textAlign: 'center', width: '100%' }}>
   <img src="./images/user-1-2.png" width="600px" height="auto" />
@@ -54,6 +52,10 @@ ALPS | Email: jbnualps@jbnu.ac.kr
 <div style={{ textAlign: 'center', width: '100%' }}>
   <img src="./images/prof-2-1.png" width="600px" height="auto" />
 </div>
+
+본인이 **생성한 문제**에 대해 수정 및 삭제 등 모든 관리 권한을 가집니다. 
+
+본인이 **생성하지 않은 문제**는 지문 및 테스트케이스를 확인 할 수 있습니다.
 
 ### (1) 주요 문제 정보 
 
@@ -136,7 +138,7 @@ ALPS | Email: jbnualps@jbnu.ac.kr
 
 문제 테스트케이스는 `ZIP 파일 방식`과 `generator 방식`을 지원합니다.
 
-- `ZIP 파일 방식`: **input 파일**과 **output 파일**을 하나의 ZIP 파일로 묶어 업로드하는 방식입니다. 파일 이름은 1.in/1.out, 2.in/2.out처럼 숫자로 일치시켜야 합니다.
+- `ZIP 파일 방식`: **input 파일**과 **output 파일**을 하나의 ZIP 파일로 묶어 업로드하는 방식입니다. 파일 이름은 1.in/1.out, 2.in/2.out 혹은 test_1.in/test_1.out 등 숫자로 매칭해주세요.
 
 - `generator 방식`: 테스트케이스를 자동으로 생성하는 코드를 제출하여 사용하는 방식입니다.
 
@@ -172,6 +174,8 @@ ALPS | Email: jbnualps@jbnu.ac.kr
 
 **과제(Assignment)**와 **대회(Contest)**는 기능적으로 동일하나, 용도에 따라 분류됩니다. 일반적으로 과제는 수업용으로, 대회는 시험이나 공식 행사용으로 사용됩니다.
 
+### (1) 과제/대회 정보
+
 - **대회 이름**: 과제/대회의 제목을 입력합니다.
 
 - **Subject**: 과제의 경우, 해당 과목을 선택합니다. 대회의 경우에는 빈칸으로 남겨둡니다.
@@ -193,6 +197,18 @@ ALPS | Email: jbnualps@jbnu.ac.kr
   - **부분 점수 허용**: 부분 점수를 허용할지 여부를 설정할 수 있습니다.
     - 허용: 통과한 테스트케이스 수에 비례하여 점수를 부여합니다. 예를 들어, 100개의 테스트케이스 중 80개를 맞히면 총점의 80%에 해당하는 점수를 받게 됩니다.
     - 허용 안 함: 제출된 답안이 모든 테스트케이스를 통과해야만 만점을 받습니다. 하나라도 틀릴 경우 0점 처리됩니다.
+
+### (2) 결과 확인
+
+<div style={{ textAlign: 'center', width: '100%' }}>
+  <img src="./images/prof-3-2.png" width="600px" height="auto" />
+</div>
+
+과제/대회의 순위와 제출 목록을 확인할 수 있으며, 결과를 다운로드 할 수 있습니다.
+
+- **결과 다운로드**: 순위를 엑셀(Excel) 파일로 다운로드 할 수 있습니다.
+
+- **코드 다운로드**: 참가자들이 최종적으로 제출한 코드를 다운로드 할 수 있습니다.
 
 ---
 
