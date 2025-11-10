@@ -1,0 +1,43 @@
+---
+title: '병합 및 배포'
+description: 'This is the meta description for this page'
+slug: 'JHelper/4admin/2deployment'
+--- 
+
+## Pull Request
+
+- Github Repository 내의 PR 요청을 확인하고 그 내용을 Review
+
+  <img src="../Images/deployment/PR_1.png" width="600px" height="auto" /> <br />
+
+- 이상이 없을 시 PR 요청을 Merge 하면 PR의 내용을 Action으로 넘겨서 Build & Test 수행
+  <img src="../Images/deployment/PR_Merge.png" width="600px" height = "auto" /> <br />
+ 
+## Merge 이후 Github Action을 이용한 Build & Test
+
+- Merge 이후에는 Github Action을 통해 자동으로 Build & Test를 진행하도록 설정이 되어 있음
+
+- Github Action을 확인하여 Merge 한 내용이 이상 없이 잘 작동하는지 확인이 필요
+
+- 방법은 아래와 같음
+
+  → 상단 메뉴 중 “Action" 클릭 <br />
+  <img src="../Images/deployment/Action_Detail.png" width="600px" height="auto" /> <br />
+
+      - 노란색 점으로 나타나 있는 부분이 현재 Test가 진행 중인 부분 
+
+  → “Build"가 진행 중인 사항 확인 <br />
+
+  <img src="../Images/deployment/Action_1.png" width="600px" height="auto" /> <br />
+
+        - 현재 진행 중인 상황 확인 가능 
+        - build 클릭 시 상세 진행 사항 확인 가능
+
+  → 진행 중인 상황에서 build 클릭하여 상세 진행 사항 확인 시 아래에 같이 나오게 됨 <br />
+    <img src="../Images/deployment/GH_Action.png" width="600px" height="auto" /> <br />
+    
+## 오류 발생 시 Trouble Shooting 진행
+
+  <img src="../Images/deployment/tokenError.png" width="600px" height="auto" /> <br />
+
+  - 기존에 발생한 오류 해결 방법은 [Trouble Shooting 페이지 - 관리자용](/JHelper/4admin/4troubleshooting)에 자세히 설명되어 있으니 해당 페이지 참조
