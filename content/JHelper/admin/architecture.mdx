@@ -1,11 +1,13 @@
 ---
-title: '아키텍쳐'
-description: 'This is the meta description for this page'
-slug: 'JHelper/4admin/2architecture'
+title: '기술 유지보수 가이드'
+description: 'JHelper 프로젝트의 아키텍처, 데이터 흐름, 핵심 유지보수 작업 안내'
+slug: 'JHelper/4admin/1architecture'
 --- 
-# 프로젝트 아키텍처 및 주요 기술
 
-## 1. 프로젝트 핵심 구조
+
+## 1. 프로젝트 아키텍처
+
+### 1.1. 프로젝트 핵심 구조
 
 - **`gatsby-config.js`**:
     - 사이트의 전반적인 설정 (사이트 제목, 설명 등)
@@ -21,7 +23,6 @@ slug: 'JHelper/4admin/2architecture'
 - **`content/` 디렉터리**:
     - 모든 문서 콘텐츠(MDX 파일)가 저장되는 최상위 디렉터리
     - 이 디렉터리 내의 폴더 구조가 웹사이트의 URL 경로 구조에 직접적으로 반영됩니다.
-    - 예: `content/JCode/studentManual.mdx`는 `/JCode/studentManual` 경로로 접근 가능
 
 - **`src/templates/docs.js`**:
     - 모든 문서 페이지를 렌더링하는 데 사용되는 **단일 템플릿 파일**
@@ -34,14 +35,70 @@ slug: 'JHelper/4admin/2architecture'
 - **`package.json`**:
     - 프로젝트의 메타데이터, 스크립트 명령어, 개발 및 프로덕션 의존성 목록
 
-## 2. 주요 기술 및 참고사항
+### 1.2. 데이터 흐름
 
-- **주요 의존성**:
-    - `gatsby`: 정적 사이트 생성 프레임워크
-    - `react`, `react-dom`: UI 컴포넌트 개발
-    - `@mdx-js/react`, `gatsby-plugin-mdx`: MDX(Markdown + JSX) 콘텐츠 처리
-    - `theme-ui`, `gatsby-plugin-theme-ui`: UI 스타일링 및 테마 관리
-- **문제 발생 시**:
-    - `yarn clean` 후 `yarn develop` 또는 `yarn build`를 다시 시도합니다.
-    - `package.json`의 스크립트 명령어를 확인하여 정확한 명령어를 사용하고 있는지 확인합니다.
-    - Node.js 버전 호환성 문제를 확인합니다.
+JHelper는 다음과 같은 흐름으로 MDX 파일을 웹 페이지로 변환합니다.
+
+1.  **콘텐츠 작성**: 관리자가 `content/` 폴더 내에 `.mdx` 파일을 작성합니다.
+2.  **파일 감지**: `gatsby-source-filesystem` 플러그인이 `content/` 폴더의 파일들을 감지하여 Gatsby의 데이터 레이어로 가져옵니다.
+3.  **페이지 생성**: `gatsby-node.js`의 로직이 각 파일에 대한 고유한 URL(`slug`)을 생성하고, `docs.js` 템플릿을 사용하여 페이지를 동적으로 만듭니다.
+4.  **데이터 요청**: 사용자가 페이지에 접속하면, `docs.js` 템플릿의 GraphQL 쿼리가 해당 페이지에 필요한 데이터(본문, 제목 등)를 요청합니다.
+5.  **렌더링**: `MDXRenderer` 컴포넌트가 GraphQL로 받은 데이터를 최종 HTML로 렌더링하여 사용자에게 보여줍니다.
+
+---
+
+## 2. 주요 기술 스택
+
+- **`gatsby`**: React 기반의 정적 사이트 생성 프레임워크
+- **`react`, `react-dom`**: UI 컴포넌트 개발
+- **`@mdx-js/react`, `gatsby-plugin-mdx`**: Markdown 문서 내에서 JSX(React 컴포넌트)를 사용할 수 있게 해주는 도구
+- **`theme-ui`, `gatsby-plugin-theme-ui`**: UI 스타일링 및 디자인 테마 관리
+
+---
+
+## 3. 유지보수 작업
+
+### 3.1. 의존성(라이브러리) 업데이트
+
+보안 및 기능 개선을 위해 주기적으로 프로젝트 의존성을 업데이트하는 것이 좋습니다.
+
+1.  **업데이트 확인 및 실행:** 아래 명령어를 실행하면 업데이트 가능한 라이브러리 목록이 표시되며, 스페이스 바로 선택하여 안전하게 업데이트할 수 있습니다.
+    ```bash
+    yarn upgrade-interactive --latest
+    ```
+2.  **업데이트 후 검증:** 업데이트가 완료되면, 로컬 서버 실행 및 빌드 테스트를 통해 기존 기능이 정상적으로 작동하는지 반드시 확인해야 합니다.
+    ```bash
+    yarn develop
+    yarn build
+    ```
+
+### 3.2. UI 및 스타일링 수정
+
+프로젝트의 전반적인 디자인(색상, 폰트, 간격 등)은 `Theme UI`를 통해 관리됩니다.
+
+- **핵심 설정 파일:** `src/gatsby-plugin-theme-ui/index.js`
+- **수정 예시 (기본 색상 변경):** 위 파일의 `colors` 객체에서 `primary` 또는 `heading` 값을 수정하면 사이트 전체의 색상이 변경됩니다.
+
+### 3.3. 빌드 및 배포 스크립트 이해
+
+`package.json`의 `scripts` 섹션에는 프로젝트 관리를 위한 주요 명령어들이 정의되어 있습니다.
+
+- `develop`: 로컬 개발 서버를 실행합니다.
+- `build`: 프로덕션용 정적 파일을 `public/` 폴더에 생성합니다.
+- `build:ghpage`: GitHub Pages 배포를 위해 `docs/` 폴더에 결과물을 생성합니다.
+
+### 3.4. GitHub Actions를 이용한 자동 배포
+
+우리 프로젝트는 `main` 브랜치에 새로운 코드가 푸시(Push)될 때마다 GitHub Actions를 통해 자동으로 웹사이트를 빌드하고 배포합니다. 이 모든 과정은 `.github/workflows/deploy.yml` 파일에 정의되어 있습니다.
+
+**자동 배포 과정:**
+
+1.  **트리거(Trigger):** `main` 브랜치에 변경사항이 푸시되면 워크플로우가 자동으로 시작됩니다.
+2.  **환경 설정:** 최신 Ubuntu 환경에서 Node.js 20.x 버전을 설정합니다.
+3.  **의존성 설치:** `yarn.lock` 파일을 기반으로 캐시된 `node_modules`를 사용하고, `yarn install`을 실행하여 의존성을 설치합니다. (빌드 속도 향상)
+4.  **프로젝트 빌드:** `yarn build:ghpage` 명령어를 실행하여 GitHub Pages 배포용 정적 파일들을 `docs/` 디렉터리에 생성합니다.
+5.  **커스텀 도메인 설정:** `docs/` 디렉터리 안에 `jhelper.jbnu.ac.kr` 내용이 담긴 `CNAME` 파일을 생성하여 커스텀 도메인을 연결합니다.
+6.  **배포:** `peaceiris/actions-gh-pages` 액션을 사용하여 `docs/` 디렉터리의 내용을 `gh-pages` 브랜치로 푸시합니다. 이 과정에서 `JHELPERTOKEN`이라는 시크릿 토큰을 사용하여 인증합니다.
+
+이 자동화 덕분에 관리자는 코드 리뷰 및 `main` 브랜치 병합(Merge)에만 집중하면 되며, 배포는 신경 쓰지 않아도 됩니다.
+

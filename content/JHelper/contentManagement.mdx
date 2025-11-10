@@ -6,60 +6,86 @@ slug: 'JHelper/2contentManagement'
 
 이 가이드는 JEduTools 문서 웹사이트의 콘텐츠를 관리하는 방법을 안내합니다. 문서는 크게 **기존 문서의 내용을 간단히 수정하는 방법**과 **새로운 서비스 문서를 추가하는 방법** 두 가지로 나뉩니다.
 
+## Part 1: 기존 문서 수정하기 (예제)
 
-## Part 1: 기존 문서 수정하기
+웹사이트에 이미 존재하는 문서의 내용을 수정하는 방법을 단계별로 알아봅니다. `JCloud 접속 주소` 가이드의 IP 주소를 `113.198.66.xxx`에서 `160.160.66.xxx`로 변경하는 과정을 예시로 사용합니다.
 
-웹사이트에 이미 존재하는 문서의 오타를 수정하거나 내용을 일부 변경하는 간단한 작업입니다. 실제 `JCloud 사용자 가이드` 문서를 수정하는 과정을 예시로 들어 단계별로 설명합니다.
+### Step 1: 수정할 페이지와 정보 확인하기
 
-### Step 1: 수정할 문서와 파일 위치 찾기
+먼저, 로컬 개발 서버(`yarn develop`)를 실행하고 웹 브라우저에서 수정하고 싶은 페이지로 이동합니다.
 
-먼저 웹사이트에서 수정하고 싶은 페이지를 찾습니다. 예를 들어, `JCloud 사용자 가이드` 페이지의 URL이 `.../JCloud/JCloudUserGuide` 라면, 이 페이지의 원본 파일은 우리 프로젝트의 `content` 폴더 안에 동일한 경로로 존재합니다.
+- **페이지 주소:** `http://localhost:8000/JCloud/2PortGuide`
+- **수정할 내용:** 본문에 보이는 `113.198.66.xxx` IP 주소
 
-- **웹사이트 URL:** `.../JCloud/JCloudUserGuide`
-- **프로젝트 내 실제 파일:** `C:\Users\oslab\develop\JHelper\content\JCloud\JCloudUserGuide.mdx`
+<br/>
+<img src="./Images/content1.png" alt="JCloud 접속 주소 웹페이지 전체 화면. 주소창에는 'localhost:8000/JCloud/2PortGuide'가 보이고, 페이지 본문에는 '1. IP 확인' 섹션 아래에 '공인IP: 113.198.66.xxx' 텍스트가 명확하게 보임." width="100%" />
+<br/>
 
-이처럼 URL 경로와 실제 파일 경로가 대부분 일치하므로 쉽게 파일을 찾을 수 있습니다.
+### Step 2: 웹 주소(URL)를 이용해 실제 파일 위치 찾기
 
-### Step 2: 파일 내용 수정하기
+웹사이트의 URL 경로는 우리 프로젝트 폴더의 `content` 디렉터리 구조와 거의 동일합니다. 이 규칙을 이용해 수정할 파일을 쉽게 찾을 수 있습니다.
 
-찾은 `.mdx` 파일을 에디터(예: VS Code)로 열고 원하는 부분을 수정합니다. `.mdx` 파일은 마크다운(Markdown) 문법을 사용하므로, 일반 텍스트를 편집하듯이 쉽게 수정할 수 있습니다.
+- **웹페이지 경로:** `/JCloud/2PortGuide`
+- **로컬 파일 경로:** `[프로젝트 폴더]/content/JCloud/JCloudPortGuide.mdx`
 
-**예시: `JCloudUserGuide.mdx` 파일의 일부 내용 수정**
+파일 탐색기나 VS Code 같은 에디터에서 해당 경로로 이동하여 `.mdx` 파일을 찾습니다.
 
+<br/>
+<img src="./Images/content2.png" alt="VS Code의 파일 탐색기(좌측 패널) 화면. 'content' 폴더가 열려 있고, 그 아래 'JCloud' 폴더가 있으며, 그 안에 'JCloudPortGuide.mdx' 파일이 선택되어 강조된 모습." width="100%" />
+<br/>
+
+### Step 3: 파일 열고 내용 수정하기
+
+찾은 `JCloudPortGuide.mdx` 파일을 에디터로 열고, IP 주소를 수정합니다. 파일 전체에서 변경이 필요할 수 있으므로 '찾아 바꾸기' 기능을 사용하면 편리합니다.
+
+- **찾을 내용:** `113.198.66.xxx`
+- **바꿀 내용:** `160.160.66.xxx`
+
+**수정 전:**
 ```markdown
-// 수정 전
-### JCloud란?
-JCloud는 전북대학교 학생들을 위한 클라우드 서비스 입니다.
-
-// 수정 후
-### JCloud란?
-JCloud는 전북대학교 학생 및 구성원을 위한 클라우드 컴퓨팅 서비스입니다.
+### 1. IP 확인
+- 공인IP: 113.198.66.xxx
+...
+- (예제) capstone 프로젝트의 경우, 113.198.66.74 사용 (아래 그림 참조)
 ```
 
-### Step 3: 로컬에서 변경사항 확인하기
-
-수정한 내용이 웹사이트에 어떻게 반영되는지 확인하기 위해 로컬 개발 서버를 실행합니다.
-
-```bash
-# 터미널에서 아래 명령어 실행
-yarn develop
+**수정 후:**
+```markdown
+### 1. IP 확인
+- 공인IP: 160.160.66.xxx
+...
+- (예제) capstone 프로젝트의 경우, 160.160.66.74 사용 (아래 그림 참조)
 ```
 
-서버가 실행되면 웹 브라우저에서 `http://localhost:8000`으로 접속하여 수정된 페이지를 직접 확인합니다. 오타나 줄바꿈 등이 올바르게 표시되는지 검토합니다.
+<br/>
+<img src="./Images/content3.png" alt="텍스트 에디터 화면. 'JCloudPortGuide.mdx' 파일의 내용이 보이며, '찾아 바꾸기' 기능(Ctrl+H)을 사용하여 '113.198.66.xxx'가 '160.160.66.xxx'로 변경되는 과정이 하이라이트 되어 있음." width="100%" />
+<br/>
 
-### Step 4: 변경사항 커밋(Commit)하기
+### Step 4: 로컬 서버에서 변경 결과 확인하기
 
-수정한 내용이 만족스러우면, 변경사항을 Git 저장소에 기록(커밋)합니다.
+파일을 저장한 후, 다시 웹 브라우저로 돌아와 `JCloud 접속 주소` 페이지를 새로고침하거나, 개발 서버가 자동으로 업데이트해주기를 기다립니다. IP 주소가 `160.160.66.xxx`로 올바르게 변경되었는지 확인합니다.
+
+<br/>
+<img src="./Images/content4.png" alt="다시 JCloud 접속 주소 웹페이지 전체 화면. 이전과 동일한 페이지지만, 본문의 '1. IP 확인' 섹션 아래에 '공인IP: 160.160.66.xxx'로 텍스트가 성공적으로 변경된 모습." width="100%" />
+<br/>
+
+### Step 5: 변경사항 커밋(Commit) 및 푸시(Push)하기
+
+수정한 내용이 만족스러우면, 변경사항을 Git 저장소에 기록(커밋)하고 자신의 원격 저장소에 푸시(Push)합니다.
 
 ```bash
 # 1. 수정한 파일을 Staging 영역에 추가합니다.
-git add content/JCloud/JCloudUserGuide.mdx
+git add content/JCloud/JCloudPortGuide.mdx
 
 # 2. 어떤 내용을 수정했는지 명확한 메시지와 함께 커밋합니다.
-git commit -m "docs(JCloud): 사용자 가이드의 JCloud 설명 업데이트"
+git commit -m "docs(JCloud): JCloudPortGuide의 IP 주소 업데이트"
+
+# 3. 자신의 원격 저장소(GitHub)에 변경사항을 푸시합니다.
+#    [your-branch-name] 부분에 현재 작업 중인 브랜치 이름을 입력하세요.
+git push origin [your-branch-name]
 ```
 
-이제 원격 저장소(GitHub)에 푸시(Push)하면 수정 작업이 최종적으로 완료됩니다.
+이제 자신의 GitHub 저장소에 변경사항이 반영되었으며, 이후 Pull Request를 생성할 수 있습니다.
 
 ---
 
@@ -133,3 +159,7 @@ content/
 2. `index.mdx` 파일에서 해당 서비스 항목 제거
 3. `architecture.md` 파일에서 디렉토리 구조 업데이트
 4. (선택 사항) `content/서비스명` 디렉토리 삭제
+
+## 주의사항
+
+- 다른 문서로 연결되는 내부 링크는 slug를 사용합니다: [링크텍스트](/서비스명/페이지slug)
