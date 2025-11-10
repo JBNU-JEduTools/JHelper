@@ -1,12 +1,42 @@
 ---
-title: '콘텐츠 관리 가이드'
+title: '문서 수정하기'
 description: 'JEduTools 매뉴얼 페이지에 새로운 항목 추가 및 관리 방법'
-slug: 'JHelper/2devManual/contentManagement'
+slug: 'JHelper/2contentManagement'
 ---
+
+
+
+## 추가정보
+
+### A. 문서 추가시 참고할 내용
+
+1) 계층구조
+* 폴더 내에 계층 안에 들어갈 문서 작성
+* 폴더명과 같은 이름의 문서.mdx 작성
+
+2) 좌측 네비게이션 정렬 순서
+* 기본적으로 slug명, 없다면 파일명으로 정렬된다.
+* gatsby-config.js에서 slug와 매칭되는 문자에 대해서 강제로 정렬할 수 있다.
+ * 해당 파일의 sidebarConfig.forcedNavOrder 에서 설정하면 된다.
+
+### B. 도메인 수정시 참고할 내용
+현재 레포지토리 이름이 /document이므로 github pages에서 /document로 서비스한다.   
+그러므로, 빌드 시 설정에 루트 경로를 /document로 설정해놓은 상태이다.  
+
+만약 도메인을 연결해 루트경로에서 서비스할 수 있게된다면 아래 항목을 수정해야 합니다.
+* package.json > yarn run build > build:ghpage > PREFIX_PATHS=true gatsby build 항목을 gatsby build 로 변경
+* gatsby-config.js > pathPrefix 항목 삭제
+
+
+
+---
+
+
 
 # JEduTools 콘텐츠 관리 가이드
 
 JEduTools 매뉴얼 페이지에 새로운 서비스를 추가하거나 기존 서비스를 제거할 때 수정해야 하는 내용과 절차를 안내합니다.
+
 
 ## 새로운 서비스 추가하기
 
@@ -117,3 +147,4 @@ content/
 - 모든 이미지는 해당 서비스의 `images` 폴더에 저장합니다.
 - 다른 문서로 연결되는 내부 링크는 slug를 사용합니다: `[링크텍스트](/서비스명/페이지slug)`
 - 문서 추가 후 로컬에서 빌드하여 오류가 없는지 확인합니다: `yarn run develop` 
+
