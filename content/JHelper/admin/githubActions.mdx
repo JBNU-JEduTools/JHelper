@@ -1,0 +1,101 @@
+---
+title: 'GitHub Actions 배포 자동화'
+description: 'JHelper 프로젝트의 GitHub Actions 기반 자동 빌드 및 배포 가이드'
+slug: 'JHelper/4admin/6github-actions'
+---
+
+# GitHub Actions를 이용한 자동 배포 가이드
+
+JHelper 프로젝트는 GitHub Actions를 활용하여 `main` 브랜시에 새로운 코드가 푸시(Push)될 때마다 자동으로 웹사이트를 빌드하고 배포합니다. 이 문서는 해당 자동화 워크플로우의 상세 내용과 작동 방식을 설명합니다.
+
+---
+
+## 1. 워크플로우 파일 위치
+
+GitHub Actions 워크플로우는 프로젝트 루트의 `.github/workflows/deploy.yml` 파일에 정의되어 있습니다.
+
+```yaml
+name: build gatsby
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{runner.OS}}-build-${{hashFiles('**/yarn.lock')}}
+          restore-keys: |
+            ${{ runner.OS }}-build-${{ runner.OS }}-
+      - name: Install dependencies
+        run: yarn install --prod --pure-lockfile
+      - name: Build
+        run: yarn build:ghpage
+        env:
+          NODE_ENV: production
+      - name: Create CNAME
+        run: echo "jhelper.jbnu.ac.kr" > ./docs/CNAME
+      - uses: peaceiris/actions-gh-pages@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.JHELPERTOKEN }}
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: ./docs
+```
+
+---
+
+## 2. 워크플로우 상세 설명
+
+### 2.1. 트리거 (Trigger)
+
+*   `on: push: branches: - main`: 이 워크플로우는 `main` 브랜치에 새로운 커밋이 푸시될 때마다 자동으로 실행됩니다.
+
+### 2.2. 빌드 환경 (Build Environment)
+
+*   `runs-on: ubuntu-latest`: 빌드 작업은 최신 버전의 Ubuntu 운영체제 환경에서 실행됩니다.
+
+### 2.3. 빌드 단계 (Build Steps)
+
+각 `step`은 특정 작업을 수행합니다.
+
+1.  **`actions/checkout@v3`**:
+    *   현재 GitHub 저장소의 코드를 워크플로우 실행 환경으로 가져옵니다.
+
+2.  **`Setup Node` (`actions/setup-node@v3`)**:
+    *   프로젝트 빌드에 필요한 Node.js 환경을 설정합니다. `node-version: '20.x'`를 통해 Node.js 20 버전이 사용됩니다.
+
+3.  **`Cache node_modules` (`actions/cache@v4`)**:
+    *   `node_modules` 디렉터리를 캐싱하여 빌드 속도를 최적화합니다. 이전 빌드에서 사용된 의존성 파일들을 재사용하여 설치 시간을 단축합니다.
+
+4.  **`Install dependencies`**:
+    *   `yarn install --prod --pure-lockfile` 명령어를 실행하여 프로젝트에 필요한 모든 의존성 패키지를 설치합니다.
+
+5.  **`Build`**:
+    *   `yarn build:ghpage` 명령어를 실행하여 Gatsby 프로젝트를 빌드합니다. 이 명령어는 GitHub Pages 배포에 적합한 형태로 정적 파일들을 `docs/` 디렉터리에 생성합니다. `NODE_ENV: production` 환경 변수를 설정하여 프로덕션 모드로 빌드합니다.
+
+6.  **`Create CNAME`**:
+    *   `echo "jhelper.jbnu.ac.kr" > ./docs/CNAME` 명령어를 통해 `docs/` 디렉터리 안에 `CNAME` 파일을 생성합니다. 이 파일은 GitHub Pages가 `jhelper.jbnu.ac.kr` 커스텀 도메인을 사용하도록 지시합니다.
+
+7.  **배포 (`peaceiris/actions-gh-pages@v2`)**:
+    *   `peaceiris/actions-gh-pages` 액션을 사용하여 빌드된 `docs/` 디렉터리의 내용을 `gh-pages` 브랜치로 푸시합니다.
+    *   `GITHUB_TOKEN: ${{ secrets.JHELPERTOKEN }}`: GitHub 저장소에 설정된 `JHELPERTOKEN`이라는 시크릿 토큰을 사용하여 배포 권한을 인증합니다.
+    *   `PUBLISH_BRANCH: gh-pages`: 배포 대상 브랜치를 `gh-pages`로 지정합니다.
+    *   `PUBLISH_DIR: ./docs`: 배포할 파일들이 위치한 디렉터리를 `docs/`로 지정합니다.
+
+---
+
+## 3. 관리자 참고 사항
+
+*   **시크릿 토큰 관리:** `JHELPERTOKEN`은 GitHub 저장소의 `Settings > Secrets and variables > Actions`에서 관리됩니다. 이 토큰의 유효 기간을 주기적으로 확인하고 갱신해야 합니다.
+*   **배포 상태 확인:** GitHub 저장소의 `Actions` 탭에서 워크플로우의 실행 상태와 로그를 확인할 수 있습니다.
+*   **자동화의 이점:** 이 자동화 덕분에 관리자는 코드 리뷰 및 `main` 브랜치 병합(Merge)에만 집중하면 되며, 배포는 신경 쓰지 않아도 됩니다.
