@@ -1,150 +1,135 @@
 ---
-title: '문서 수정하기'
-description: 'JEduTools 매뉴얼 페이지에 새로운 항목 추가 및 관리 방법'
+title: '문서 작성하기'
+description: 'JEduTools 문서 수정 및 신규 서비스 추가 방법'
 slug: 'JHelper/2contentManagement'
 ---
 
+이 가이드는 JEduTools 문서 웹사이트의 콘텐츠를 관리하는 방법을 안내합니다. 문서는 크게 **기존 문서의 내용을 간단히 수정하는 방법**과 **새로운 서비스 문서를 추가하는 방법** 두 가지로 나뉩니다.
 
 
-## 추가정보
+## Part 1: 기존 문서 수정하기
 
-### A. 문서 추가시 참고할 내용
+웹사이트에 이미 존재하는 문서의 오타를 수정하거나 내용을 일부 변경하는 간단한 작업입니다. 실제 `JCloud 사용자 가이드` 문서를 수정하는 과정을 예시로 들어 단계별로 설명합니다.
 
-1) 계층구조
-* 폴더 내에 계층 안에 들어갈 문서 작성
-* 폴더명과 같은 이름의 문서.mdx 작성
+### Step 1: 수정할 문서와 파일 위치 찾기
 
-2) 좌측 네비게이션 정렬 순서
-* 기본적으로 slug명, 없다면 파일명으로 정렬된다.
-* gatsby-config.js에서 slug와 매칭되는 문자에 대해서 강제로 정렬할 수 있다.
- * 해당 파일의 sidebarConfig.forcedNavOrder 에서 설정하면 된다.
+먼저 웹사이트에서 수정하고 싶은 페이지를 찾습니다. 예를 들어, `JCloud 사용자 가이드` 페이지의 URL이 `.../JCloud/JCloudUserGuide` 라면, 이 페이지의 원본 파일은 우리 프로젝트의 `content` 폴더 안에 동일한 경로로 존재합니다.
 
-### B. 도메인 수정시 참고할 내용
-현재 레포지토리 이름이 /document이므로 github pages에서 /document로 서비스한다.   
-그러므로, 빌드 시 설정에 루트 경로를 /document로 설정해놓은 상태이다.  
+- **웹사이트 URL:** `.../JCloud/JCloudUserGuide`
+- **프로젝트 내 실제 파일:** `C:\Users\oslab\develop\JHelper\content\JCloud\JCloudUserGuide.mdx`
 
-만약 도메인을 연결해 루트경로에서 서비스할 수 있게된다면 아래 항목을 수정해야 합니다.
-* package.json > yarn run build > build:ghpage > PREFIX_PATHS=true gatsby build 항목을 gatsby build 로 변경
-* gatsby-config.js > pathPrefix 항목 삭제
+이처럼 URL 경로와 실제 파일 경로가 대부분 일치하므로 쉽게 파일을 찾을 수 있습니다.
 
+### Step 2: 파일 내용 수정하기
 
+찾은 `.mdx` 파일을 에디터(예: VS Code)로 열고 원하는 부분을 수정합니다. `.mdx` 파일은 마크다운(Markdown) 문법을 사용하므로, 일반 텍스트를 편집하듯이 쉽게 수정할 수 있습니다.
+
+**예시: `JCloudUserGuide.mdx` 파일의 일부 내용 수정**
+
+```markdown
+// 수정 전
+### JCloud란?
+JCloud는 전북대학교 학생들을 위한 클라우드 서비스 입니다.
+
+// 수정 후
+### JCloud란?
+JCloud는 전북대학교 학생 및 구성원을 위한 클라우드 컴퓨팅 서비스입니다.
+```
+
+### Step 3: 로컬에서 변경사항 확인하기
+
+수정한 내용이 웹사이트에 어떻게 반영되는지 확인하기 위해 로컬 개발 서버를 실행합니다.
+
+```bash
+# 터미널에서 아래 명령어 실행
+yarn develop
+```
+
+서버가 실행되면 웹 브라우저에서 `http://localhost:8000`으로 접속하여 수정된 페이지를 직접 확인합니다. 오타나 줄바꿈 등이 올바르게 표시되는지 검토합니다.
+
+### Step 4: 변경사항 커밋(Commit)하기
+
+수정한 내용이 만족스러우면, 변경사항을 Git 저장소에 기록(커밋)합니다.
+
+```bash
+# 1. 수정한 파일을 Staging 영역에 추가합니다.
+git add content/JCloud/JCloudUserGuide.mdx
+
+# 2. 어떤 내용을 수정했는지 명확한 메시지와 함께 커밋합니다.
+git commit -m "docs(JCloud): 사용자 가이드의 JCloud 설명 업데이트"
+```
+
+이제 원격 저장소(GitHub)에 푸시(Push)하면 수정 작업이 최종적으로 완료됩니다.
 
 ---
 
+## Part 2: 신규 서비스/문서 추가하기
 
+새로운 서비스(예: J-NewService)를 JEduTools 매뉴얼에 추가하는 전체 과정입니다.
 
-# JEduTools 콘텐츠 관리 가이드
+### 1. `content` 디렉터리에 새 폴더 생성
 
-JEduTools 매뉴얼 페이지에 새로운 서비스를 추가하거나 기존 서비스를 제거할 때 수정해야 하는 내용과 절차를 안내합니다.
-
-
-## 새로운 서비스 추가하기
-
-새로운 서비스(예: JCloud)를 JEduTools 매뉴얼에 추가하려면 다음 단계를 수행해야 합니다:
-
-### 1. content 디렉토리에 새 폴더 생성
+새로운 서비스를 위한 폴더와 그 안에 이미지를 저장할 `images` 폴더를 생성합니다.
 
 ```bash
-mkdir -p content/서비스명/images
+mkdir -p content/J-NewService/images
 ```
-
-예: `mkdir -p content/JCloud/images`
 
 ### 2. 메인 문서 파일 생성
 
-서비스 디렉토리에 메인 문서 파일을 생성합니다. 파일 이름은 일반적으로 `서비스명Home.mdx` 또는 `서비스명.mdx` 형식으로 지정합니다.
+서비스의 첫 페이지가 될 메인 문서를 `.mdx` 파일로 생성합니다. 파일 상단에는 `frontmatter`라는 영역에 페이지의 제목, 설명, URL 경로(`slug`)를 정의해야 합니다.
 
-```
-content/서비스명/서비스명Home.mdx
-```
-
-이 파일에는 다음과 같은 프론트매터(frontmatter)가 포함되어야 합니다:
+**파일 위치:** `content/J-NewService/Home.mdx`
 
 ```yaml
 ---
-title: '서비스명 사용 가이드'
-description: '서비스에 대한 간략한 설명'
-slug: '서비스명/1Home'
+title: 'J-NewService 사용 가이드'
+description: '새로운 서비스 J-NewService에 대한 간략한 설명'
+slug: 'J-NewService/1Home'
 ---
+
+# J-NewService 사용 가이드
+
+여기에 서비스에 대한 상세한 내용을 작성합니다.
 ```
+> **Tip:** `slug`의 `1Home`처럼 숫자 접두사를 사용하면 사이드바 메뉴의 정렬 순서를 제어할 수 있습니다.
 
-slug는 실제 URL 경로를 지정합니다. 일반적으로 `서비스명/1Home`과 같이 숫자를 사용하여 정렬 순서를 지정할 수 있습니다.
+### 3. `gatsby-config.js` 파일 수정 (사이드바 메뉴 추가)
 
-### 3. gatsby-config.js 파일 수정
+왼쪽 사이드바 메뉴에 새로운 서비스를 추가하기 위해 `gatsby-config.js` 파일의 `forcedNavOrder` 배열을 수정합니다.
 
-네비게이션 메뉴 순서를 설정하기 위해 `gatsby-config.js` 파일의 `forcedNavOrder` 배열을 수정합니다:
-
-```js
+```javascript
+// gatsby-config.js
 sidebarConfig: {
-  forcedNavOrder: ['/서비스명', '기존서비스1', '기존서비스2'],
+  forcedNavOrder: ['/J-NewService', '/JCloud', '/Litmus', '/JCode', '/JFlow', '/JHelper', '/JIGSSO (통합 로그인)', '/Portal'],
   ignoreIndex: false
 }
 ```
 
-예를 들어, JCloud를 추가하는 경우:
-```js
-forcedNavOrder: ['/JCloud', '/JCode', '/JHelper']
-```
+### 4. `index.mdx` 파일 수정 (메인 페이지에 추가)
 
-### 4. index.mdx 파일 수정
-
-홈페이지의 서비스 목록 표에 새 서비스를 추가합니다:
+웹사이트의 메인 페이지(`index.mdx`)에 있는 서비스 목록 표에 새로 추가한 서비스를 한 줄 추가합니다.
 
 ```markdown
 | 이름      | 소개          | 링크   | 도움말 | GitHub 저장소 |
 |-----------|--------------|:------:|:------:|:-------------:|
-| 서비스명  | 서비스 설명   | [Click](서비스URL) | [Manual](/서비스slug) | [repo](repo주소) |
+| J-NewService | 새로운 서비스 설명 | [Click](서비스URL) | [Manual](/J-NewService/1Home) | [repo](repo주소) |
 ```
 
-예를 들어:
-```markdown
-| JCloud | 전북대학교 클라우드 시스템 | [Click](http://jcloud.jbnu.ac.kr) | [Manual](/JCloud/1Home) | [repo](https://github.com/JBNU-JEduTools/JCloud) |
-```
+### 5. `architecture.md` 파일 업데이트
 
-### 5. architecture.md 파일 업데이트
-
-`architecture.md` 파일의 디렉토리 구조 섹션에 새 서비스 폴더를 추가합니다:
+프로젝트의 전체 구조를 설명하는 `architecture.md` 파일의 디렉터리 구조 부분에도 새 서비스 폴더를 추가하여 문서를 최신 상태로 유지합니다.
 
 ```
 content/
-├── 서비스명/        # 서비스명 관련 문서
+├── J-NewService/      # 신규 서비스 관련 문서
+...
 ```
 
-## 기존 서비스 제거하기
+### 기존 서비스 제거하기
 
 서비스를 제거할 때는 위 단계의 역순으로 진행합니다:
-
 1. `gatsby-config.js` 파일의 `forcedNavOrder` 배열에서 서비스 제거
 2. `index.mdx` 파일에서 해당 서비스 항목 제거
 3. `architecture.md` 파일에서 디렉토리 구조 업데이트
 4. (선택 사항) `content/서비스명` 디렉토리 삭제
-
-## 서비스 문서 구조화 요령
-
-복잡한 서비스 문서는 다음과 같이 구조화하는 것이 좋습니다:
-
-```
-content/
-└── 서비스명/
-    ├── 서비스명Home.mdx       # 메인 문서
-    ├── userManual/            # 사용자 매뉴얼
-    │   ├── userGuide.mdx
-    │   └── troubleshooting.mdx
-    ├── devManual/             # 개발자 매뉴얼
-    │   ├── setupGuide.mdx
-    │   └── apiReference.mdx
-    └── images/                # 문서에 사용되는 이미지
-```
-
-각 문서 파일의 slug에 숫자 접두사를 사용하여 정렬 순서를 조정할 수 있습니다:
-- `서비스명/1Home`
-- `서비스명/2userManual/1userGuide`
-- `서비스명/2userManual/2troubleshooting`
-- `서비스명/3devManual/1setupGuide`
-
-## 주의사항
-
-- 모든 이미지는 해당 서비스의 `images` 폴더에 저장합니다.
-- 다른 문서로 연결되는 내부 링크는 slug를 사용합니다: `[링크텍스트](/서비스명/페이지slug)`
-- 문서 추가 후 로컬에서 빌드하여 오류가 없는지 확인합니다: `yarn run develop` 
-
