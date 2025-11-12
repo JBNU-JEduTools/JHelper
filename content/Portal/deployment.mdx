@@ -1,0 +1,30 @@
+---
+title: '배포'
+description: 'This is the meta description for this page'
+slug: 'Portal/4deployment'
+---
+
+이 프로젝트는 **GitHub Actions**를 이용해 **GitHub Pages**로 자동 배포됩니다. 유지보수자는 별도의 배포 명령 없이, 소스 코드 변경사항을 `main` 브랜치에 푸시하기만 하면 됩니다.
+
+1.  **트리거 (Trigger)**
+    *   **조건:** 원본 저장소의 `main` 브랜치에 새로운 커밋이 푸시(push)되면 배포 프로세스가 시작됩니다.
+    *   **설정 파일:** 이 동작은 `.github/workflows/deploy.yml` 파일에 정의되어 있습니다.
+
+2.  **빌드 (Build)**
+    *   GitHub Actions 서버에서 가상 환경이 실행됩니다.
+    *   워크플로우 설정에 따라 Node.js 환경이 구성됩니다.
+    *   `npm install` 명령으로 프로젝트 의존성을 설치합니다.
+    *   `npm run build` 스크립트를 실행하여 Vite 프로젝트를 정적 HTML/CSS/JS 파일로 빌드합니다. 빌드 결과물은 `dist` 디렉터리에 생성됩니다.
+
+3.  **배포 (Deploy)**
+    *   빌드가 성공적으로 완료되면, `dist` 디렉터리의 내용만 `gh-pages` 브랜치로 푸시됩니다.
+    *   GitHub Pages는 `gh-pages` 브랜치의 내용을 감지하여 실제 서비스 페이지에 반영합니다.
+
+### **확인 및 트러블슈팅**
+
+*   **배포 현황 확인:**
+    *   배포 과정의 성공, 실패 여부 및 상세 로그는 저장소의 **[Actions 탭](https://github.com/JBNU-JEduTools/portal/actions)**에서 실시간으로 확인할 수 있습니다.
+*   **배포 실패 시:**
+    *   Actions 탭에서 실패한 워크플로우를 클릭하여 로그를 확인하면, 빌드 과정에서 발생한 에러(예: 코드 문법 오류, 의존성 문제)를 파악할 수 있습니다.
+*   **최종 배포 주소:**
+    *   배포가 완료된 사이트는 [https://jedutools.jbnu.ac.kr](https://jedutools.jbnu.ac.kr) 에서 확인할 수 있습니다.
