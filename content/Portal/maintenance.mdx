@@ -1,0 +1,66 @@
+---
+title: '유지보수 가이드'
+description: 'This is the meta description for this page'
+slug: 'Portal/2maintenance'
+---
+
+
+이 문서는 `jedutools-portal` 프로젝트의 유지보수를 담당하게 될 개발자를 위해 작성되었습니다. "어떻게?"에 초점을 맞춰 일반적인 유지보수 작업을 수행하는 방법을 안내합니다.
+
+
+### 1. 공지사항 수정
+
+*   **수정 대상:**
+    *   `public/notice.md` 파일을 직접 수정하면 됩니다.
+        ![공지사항 수정 과정 스크린샷](/images/notice1.png)
+*   **동작 원리:**
+    *   `src/hooks/useNotices.ts` 훅이 이 마크다운 파일을 `fetch` API로 가져와서 텍스트로 파싱합니다.
+    *   `src/components/home/Notice.tsx` 와 `src/components/layout/NoticeBanner.tsx` 컴포넌트가 이 훅을 사용해 공지를 화면에 표시합니다.
+*   **주의 사항:**
+    *   마크다운 문법에 맞춰서 작성해야 줄바꿈 등이 올바르게 표시됩니다.
+    expiry가 지나면 공지사항을 수정하지 않아도 자동으로 내려갑니다.
+    ![공지사항 수정 과정 스크린샷](/images/notice2.png)
+
+### 2. 새로운 서비스 바로가기 추가
+
+*   **수정 대상:**
+    *   `src/components/home/Projects.tsx` 파일 하나만 수정하면 됩니다.
+*   **수정 방법:**
+    1.  새로 추가할 서비스의 로고 이미지를 `public/img` 와 `public/img/hero` 폴더에 추가합니다. (기존 이미지들을 참고하여 비슷한 크기와 스타일로 만드세요.)
+    2.  `Projects.tsx` 파일 내에서 `<ProjectCard />` 컴포넌트를 사용하는 부분을 찾습니다.
+    3.  기존 `<ProjectCard />` 코드 블록을 하나 복사하여 아래와 같이 내용을 채웁니다.
+
+    ```tsx
+    // src/components/home/Projects.tsx
+
+    // ... 기존 ProjectCard들 ...
+
+    <ProjectCard
+      name="J-GPT" // 서비스 이름
+      description="AI 기반 질의응답 서비스" // 서비스 한 줄 설명
+      href="https://gpt.jedutools.com" // 실제 서비스 URL
+      imgSrc="/img/j-gpt.png" // public/img 폴더의 이미지 경로
+      heroImgSrc="/img/hero/j-gpt.png" // public/img/hero 폴더의 이미지 경로
+    />
+    ```
+    <!-- ![새로운 서비스 바로가기 추가 과정 스크린샷](/img/maintenance/add-service-flow.png) -->
+
+### 3. 특정 페이지 문구/링크 수정
+
+*   **탐색 방법:**
+    *   이 프로젝트는 화면 단위가 아닌 **컴포넌트 단위**로 구성되어 있습니다.
+    *   브라우저에서 바꾸고 싶은 문구를 확인한 뒤, VS Code 등에서 해당 텍스트로 전체 코드를 검색하는 것이 가장 빠릅니다.
+    *   대부분의 UI 관련 코드는 `src/components` 폴더 안에 있습니다.
+        *   `layout/AppBar.tsx`: 상단 메뉴
+        *   `layout/Footer.tsx`: 하단 푸터
+        *   `home/Hero.tsx`: 메인 페이지의 가장 큰 제목 영역
+    <!-- ![특정 페이지 문구/링크 수정 과정 스크린샷](/img/maintenance/edit-page-content-flow.png) -->
+
+### 4. 스타일(색상, 간격 등) 수정
+
+*   **수정 방법:**
+    *   이 프로젝트는 **Tailwind CSS**를 사용합니다. HTML 태그의 `className`에 `p-4`, `text-blue-500`, `flex` 와 같은 유틸리티 클래스를 직접 수정하여 스타일을 변경합니다.
+    *   `src/lib/utils.ts` 파일의 `cn` 함수는 여러 Tailwind 클래스를 조건부로 조합하기 위해 사용됩니다.
+    <!-- ![스타일 수정 과정 스크린샷](/img/maintenance/edit-style-flow.png) -->
+
+---

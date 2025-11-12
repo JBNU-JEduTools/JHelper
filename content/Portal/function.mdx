@@ -1,0 +1,30 @@
+---
+title: '주요 기능'
+description: 'This is the meta description for this page'
+slug: 'Portal/3function'
+---
+
+### **1. Keycloak 인증 흐름**
+
+`src/hooks/useKeycloak.ts` 파일은 Keycloak(JIG SSO) 인증을 처리하는 핵심적인 역할을 담당합니다. 이 로직의 동작 방식을 이해하는 것은 매우 중요합니다.
+`useKeycloak` 훅은 `react-oidc-context` 라이브러리를 기반으로 하여, 애플리케이션 전체의 인증 상태를 관리합니다.
+
+
+인증 과정은 다음 단계로 이루어집니다.
+
+1.  **인증 상태 확인:** `useAuth()` 훅을 호출하여 `auth` 객체에서 `isAuthenticated`, `isLoading` 같은 현재 인증 상태를 가져옵니다.
+2.  **로그인 시작:** `handleLogin` 함수 내에서 `auth.signinRedirect()`를 호출하여 사용자를 Keycloak 로그인 페이지로 보냅니다.
+3.  **로그인 완료:** 사용자가 Keycloak에서 성공적으로 로그인하고 돌아오면, URL에 포함된 `code`, `state` 같은 파라미터를 `hasAuthParams()` 함수로 감지하여 로그인 절차를 마무리합니다.
+4.  **사용자 정보 제공:** 인증이 완료되면, 훅은 앱의 다른 컴포넌트에서 사용할 수 있도록 `user` 객체, `isAuthenticated` 상태 등을 반환합니다.
+    ```typescript
+    return {
+      isAuthenticated: auth.isAuthenticated,
+      isLoading: auth.isLoading,
+      user: auth.user,
+      // ... and other helpers
+    };
+    ```
+
+
+`useEffect` 훅을 사용하여 `auth.error`를 감시합니다. 예를 들어, `No matching state found in storage` 에러가 발생하면, 로그인 요청을 보낸 브라우저와 다른 브라우저에서 접속했음을 알리는 경고창을 띄웁니다.
+
