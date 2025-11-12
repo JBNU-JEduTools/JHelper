@@ -5,9 +5,6 @@ slug: 'Portal/2maintenance'
 ---
 
 
-이 문서는 `jedutools-portal` 프로젝트의 유지보수를 담당하게 될 개발자를 위해 작성되었습니다. "어떻게?"에 초점을 맞춰 일반적인 유지보수 작업을 수행하는 방법을 안내합니다.
-
-
 ### 1. 공지사항 수정
 
 *   **수정 대상:**
@@ -26,23 +23,26 @@ slug: 'Portal/2maintenance'
 *   **수정 대상:**
     *   `src/components/home/Projects.tsx` 파일 하나만 수정하면 됩니다.
 *   **수정 방법:**
-    1.  새로 추가할 서비스의 로고 이미지를 `public/img` 와 `public/img/hero` 폴더에 추가합니다. (기존 이미지들을 참고하여 비슷한 크기와 스타일로 만드세요.)
-    2.  `Projects.tsx` 파일 내에서 `<ProjectCard />` 컴포넌트를 사용하는 부분을 찾습니다.
-    3.  기존 `<ProjectCard />` 코드 블록을 하나 복사하여 아래와 같이 내용을 채웁니다.
+    1.  새로 추가할 서비스의 로고 이미지를 `public/img` 폴더에 추가합니다. (기존 이미지들을 참고하여 비슷한 크기와 스타일로 만드세요.)
+    2.  `Projects.tsx` 파일에서 `projectList` (JEduTools 프로젝트) 또는 `jflowProjects` (JFlow 프로젝트) 배열을 찾습니다.
+    3.  배열에 아래 형식에 맞춰 새로운 객체를 추가합니다.
 
     ```tsx
     // src/components/home/Projects.tsx
 
-    // ... 기존 ProjectCard들 ...
-
-    <ProjectCard
-      name="J-GPT" // 서비스 이름
-      description="AI 기반 질의응답 서비스" // 서비스 한 줄 설명
-      href="https://gpt.jedutools.com" // 실제 서비스 URL
-      imgSrc="/img/j-gpt.png" // public/img 폴더의 이미지 경로
-      heroImgSrc="/img/hero/j-gpt.png" // public/img/hero 폴더의 이미지 경로
-    />
+    const projectList: Project[] = [
+      // ... 기존 프로젝트 객체들 ...
+      {
+        title: "새로운 서비스", // 서비스 이름
+        description: "새로운 서비스에 대한 한 줄 설명입니다.", // 서비스 설명
+        imgSrc: "/img/new-service.png", // /public/img 폴더의 이미지 경로
+        link: "https://new-service.jbnu.ac.kr", // 서비스 바로가기 링크 (없으면 null)
+        github: "https://github.com/user/repo", // GitHub 리포지토리 (없으면 null)
+        docs: "https://jhelper.jbnu.ac.kr/new-service", // 관련 문서 페이지 (없으면 null)
+      },
+    ];
     ```
+    *   **참고:** `link` 속성값이 `null`이거나 없으면 "바로가기" 버튼이 비활성화됩니다. 특별한 버튼(예: "서비스 준비중")을 추가하려면 `linkbtn` 속성을 사용하세요. (파일 내 `createLinkButton` 함수 참고)
     <!-- ![새로운 서비스 바로가기 추가 과정 스크린샷](/img/maintenance/add-service-flow.png) -->
 
 ### 3. 특정 페이지 문구/링크 수정
@@ -58,9 +58,20 @@ slug: 'Portal/2maintenance'
 
 ### 4. 스타일(색상, 간격 등) 수정
 
-*   **수정 방법:**
-    *   이 프로젝트는 **Tailwind CSS**를 사용합니다. HTML 태그의 `className`에 `p-4`, `text-blue-500`, `flex` 와 같은 유틸리티 클래스를 직접 수정하여 스타일을 변경합니다.
-    *   `src/lib/utils.ts` 파일의 `cn` 함수는 여러 Tailwind 클래스를 조건부로 조합하기 위해 사용됩니다.
-    <!-- ![스타일 수정 과정 스크린샷](/img/maintenance/edit-style-flow.png) -->
+이 프로젝트의 스타일링은 **Tailwind CSS**를 기반으로 하며, **shadcn/ui**를 컴포넌트 시스템으로 사용합니다.
 
----
+*   **Tailwind CSS (기본 스타일링):**
+    *   간단한 스타일 변경은 HTML 태그의 `className`에 `p-4`, `text-blue-500`, `flex` 와 같은 유틸리티 클래스를 직접 수정하여 적용합니다.
+    *   `src/lib/utils.ts` 파일의 `cn` 함수는 여러 Tailwind 클래스를 조건부로 조합하기 위해 사용됩니다.
+
+*   **shadcn/ui (컴포넌트 스타일링):**
+    *   `Button`, `Card`, `Alert` 등 UI 컴포넌트는 `shadcn/ui`를 통해 관리됩니다.
+    *   **핵심 개념:** `shadcn/ui`는 일반적인 라이브러리와 달리, 컴포넌트의 소스 코드를 직접 프로젝트에 추가하는 방식입니다. 모든 UI 컴포넌트의 코드는 `src/components/ui` 폴더에 위치합니다.
+    *   **컴포넌트 수정:** 기존 컴포넌트의 스타일(색상, 크기, 형태 등)을 바꾸려면, `src/components/ui` 폴더에서 해당 컴포넌트 파일(예: `button.tsx`)을 찾아 직접 코드를 수정하면 됩니다. 내부적으로 Tailwind CSS를 사용하므로, `className`을 수정하는 방식은 동일합니다.
+    *   **새로운 컴포넌트 추가:** 필요한 컴포넌트가 없다면, [shadcn/ui 공식 문서](https://ui.shadcn.com/docs/components)를 참고하여 CLI 명령어로 추가할 수 있습니다. 예를 들어, `accordion` 컴포넌트를 추가하려면 아래 명령어를 실행합니다.
+      ```bash
+      npx shadcn-ui@latest add accordion
+      ```
+      이 명령은 `src/components/ui/accordion.tsx` 파일을 생성하며, 이후 프로젝트 어디에서든 `import`하여 사용할 수 있습니다.
+<!-- ![스타일 수정 과정 스크린샷](/img/maintenance/edit-style-flow.png) -->
+
