@@ -152,16 +152,13 @@ Litmus 서비스는 JEduTools와 연동되어 있습니다. 두 단계의 회원
 - **SC (Short Circuited, 단락)**: 일부 테스트 케이스에서 실패하여 나머지 테스트를 건너뛴 경우입니다.
 
 #### 프로그램 오류
-- **IR (Invalid Return, 잘못된 반환)**: 프로그램이 예상되지 않은 방식으로 종료된 경우입니다.
-- **RTE (Runtime Error, 런타임 에러)**: 프로그램 실행 중 오류가 발생한 경우입니다.
-- **CE (Compile Error, 컴파일 에러)**: 코드 컴파일 중 문법적인 오류가 발생한 경우입니다.
-<small>※ Java 8 채점기에서 해당 문구가 등장하는 경우입니다.
-``` 컴파일 에러: 제출한 코드가 리트머스 서버에서 지원하는 제출 코드 형식에 해당하지 않습니다. ```
-Java 8 코드의 일부 케이스에서는 상세한 컴파일 오류 메시지를 제공해주지 않습니다.
-- public 최상위 타입이 2개 이상 존재할 때
-- 주석 문자열에 ```class Main``` 패턴이 있을 때
-
-</small>
+* **IR (Invalid Return, 잘못된 반환)**: 프로그램이 예상되지 않은 방식으로 종료된 경우입니다.
+* **RTE (Runtime Error, 런타임 에러)**: 프로그램 실행 중 오류가 발생한 경우입니다.
+* **CE (Compile Error, 컴파일 에러)**: 코드 컴파일 중 문법적인 오류가 발생한 경우입니다.
+    * `컴파일 에러: 제출한 코드가 리트머스 서버에서 지원하는 제출 코드 형식에 해당하지 않습니다.`
+    * Java 8 코드의 일부 케이스에서는 상세 오류 메세지 대신 위 메시지가 공통 출력됩니다.
+        * public 최상위 타입이 2개 이상 존재할 때
+        * 주석 문자열에 `class Main` 패턴이 있을 때
 
 #### 시스템 오류
 - **IE (Internal Error, 내부 오류)**: 채점 시스템 내부에서 오류가 발생한 경우입니다.
@@ -178,7 +175,7 @@ Java 8 코드의 일부 케이스에서는 상세한 컴파일 오류 메시지�
 
 Litmus는 DMOJ 오픈소스를 기반으로 개발되었으며, **[ALPS](https://sites.google.com/view/jbnu-alps)**의 **[LITMUS](https://github.com/alps-jbnu)** 팀에서 관리합니다.
 
-해당 프로젝트는 **AGPL-3.0 License** 하에 배포됩니다. **GitHub** 주소는 **[여기](https://github.com/dameun2224/Litmus)**를 클릭해주세요.
+해당 프로젝트는 **AGPL-3.0 License** 하에 배포됩니다. **GitHub** 주소는 **[여기](https://github.com/alps-jbnu/JBNU-Litmus)**를 클릭해주세요.
 
 더 자세한 내용은 **[ABOUT 탭](https://litmus.jbnu.ac.kr/about/)**을 참고해주세요.
 
