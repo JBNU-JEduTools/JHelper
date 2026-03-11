@@ -18,7 +18,11 @@
     "develop": "gatsby develop",
     "build": "gatsby build",
     "clean": "gatsby clean",
-    "build:ghpage": "rm -rf ./docs && PREFIX_PATHS=true gatsby build && mv ./public ./docs"
+    "build:ghpage": "rm -rf ./docs && PREFIX_PATHS=true gatsby build && mv ./public ./docs",
+    "verify:paths": "node -e \"const fs=require('fs'),path=require('path');function scan(d){let r=[];if(!fs.existsSync(d))return r;fs.readdirSync(d).forEach(f=>{const p=path.join(d,f);if(fs.statSync(p).isDirectory())r=r.concat(scan(p));else if(f.endsWith('.js'))r.push(p)});return r;}const bad=['/Users/','/home/','/opt/build','C:\\\\\\\\Users'];let ok=true;scan('docs').forEach(f=>{const c=fs.readFileSync(f,'utf8');bad.forEach(b=>{if(c.includes(b)){console.error('FAIL: '+f+' has '+b);ok=false;}});});ok?console.log('verify:paths PASSED'):process.exit(1)\"",
+    "verify:emails": "node -e \"const fs=require('fs'),path=require('path');function scan(d){let r=[];if(!fs.existsSync(d))return r;fs.readdirSync(d).forEach(f=>{const p=path.join(d,f);if(fs.statSync(p).isDirectory())r=r.concat(scan(p));else if(f.endsWith('.html'))r.push(p)});return r;}const emails=['litmus@jbnu.ac.kr','hyunchan.park@jbnu.ac.kr','nhj7804@jbnu.ac.kr'];let ok=true;scan('docs').forEach(f=>{const lines=fs.readFileSync(f,'utf8').split('\\\\n');lines.forEach((line,idx)=>{emails.forEach(e=>{if(line.includes(e)){console.error('FAIL: '+f+':'+idx+' has '+e);ok=false;}});if(line.includes('jedutools@gmail.com')&&!line.includes('VITE_ADMIN_EMAIL')&&!line.includes('Cloudflare')){console.error('FAIL: '+f+':'+idx+' has jedutools@gmail.com');ok=false;}});});ok?console.log('verify:emails PASSED'):process.exit(1)\"",
+    "verify:headers": "node -e \"const fs=require('fs');if(!fs.existsSync('docs/_headers')){console.error('FAIL: docs/_headers not found');process.exit(1);}const content=fs.readFileSync('docs/_headers','utf8');const required=['Strict-Transport-Security','Content-Security-Policy','X-Content-Type-Options'];let ok=true;required.forEach(h=>{if(!content.includes(h)){console.error('FAIL: '+h+' missing from docs/_headers');ok=false;}});ok?console.log('verify:headers PASSED'):process.exit(1)\"",
+    "verify:all": "yarn verify:paths && yarn verify:emails && yarn verify:headers && echo 'All security checks PASSED'"
   },
   "peerDependencies": {},
   "devDependencies": {
