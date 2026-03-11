@@ -1,7 +1,12 @@
-# 모든 리소스에 최고 수준 보안 적용
+# JHelper — Cloudflare Pages Security Headers
+# Source of truth: static/_headers (copied to public/ during gatsby build, moved to docs/ by build:ghpage)
+
+# Global security headers for all routes
 /*
   ! Access-Control-Allow-Origin
   ! Server
+  ! X-Powered-By
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: no-referrer
@@ -10,6 +15,30 @@
   Cross-Origin-Embedder-Policy: require-corp
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-origin
-  Cache-Control: private, no-cache, no-store, must-revalidate, max-age=0
-  Pragma: no-cache
   X-Robots-Tag: noindex, nofollow, nosnippet, noarchive
+
+# Long-term cache for Gatsby's content-hashed static assets
+/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.css
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML pages must always be fresh
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Gatsby page-data must be fresh + CORS
+/page-data/*
+  Cache-Control: public, max-age=0, must-revalidate
+  Access-Control-Allow-Origin: https://jhelper.jbnu.ac.kr
+
+# CORS for Gatsby data files and manifest
+/app-data.json
+  Access-Control-Allow-Origin: https://jhelper.jbnu.ac.kr
+
+/manifest.webmanifest
+  Access-Control-Allow-Origin: https://jhelper.jbnu.ac.kr
