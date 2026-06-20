@@ -76,16 +76,29 @@ export default {
     },
     table: {
       width: '100%',
-      borderCollapse: 'separate',
-      borderSpacing: 0
+      my: 4,
+      borderCollapse: 'collapse'
     },
     th: {
       textAlign: 'left',
-      borderBottomStyle: 'solid'
+      padding: '0.6rem 0.9rem',
+      backgroundColor: 'sidebar',
+      borderBottom: '2px solid',
+      borderColor: 'borderColor',
+      fontWeight: 'bold',
+      whiteSpace: 'nowrap'
     },
     td: {
       textAlign: 'left',
-      borderBottomStyle: 'solid'
+      padding: '0.6rem 0.9rem',
+      borderBottom: '1px solid',
+      borderColor: 'borderColor'
+    },
+    tr: {
+      transition: `background-color ${transition}`,
+      ':hover': {
+        backgroundColor: 'sidebar'
+      }
     }
   }
 };
