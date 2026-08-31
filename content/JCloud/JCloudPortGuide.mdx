@@ -12,7 +12,9 @@ slug: 'JCloud/2PortGuide'
 ### 1. 접속 명령 복사 (가장 쉬운 방법 — students 프로젝트)
 - students 프로젝트에서는 인스턴스 목록에 **"접속 주소"** 열과 **"SSH 접속 명령 복사"** 버튼이 제공됨
   - 복사되는 명령: `ssh -i <키페어 파일 경로> ubuntu@113.198.66.75 -p 12135` (키페어 경로만 본인 것으로 바꿔 사용)
+  <img src="./images/skyline-access-list.png" width="auto" height="auto"/>
 - 인스턴스 상세 페이지에서 서비스별(SSH·HTTP·HTTPS·3000·8080) 접속 포트 표 확인 가능
+  <img src="./images/skyline-access-detail.png" width="auto" height="auto"/>
 - 그 외 프로젝트는 아래 규칙으로 포트를 직접 계산 — 2~4번 참고
 
 ### 2. IP 확인
@@ -46,9 +48,3 @@ slug: 'JCloud/2PortGuide'
 - IP:PORT 형식 주소로 접근
 - (예제) students 프로젝트의 10.0.2.135 인스턴스의 8080 포트를 접근할 경우,
   - **최종 주소: 113.198.66.75:52135**
----
-
-## 참고 자료
-  <img src="./images/port1.png" width="auto" height="auto"/>
-
-  <img src="./images/port2.png" width="auto" height="auto"/>
