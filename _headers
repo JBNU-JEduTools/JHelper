@@ -34,11 +34,11 @@
 # Gatsby page-data must be fresh + CORS
 /page-data/*
   Cache-Control: public, max-age=0, must-revalidate
-  Access-Control-Allow-Origin: https://jhelper.jbnu.ac.kr
+  Access-Control-Allow-Origin: https://jhelper.jedutools.io
 
 # CORS for Gatsby data files and manifest
 /app-data.json
-  Access-Control-Allow-Origin: https://jhelper.jbnu.ac.kr
+  Access-Control-Allow-Origin: https://jhelper.jedutools.io
 
 /manifest.webmanifest
-  Access-Control-Allow-Origin: https://jhelper.jbnu.ac.kr
+  Access-Control-Allow-Origin: https://jhelper.jedutools.io
