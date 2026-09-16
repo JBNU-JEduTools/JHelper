@@ -1,0 +1,152 @@
+---
+title: 'API 사용법'
+description: 'JPUShare의 인증 방식, 작업·데이터·로그 조회 API와 조건부 LLM API 사용법을 안내합니다.'
+slug: 'JPUShare/5API'
+---
+
+JPUShare API의 기본 주소는 `https://share.jedutools.io`입니다. 먼저 [시작하기](/JPUShare/1GettingStarted)에서 로그인과 연구실 소속을 확인하세요.
+
+### 1. 인증 방식 구분하기
+
+| 구분 | 인증 값 | 사용할 수 있는 범위 |
+| --- | --- | --- |
+| 일반 사용자 API | 로그인 인증 서버가 발급한 사용자 액세스 토큰(JWT) | 권한이 있는 작업·데이터·결과 조회 |
+| LLM API | 사용자 JWT 또는 JPUShare LLM API 키(`sk-`로 시작) | LLM 모델 조회와 채팅 요청 |
+| LLM API 키 관리 | 사용자 JWT | 자신의 키 생성·목록·폐기·사용량 조회 |
+
+요청 헤더는 `Authorization: Bearer 인증값`입니다. **LLM API 키를 작업·스토리지 API의 JWT 대신 사용할 수는 없습니다.**
+
+아래 일반 API 예제는 유효한 사용자 JWT를 사용할 수 있는 경우의 요청 형식입니다. 브라우저 로그인만으로 터미널에 토큰이 설정되지는 않습니다. 별도 연동이 필요하면 담당자에게 지원하는 인증 절차를 확인하세요. 비밀번호로 토큰을 발급받는 CLI 절차는 제공하지 않으며, 과거의 `POST /v1/auth/token` 경로도 사용할 수 없습니다.
+
+> 토큰과 API 키는 비밀번호처럼 보관하세요. 소스 코드, 공유 문서, 오류 문의에 원문을 넣지 마세요.
+
+예제는 Bash 기준입니다. `USER_ACCESS_TOKEN`, `JOB_ID`, `DATASET_BUCKET`, `LLM_API_KEY`는 본인의 유효한 값으로 설정된 환경 변수라고 가정합니다.
+
+### 2. 내 작업 조회하기
+
+```bash
+curl --fail-with-body --get 'https://share.jedutools.io/v1/jobs' \
+  -H "Authorization: Bearer $USER_ACCESS_TOKEN" \
+  --data-urlencode 'limit=20'
+```
+
+응답 예시의 ID와 내용은 설명용입니다.
+
+```json
+{
+  "items": [
+    {
+      "job_id": "00000000-0000-4000-8000-000000000001",
+      "state": "RUNNING",
+      "priority": "NORMAL",
+      "name": "학습 실험",
+      "work_type": "training",
+      "description": "작은 데이터로 학습 확인"
+    }
+  ],
+  "next_cursor": null
+}
+```
+
+`GET /v1/jobs`는 자신의 작업을 반환합니다. `limit`은 1~100이며 기본값은 20입니다. `state=RUNNING`처럼 서버 상태 코드로 필터링할 수 있습니다. `next_cursor`가 문자열이면 다음 요청의 `cursor`에 그대로 전달하고, `null`이면 마지막 페이지입니다.
+
+화면의 **대기 중**은 API에서 `USER_QUEUE_WAIT`, `GLOBAL_QUEUE_WAIT`, `ESCALATION_WAIT`로 구분됩니다. **배정됨**은 `ASSIGNED`입니다.
+
+```bash
+curl --fail-with-body "https://share.jedutools.io/v1/jobs/$JOB_ID" \
+  -H "Authorization: Bearer $USER_ACCESS_TOKEN"
+```
+
+상세 응답에는 `job_id`, `state`, `command`, `args`, `timeout_seconds`, `tier`, `attempts`, `events` 등이 포함됩니다. 실행 준비와 제출 절차는 [작업 실행](/JPUShare/3Jobs)을 참고하세요.
+
+### 3. 데이터·로그·결과 조회하기
+
+| 메서드와 경로 | 주요 입력 | 응답 |
+| --- | --- | --- |
+| `GET /v1/storage` | 없음 | `quota_gb`, `used_gb`, `buckets` 등 |
+| `GET /v1/storage/objects` | 필수 `bucket`, 선택 `prefix`, `limit`, `cursor` | `items`, `next_cursor` |
+| `GET /v1/jobs/{job_id}/log` | `stream=stdout` 또는 `stderr`, 선택 `lines` | `stream`, `state`, `finished`, `lines` |
+| `GET /v1/jobs/{job_id}/results` | 선택 `limit`, `cursor`, `download` | `bucket`, `prefix`, `uri`, `objects`, `next_cursor`, `retention_days`, `retained` |
+| `GET /v1/jobs/{job_id}/results-zip` | 없음 | ZIP 파일 |
+
+스토리지 조회는 연구실 소속과 저장소 준비가 필요합니다. `bucket`에는 자신의 저장소 목록에서 확인한 이름을 사용하세요.
+
+```bash
+curl --fail-with-body --get 'https://share.jedutools.io/v1/storage/objects' \
+  -H "Authorization: Bearer $USER_ACCESS_TOKEN" \
+  --data-urlencode "bucket=$DATASET_BUCKET" \
+  --data-urlencode 'prefix=train/'
+```
+
+스토리지 `items`의 각 항목은 `key`, `size`, `last_modified`, `is_prefix`를 가집니다. `is_prefix=true`이면 폴더 항목입니다. 객체 `size`는 바이트, 저장소 용량의 `_gb` 필드는 GiB(1024³바이트) 기준입니다.
+
+```bash
+curl --fail-with-body "https://share.jedutools.io/v1/jobs/$JOB_ID/log?stream=stderr" \
+  -H "Authorization: Bearer $USER_ACCESS_TOKEN"
+```
+
+기본 로그 응답의 `lines`는 문자열 배열입니다. 아직 실행을 시작하지 않은 작업은 `NO_ATTEMPT` 오류를 반환할 수 있습니다. 실시간 로그는 `follow=1`을 붙이면 JSON 대신 `text/event-stream`(SSE)으로 전달됩니다.
+
+```bash
+curl --fail-with-body "https://share.jedutools.io/v1/jobs/$JOB_ID/results" \
+  -H "Authorization: Bearer $USER_ACCESS_TOKEN"
+```
+
+결과 `objects`의 각 항목은 `key`, `size`, `last_modified`, `url`, `expires_at`을 가집니다. `url`은 만료되는 임시 다운로드 주소입니다. 만료되면 결과 목록을 다시 조회해 새 주소를 받으세요. `retention_days`는 기본 보관 기간이며, `retained`는 자동 정리 대상에서 제외하도록 설정된 보존 표시입니다. 파일이 실제로 남아 있는지는 결과 목록과 다운로드로 확인합니다.
+
+파일 업로드는 [데이터 준비](/JPUShare/2Datasets), 결과 보관과 다운로드는 [결과 확인](/JPUShare/4Results)을 참고하세요.
+
+### 4. LLM API 사용하기 — 서비스가 설정된 경우
+
+LLM 호출에는 제공 중인 모델과 유효한 인증 값이 필요합니다. 키가 있다고 모델이 항상 실행 중인 것은 아닙니다. 먼저 모델 목록을 조회하세요.
+
+```bash
+curl --fail-with-body 'https://share.jedutools.io/v1/llm/models' \
+  -H "Authorization: Bearer $LLM_API_KEY"
+```
+
+응답은 `{"models": [...]}` 형식입니다. 각 모델의 `name`과 `serving_count`를 확인하세요. 빈 목록이거나 제공 중인 인스턴스가 없으면 담당자에게 제공 상태를 확인합니다. 모델 이름을 고정해서 쓰기보다 현재 목록의 값을 사용하세요.
+
+`GET /v1/llm/models/{model_name}/health`는 `model`, `status`, `serving_count`를 반환합니다. `status`는 `healthy` 또는 `unavailable`입니다.
+
+목록에서 확인한 모델 이름으로 다음 JSON 파일 `request.json`을 준비합니다.
+
+```json
+{
+  "model": "MODEL_NAME_FROM_LIST",
+  "messages": [
+    {"role": "user", "content": "안녕하세요. 한 문장으로 답해주세요."}
+  ],
+  "stream": false
+}
+```
+
+```bash
+curl --fail-with-body 'https://share.jedutools.io/v1/llm/chat/completions' \
+  -H "Authorization: Bearer $LLM_API_KEY" \
+  -H 'Content-Type: application/json' \
+  --data-binary @request.json
+```
+
+채팅 요청과 응답은 연결된 LLM 게이트웨이로 전달됩니다. 일반 요청은 JSON, `stream=true` 요청은 SSE로 반환됩니다. 세부 응답 필드와 지원 옵션은 제공 모델·게이트웨이에 따라 확인해야 합니다.
+
+### 5. LLM API 키 관리
+
+키 관리 API는 모두 **사용자 JWT**가 필요합니다. 화면에 키 관리 기능이 제공되지 않으면 담당자에게 이용 방법을 확인하세요.
+
+| 메서드와 경로 | 요청·응답 |
+| --- | --- |
+| `POST /v1/llm/api-keys` | JSON `{"name":"실험용"}`. 이름 1~100자. 성공 시 HTTP 201과 `id`, `key`, `key_prefix`, `name`, `created_at`, `expires_at` 반환 |
+| `GET /v1/llm/api-keys` | `items` 배열. 원문 키 없이 메타데이터와 `is_active` 반환 |
+| `DELETE /v1/llm/api-keys/{key_id}` | 자신의 키 폐기. 성공 시 `{"status":"revoked"}` 반환 |
+| `GET /v1/llm/api-keys/usage` | 선택 `days`(기본 30, 최대 90). `items`에 일별 요청 수와 토큰 사용량 반환 |
+
+활성 키는 사용자당 최대 2개이고 유효기간은 생성 후 28일입니다. **키 원문은 생성 응답에서 한 번만 반환**됩니다. 잃어버렸거나 노출되었다면 해당 키를 폐기하고 새 키를 발급받으세요.
+
+### 6. 오류와 API 문서 확인
+
+일반 오류는 `code`, `error`, `message`와 경우에 따라 `request_id`를 포함합니다. 작업 제출 검증 오류는 별도 형식인 `status: "VALIDATION_FAILED"`, `stage`, `errors`를 사용합니다. 입력 형식 검증의 `detail` 응답이나 LLM 게이트웨이 오류는 형식이 다를 수 있으므로 HTTP 상태도 함께 확인하세요.
+
+`/docs`, `/redoc`, `/openapi.json`은 API 문서 공개가 설정된 환경에서만 열립니다. 이 주소의 404만으로 서비스 장애라고 판단하지 마세요.
+
+인증 오류, 요청 제한, 결과 다운로드 오류는 [문제 해결](/JPUShare/6Troubleshooting)을 참고하세요.

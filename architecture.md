@@ -21,6 +21,7 @@ JEduTools는 전북대학교의 SW 교육을 위한 도구 모음입니다. 이 
 │   ├── JCode/           # JCode 관련 문서
 │   ├── JFlow/           # JFlow 관련 문서
 │   ├── JCloud/          # JCloud 관련 문서
+│   ├── JPUShare/        # GPU 공유 서비스 시작하기, 데이터셋, 작업, 결과, API, 문제 해결
 │   ├── JIGSSO/          # JIGSSO 관련 문서
 │   ├── Litmus/          # Litmus 관련 문서
 │   └── Portal/          # Portal 관련 문서
@@ -73,4 +74,4 @@ GitHub Actions를 통해 저장소에 변경사항이 푸시되면 자동으로 
 JEduTools는 오픈소스 프로젝트로, 누구나 개발에 참여할 수 있습니다. 특히 학생들이 실제 사용하는 도구에 대한 개발에 참여함으로써:
 - SW 학습에 대한 동기 부여 향상
 - 실무 역량 강화
-- 오픈소스 SW에 대한 이해 증진 
+- 오픈소스 SW에 대한 이해 증진
