@@ -12,7 +12,7 @@ const RightSidebar = ({ tableOfContents, location }) => {
     const mappedLinks = [];
     function mapLinks(items) {
       items.forEach(item => {
-        mappedLinks.push(item);
+        if (item.url) mappedLinks.push(item);
         if (item.items) {
           mapLinks(item.items);
         }
