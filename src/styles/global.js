@@ -28,6 +28,23 @@ const globalStyles = css`
     margin: 0;
   }
 
+  /* Keep screenshots next to their headings and instructions. */
+  p:has(.gatsby-resp-image-wrapper) {
+    margin: 12px 0;
+  }
+
+  p:has(.gatsby-resp-image-wrapper) + p,
+  p:has(.gatsby-resp-image-wrapper) + ol,
+  p:has(.gatsby-resp-image-wrapper) + ul,
+  p:has(.gatsby-resp-image-wrapper) + table {
+    margin-top: 12px;
+  }
+
+  h2:has(+ p .gatsby-resp-image-wrapper),
+  h3:has(+ p .gatsby-resp-image-wrapper) {
+    margin-bottom: 12px;
+  }
+
   /* https://github.com/gatsbyjs/gatsby/issues/15486 */
   .gatsby-resp-image-image {
     width: 100%;
