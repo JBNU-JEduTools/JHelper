@@ -6,7 +6,7 @@ slug: 'JPUShare/5API'
 
 터미널, 스크립트, CI, 자동화 에이전트에서 JPUShare를 쓸 때는 사용자 API 키(`jpk_`로 시작)로 API를 호출합니다. 사람이 직접 부르든 에이전트가 부르든 키와 호출 방법은 같습니다. 이 문서는 키 발급부터 파일 업로드, 작업 제출·조회, 결과 받기까지의 절차를 설명합니다.
 
-API 기본 주소는 `https://share.jedutools.io`입니다. 먼저 [시작하기](/JPUShare/1GettingStarted)에서 로그인과 연구실 소속을 확인하세요.
+API 기본 주소는 `https://share.jedutools.io`입니다. 먼저 [시작하기](/JPUShare/1GettingStarted)에서 로그인과 연구실 소속을 확인합니다.
 이 문서의 예제는 운영 사이트에서 실제로 실행해 확인한 것입니다(2026년 9월 23일).
 
 ## 1. 인증 방식 구분하기
@@ -16,9 +16,9 @@ API 기본 주소는 `https://share.jedutools.io`입니다. 먼저 [시작하기
 | 로그인 토큰(JWT) | 브라우저 로그인 때 로그인 서버가 발급 | 웹 화면. 키 관리·관리자·연구실 가입 경로는 이 토큰만 받습니다. |
 | 사용자 API 키 | `jpk_`로 시작하는 키. **내 정보/설정 → API 키 발급**에서 직접 발급 | 터미널·스크립트·에이전트. 허용 범위 안의 경로만 호출합니다. |
 
-요청 헤더는 둘 다 `Authorization: Bearer 인증값`입니다. 브라우저 로그인만으로 터미널에 토큰이 설정되지는 않으며, 비밀번호로 토큰을 받는 CLI 절차도 없습니다. **터미널에서는 `jpk_` 키를 씁니다.**
+요청 헤더는 둘 다 `Authorization: Bearer 인증값`입니다. 브라우저 로그인만으로 터미널에 토큰이 설정되지는 않으며, 비밀번호로 토큰을 받는 CLI 절차도 없습니다. **터미널에서는 API 키를 씁니다.**
 
-> `jpk_` 키는 발급한 사용자 본인의 자격 증명입니다. 키를 가진 프로그램은 그 사용자로 인증되며, 키의 허용 범위(scope)는 그 사용자의 권한을 **좁힐 뿐 넓히지 않습니다**. 키는 비밀번호처럼 보관하고, 소스 코드·프롬프트·로그·공유 문서·오류 문의에 원문을 넣지 마세요.
+> API 키는 발급한 사용자 본인의 자격 증명입니다. 키를 가진 프로그램은 그 사용자로 인증되며, 키의 허용 범위(scope)는 그 사용자의 권한을 **좁힐 뿐 넓히지 않습니다**. 키는 비밀번호처럼 보관하고, 소스 코드·프롬프트·로그·공유 문서·오류 문의에 원문을 넣지 마세요.
 
 ## 2. API 키 발급받기
 
@@ -34,16 +34,16 @@ API 기본 주소는 `https://share.jedutools.io`입니다. 먼저 [시작하기
 
 ![발급 직후 한 번만 보이는 키 원문(값은 가림)](./images/me-api-key-issued.png)
 
-활성 키는 사용자당 최대 5개입니다. 키를 잃어버렸거나 노출했다면 같은 화면에서 폐기하고 새로 발급하세요. 폐기·만료·계정 비활성화·연구실 역할 변경은 다음 요청부터 바로 적용됩니다.
+활성 키는 사용자당 최대 5개입니다. 키를 잃어버렸거나 노출했다면 같은 화면에서 폐기하고 새로 발급합니다. 폐기·만료·계정 비활성화·연구실 역할 변경은 다음 요청부터 바로 적용됩니다.
 
-### 허용 범위(scope) 선택
+### 허용 범위 고르기
 
 범위는 할 일에 필요한 것만 고릅니다. 선택할 수 있는 범위는 발급자의 권한에 따라 달라집니다 — 연구실 소속이 없는 계정은 `account:read`만 위임할 수 있고, 연구실 구성원은 아래 범위 전체를 위임할 수 있습니다.
 
 | 범위 | 할 수 있는 일 |
 | --- | --- |
 | `account:read` | 내 계정·소속 정보 조회 (`/v1/me`) |
-| `platform:read` | GPU 서버(tier)·실행 환경·플랫폼 통계·대기열 스냅샷 조회 |
+| `platform:read` | GPU 서버·실행 환경·플랫폼 통계·대기열 스냅샷 조회 |
 | `jobs:read` | 내 작업 목록·상세·로그·GPU 사용량·결과 조회 |
 | `jobs:submit` | 작업 제출 |
 | `jobs:cancel` | 내 작업 취소 |
@@ -72,11 +72,11 @@ curl --fail-with-body 'https://share.jedutools.io/v1/me' \
   -H "Authorization: Bearer $JPUSHARE_API_KEY"
 ```
 
-`GET /v1/me`는 키와 계정이 유효한지 확인하는 가장 간단한 호출입니다. 응답에는 `sub`, `username`, `lab`, `membership`, `actions` 등이 항상 포함되며, 값이 없으면 `null`입니다. `username`과 `lab`으로 키가 누구의 것인지 알 수 있습니다. `actions`는 **이 키로** 할 수 있는 동작 목록입니다 — 계정 권한과 키 범위의 교집합이라, 읽기 전용 키면 `account.read` 처럼 좁게 나옵니다.
+`GET /v1/me`는 키와 계정이 유효한지 확인하는 가장 간단한 호출입니다. 응답에는 `sub`, `username`, `lab`, `membership`, `actions` 등이 항상 포함되며, 값이 없으면 `null`입니다. `username`과 `lab`으로 키가 누구의 것인지 알 수 있습니다. `actions`는 **이 키로** 할 수 있는 동작 목록입니다 — 계정 권한과 키 범위의 교집합이라, 읽기 전용 키면 `account.read`처럼 좁게 나옵니다.
 
 ### 키로 부를 수 있는 경로
 
-키의 허용 범위와 무관하게, 아래 표의 경로만 `jpk_` 키로 호출할 수 있습니다. 표에 없는 경로(관리자·토론·키 관리·연구실 가입 관련 등)는 브라우저 로그인 토큰 전용이며 키로 호출하면 403 `JWT_REQUIRED`가 반환됩니다.
+키의 허용 범위와 무관하게, 아래 표의 경로만 API 키로 호출할 수 있습니다. 표에 없는 경로(관리자·토론·키 관리·연구실 가입 관련 등)는 브라우저 로그인 토큰 전용이며 키로 호출하면 403 `JWT_REQUIRED`가 반환됩니다.
 
 | 범위 | 경로 |
 | --- | --- |
@@ -244,11 +244,11 @@ curl --fail-with-body 'https://share.jedutools.io/v1/workspace-profiles' \
 ```
 
 각 항목은 `id`, `name`, `current_snapshot_id`, `supported_compute_caps`(이미지가 지원하는 GPU 세대, 예: `["8.0","8.6","9.0"]`)를 가집니다. GPU 서버의 세대는 `GET /v1/tiers` 항목의 `compute_capability`(예: `"8.6"`)입니다.
-**호환 규칙**: `supported_compute_caps` 중 점 앞 숫자가 GPU 와 같고 점 뒤 숫자가 GPU 이하인 값이 하나라도 있으면 호환입니다. 둘 중 하나라도 `null` 이면 서버가 판정하지 않고 받아 줍니다. 호환되지 않는 조합으로 제출하면 400 `VALIDATION_FAILED` 의 `errors[].code` 가 `WORKSPACE_GPU_INCOMPATIBLE` 입니다.
+**호환 규칙**: `supported_compute_caps` 중 점 앞 숫자가 GPU와 같고 점 뒤 숫자가 GPU 이하인 값이 하나라도 있으면 호환입니다. 둘 중 하나라도 `null`이면 서버가 판정하지 않고 받아 줍니다. 호환되지 않는 조합으로 제출하면 400 `VALIDATION_FAILED`의 `errors[].code`가 `WORKSPACE_GPU_INCOMPATIBLE`입니다.
 
 ### 제출 (jobs:submit)
 
-`POST /v1/jobs`는 `multipart/form-data`입니다. 코드 원본은 ZIP 파일(`artifact`) 또는 Git 주소(`git_url`) 중 **하나만** 지정합니다. 아래 예제의 `code.zip` 은 [학습 작업 실행](/JPUShare/3Jobs)의 `main.py` 예제를 압축한 것입니다.
+`POST /v1/jobs`는 `multipart/form-data`입니다. 코드 원본은 ZIP 파일(`artifact`) 또는 Git 주소(`git_url`) 중 **하나만** 지정합니다. 아래 예제의 `code.zip`은 [학습 작업 실행](/JPUShare/3Jobs)의 `main.py` 예제를 압축한 것입니다.
 
 <!-- doc-exec: C07 expect=200 -->
 
@@ -273,7 +273,7 @@ JOB_ID=$(jq -r .job_id job.json)
 - `args`와 `channels`는 JSON 문자열로 전달합니다.
 - `channels`의 각 항목은 `name`(코드에서 `JOB_CHANNEL_<이름>` 환경 변수로 접근), `scope`, `folder`, `prefix`, `size_gb`를 가집니다.
 - `result_location`은 결과를 둘 자리로 `shared`(연구실 공유) 또는 `private`(내 폴더)입니다. 생략하면 입력 채널을 따라갑니다 — `private` 채널이 하나라도 있으면 `private`, 아니면 `shared`.
-- `tier`는 `GET /v1/tiers`로 현재 선택 가능한 값을 확인합니다. GPU 수는 tier가 결정하며 `num_gpus`는 무시됩니다.
+- `tier`는 `GET /v1/tiers`로 현재 선택 가능한 값을 확인합니다. GPU 수는 GPU 서버(`tier`)가 정하며 `num_gpus`는 무시됩니다.
 - `timeout_seconds`는 60~259200초(최대 72시간)입니다. 화면은 시간 단위 1~72로만 받습니다.
 - 응답은 `job_id`, `state`, `priority`, `tier`, `queue_position`, `warnings`를 포함합니다.
 - 연구실 소속이 없으면 본문 검사 전에 403 `NO_LAB`이 반환됩니다.
@@ -322,7 +322,7 @@ curl --fail-with-body "https://share.jedutools.io/v1/jobs/$JOB_ID" \
 | 진행 중 | `USER_QUEUE_WAIT`, `GLOBAL_QUEUE_WAIT`, `ESCALATION_WAIT`(화면의 **대기 중**), `ASSIGNED`(배정됨), `RUNNING`, `CANCEL_REQUESTED`(취소 중) |
 | 종료 상태 | `SUCCEEDED`, `FAILED_RUNTIME`, `FAILED_ENV`, `FAILED_OOM_CONFIRMED`, `FAILED_OOM_SUSPECT`, `TIMED_OUT`, `CANCELLED`, `KILLED_BY_ADMIN`, `FAILED_SUBMISSION`, `UPLOAD_FAILED` |
 
-종료 상태 10개 중 하나가 되면 더 바뀌지 않습니다. `SUCCEEDED` 외의 종료 상태면 상세 응답의 `last_error_code`(예: `RUNTIME_EXIT_NONZERO`)와 `last_error_message`(화면의 **실패 사유** 한 줄과 같은 문장)를 보고, 로그의 stderr 를 확인합니다. 두 필드는 성공한 작업에서 `null` 입니다.
+종료 상태 10개 중 하나가 되면 더 바뀌지 않습니다. `SUCCEEDED` 외의 종료 상태면 상세 응답의 `last_error_code`(예: `RUNTIME_EXIT_NONZERO`)와 `last_error_message`(화면의 **실패 사유** 한 줄과 같은 문장)를 보고, 로그의 stderr를 확인합니다. 두 필드는 성공한 작업에서 `null`입니다.
 
 ### 로그와 결과 (jobs:read)
 
@@ -344,7 +344,7 @@ curl --fail-with-body "https://share.jedutools.io/v1/jobs/$JOB_ID/results" \
   -H "Authorization: Bearer $JPUSHARE_API_KEY"
 ```
 
-응답의 `objects` 각 항목은 `key`, `size`, `last_modified`, `url`, `expires_at`이고, `next_cursor`, `retention_days` 등이 함께 옵니다(선택 쿼리 `limit`, `cursor`). `url`은 만료되는 임시 다운로드 주소이므로, 만료되면 결과 목록을 다시 조회해 새 주소를 받으세요. 프로그램이 실행된 뒤 실패한 작업도 `logs/stdout.log`, `logs/stderr.log`, `exit_code.txt`가 남습니다. 실행 전 준비 단계에서 실패한 작업(`FAILED_ENV` 등)은 결과가 비어 있을 수 있으므로 `last_error_message`를 봅니다. 전체를 한 파일로 받으려면 `GET /v1/jobs/{id}/results-zip`(완료된 작업, 2 GiB 까지)을 씁니다. **내 폴더**로 낸 작업의 결과는 끝난 뒤 30일이 지나면 정리됩니다. 화면에서 보는 방법은 [결과 확인과 다운로드](/JPUShare/4Results)를 참고하세요.
+응답의 `objects` 각 항목은 `key`, `size`, `last_modified`, `url`, `expires_at`이고, `next_cursor`, `retention_days` 등이 함께 옵니다(선택 쿼리 `limit`, `cursor`). `url`은 만료되는 임시 다운로드 주소이므로, 만료되면 결과 목록을 다시 조회해 새 주소를 받으세요. 프로그램이 실행된 뒤 실패한 작업도 `logs/stdout.log`, `logs/stderr.log`, `exit_code.txt`가 남습니다. 실행 전 준비 단계에서 실패한 작업(`FAILED_ENV` 등)은 결과가 비어 있을 수 있으므로 `last_error_message`를 봅니다. 전체를 한 파일로 받으려면 `GET /v1/jobs/{id}/results-zip`(완료된 작업, 2 GiB까지)을 씁니다. **내 폴더**로 낸 작업의 결과는 끝난 뒤 30일이 지나면 정리됩니다. 화면에서 보는 방법은 [결과 확인과 다운로드](/JPUShare/4Results)를 참고하세요.
 
 ### 취소 (jobs:cancel)
 
@@ -360,16 +360,16 @@ curl --fail-with-body -X POST "https://share.jedutools.io/v1/jobs/$JOB_ID/cancel
 | 상태·코드 | 의미와 대응 |
 | --- | --- |
 | 401 | 키가 없거나 만료·폐기됨. `Authorization: Bearer jpk_...` 형식과 키 상태를 확인합니다. |
-| 403 `JWT_REQUIRED` | 그 경로는 `jpk_` 키로 호출할 수 없습니다. 키 관리·관리자 경로는 브라우저 로그인 토큰이 필요합니다. |
+| 403 `JWT_REQUIRED` | 그 경로는 API 키로 호출할 수 없습니다. 키 관리·관리자 경로는 브라우저 로그인 토큰이 필요합니다. |
 | 403 `API_KEY_SCOPE_REQUIRED` | 키에 그 경로의 범위가 없습니다. 필요한 범위를 포함해 새 키를 발급받습니다. |
 | 403 `API_KEY_ROUTE_FORBIDDEN` | 분류되지 않은 경로입니다. 호출 경로와 메서드를 확인합니다. |
 | 403 `NO_LAB` | 연구실 소속이 없어 작업 제출이 거절되었습니다. 계정의 연구실 참가 상태를 확인합니다. |
 | 403 `SignatureDoesNotMatch` / `AccessDenied` (XML) | 업로드 주소로 PUT 할 때 발급 응답의 `headers`를 빠뜨렸습니다. |
 | 400 `INVALID_LOCATION` | `scope`/`folder` 조합이 잘못되었습니다. 네 가지 조합만 허용됩니다. |
 | 400 `MUST_USE_MULTIPART` / `USE_SINGLE_PUT` | 파일 크기에 맞지 않는 업로드 방식입니다. 256 MiB 초과는 멀티파트, 이하는 단일 PUT. |
-| 400 `VALIDATION_FAILED` / `WORKSPACE_GPU_INCOMPATIBLE` | 실행 환경이 그 tier 의 GPU 세대를 지원하지 않습니다. 호환 규칙(6절)에 맞는 환경이나 tier 를 고릅니다. |
-| 400 `VALIDATION_FAILED` / `WORKER_ACCOUNT_MISSING` | 그 tier 의 GPU 서버에 실행 계정이 아직 없습니다(가입 직후 준비 일부 실패). 다른 tier 로 내거나 잠시 뒤 재시도하고, 계속되면 담당자에게 알립니다. |
-| 429 | 요청이 너무 잦습니다. 전역 제한은 **평문 본문 + `Retry-After` 헤더**이고(JSON 으로 파싱하지 마세요), `JOIN_RATE_LIMITED`·`LOG_STREAM_LIMIT`은 JSON 봉투입니다. 표시된 시간만큼 쉬고 재시도합니다. |
+| 400 `VALIDATION_FAILED` / `WORKSPACE_GPU_INCOMPATIBLE` | 실행 환경이 그 GPU 서버(`tier`)의 GPU 세대를 지원하지 않습니다. 호환 규칙(6절)에 맞는 환경이나 GPU 서버를 고릅니다. |
+| 400 `VALIDATION_FAILED` / `WORKER_ACCOUNT_MISSING` | 그 GPU 서버에 실행 계정이 아직 없습니다(가입 직후 준비 일부 실패). 다른 GPU 서버로 내거나 잠시 뒤 재시도하고, 계속되면 담당자에게 알립니다. |
+| 429 | 요청이 너무 잦습니다. 전역 제한은 **평문 본문 + `Retry-After` 헤더**이고(JSON으로 파싱하지 마세요), `JOIN_RATE_LIMITED`·`LOG_STREAM_LIMIT`은 JSON 봉투입니다. 표시된 시간만큼 쉬고 재시도합니다. |
 | 503 `SERVICE_MAINTENANCE` | 점검 중입니다. `GET /v1/maintenance/status`(공개)로 상태를 확인하고 종료 후 재시도합니다. |
 
 범위가 모자란 키로 부르면 이렇게 거절됩니다.
@@ -394,13 +394,13 @@ curl -sS 'https://share.jedutools.io/v1/api-keys' \
   -H "Authorization: Bearer $JPUSHARE_API_KEY"
 ```
 
-키가 정상인데 특정 경로만 계속 거절되면, 그 경로가 키로 호출 가능한 경로인지 3절의 표에서 먼저 확인하세요. 범위는 발급 후에 바꿀 수 없으므로 부족한 범위는 새 키로 발급해야 합니다.
+키가 정상인데 특정 경로만 계속 거절되면, 그 경로가 키로 호출 가능한 경로인지 3절의 표에서 먼저 확인합니다. 범위는 발급 후에 바꿀 수 없으므로 부족한 범위는 새 키로 발급해야 합니다.
 
 `/docs`, `/redoc`, `/openapi.json`은 API 문서 공개가 설정된 환경에서만 열립니다. 이 주소의 404만으로 서비스 장애라고 판단하지 마세요.
 
 ## 8. 주의할 것
 
-- **LLM 기능은 현재 제공하지 않습니다.** `/v1/llm/*` 경로는 503 `LLM_DISABLED` 입니다.
+- **LLM 기능은 현재 제공하지 않습니다.** `/v1/llm/*` 경로는 503 `LLM_DISABLED`입니다.
 - **키 관리는 로그인 토큰 전용입니다.** 키 발급·목록·폐기(`POST/GET/DELETE /v1/api-keys`)는 브라우저 로그인 세션에서만 가능하므로 에이전트가 자기 키를 관리할 수는 없습니다.
 - **권한은 매 요청마다 다시 평가됩니다.** 키를 발급한 뒤 연구실 소속이나 역할이 바뀌면 다음 요청부터 새 권한이 적용됩니다.
 - **파괴적 동작(삭제·취소·순서 변경)은 사람의 확인을 받은 뒤 실행하세요.**
