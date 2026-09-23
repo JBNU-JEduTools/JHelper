@@ -85,8 +85,10 @@ slug: 'JPUShare/6Troubleshooting'
 
 | 응답 | 확인할 내용 |
 | --- | --- |
-| 401 | JWT 또는 LLM 키의 만료·폐기 여부와 `Authorization: Bearer ...` 형식을 확인합니다. |
+| 401 | JWT, `jpk_` 키 또는 LLM 키의 만료·폐기 여부와 `Authorization: Bearer ...` 형식을 확인합니다. |
 | 403 | 해당 작업·저장소에 접근할 권한이 있는지 확인합니다. LLM 키는 일반 API에 사용할 수 없습니다. |
+| 403 `JWT_REQUIRED` | `jpk_` 키로 호출할 수 없는 경로입니다. 키 관리·관리자·LLM 경로는 로그인 JWT가 필요합니다. |
+| 403 `API_KEY_SCOPE_REQUIRED` | `jpk_` 키에 그 경로의 허용 범위가 없습니다. 필요한 범위를 포함해 키를 다시 발급받습니다. |
 | 400·422 | 필수 입력, 자료형, 범위와 응답의 `code`, `errors`, `detail`을 확인합니다. |
 | 429 | 요청 빈도나 동시 연결을 줄입니다. 응답에 재시도 대기 시간이 있으면 그 시간을 따릅니다. |
 | 503·`SERVICE_MAINTENANCE` | 점검 안내를 확인하고 종료 후 다시 시도합니다. |
