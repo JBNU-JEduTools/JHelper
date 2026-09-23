@@ -87,7 +87,9 @@ const calculateTreeData = (edges, sidebarConfig) => {
       });
     });
     const index = prevItems.findIndex(({ label }) => label === parts[parts.length - 1]);
-    accu.items.unshift(prevItems.splice(index, 1)[0]);
+    if (index === -1) return accu;
+    // 하위 경로(예: '/JPUShare/7AgentApi')는 부모 메뉴 안에서만 앞으로 옮긴다.
+    prevItems.unshift(prevItems.splice(index, 1)[0]);
     return accu;
   }, tree);
 };
