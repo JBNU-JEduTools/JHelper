@@ -1,12 +1,12 @@
 ---
 title: 'API 사용법'
 description: 'jpk_ API 키 발급과 허용 범위, 파일 업로드·다운로드, 작업 제출·조회·취소, 로그·결과, 오류 코드까지 JPUShare API 사용법을 안내합니다.'
-slug: 'JPUShare/5API'
+slug: 'JPUShare/2Agent/2API'
 ---
 
 터미널, 스크립트, CI, 자동화 에이전트에서 JPUShare를 쓸 때는 사용자 API 키(`jpk_`로 시작)로 API를 호출합니다. 사람이 직접 부르든 에이전트가 부르든 키와 호출 방법은 같습니다. 이 문서는 키 발급부터 파일 업로드, 작업 제출·조회, 결과 받기까지의 절차를 설명합니다.
 
-API 기본 주소는 `https://share.jedutools.io`입니다. 먼저 [시작하기](/JPUShare/1GettingStarted)에서 로그인과 연구실 소속을 확인합니다.
+API 기본 주소는 `https://share.jedutools.io`입니다. 먼저 [시작하기](/JPUShare/1Web/1GettingStarted)에서 로그인과 연구실 소속을 확인합니다.
 이 문서의 예제는 운영 사이트에서 실제로 실행해 확인한 것입니다(2026년 9월 23일).
 
 ## 1. 인증 방식 구분하기
@@ -24,15 +24,16 @@ API 기본 주소는 `https://share.jedutools.io`입니다. 먼저 [시작하기
 
 키 발급과 관리는 브라우저 로그인이 필요합니다. 에이전트가 키를 스스로 만들 수는 없으므로, 사용할 계정으로 로그인해 발급한 뒤 에이전트에 전달합니다.
 
-![내 정보/설정의 API 키 발급 판 — 키 이름·유효 기간·허용 범위(앞부분)](./images/me-api-key.png)
+![내 정보/설정의 API 키 발급 판 — 키 이름·유효 기간·허용 범위(앞부분)](../images/me-api-key.png)
 
 1. [JPUShare](https://share.jedutools.io)에 로그인합니다.
 2. 왼쪽 위의 **내 정보/설정**을 엽니다.
 3. **API 키 발급** 판에 키 이름과 유효 기간(1~90일, 기본 30일)을 입력합니다.
 4. **API 키 허용 범위**에서 필요한 범위만 선택합니다.
-5. **발급**을 누르고, 표시되는 `jpk_...` 원문을 즉시 안전한 곳에 저장합니다. 원문은 이 화면에서 한 번만 보입니다.
+5. **API 키 발급**을 누릅니다. `jobs:submit`처럼 권한이 큰 범위를 골랐다면 **키 허용 범위 확인** 창에서 **확인 후 발급**을 누릅니다.
+6. 표시되는 `jpk_...` 원문을 즉시 안전한 곳에 저장합니다. 원문은 이 화면에서 한 번만 보입니다.
 
-![발급 직후 한 번만 보이는 키 원문(값은 가림)](./images/me-api-key-issued.png)
+![발급 직후 한 번만 보이는 키 원문(값은 가림)](../images/me-api-key-issued.png)
 
 활성 키는 사용자당 최대 5개입니다. 키를 잃어버렸거나 노출했다면 같은 화면에서 폐기하고 새로 발급합니다. 폐기·만료·계정 비활성화·연구실 역할 변경은 다음 요청부터 바로 적용됩니다.
 
@@ -126,7 +127,7 @@ curl --fail-with-body --get 'https://share.jedutools.io/v1/storage/objects' \
 
 ## 5. 파일 업로드와 다운로드
 
-화면에서 올리는 방법은 [데이터 관리](/JPUShare/2Datasets)를 참고하세요.
+화면에서 올리는 방법은 [데이터 관리](/JPUShare/1Web/2Datasets)를 참고하세요.
 
 ### 작은 파일 — 단일 PUT (storage:write)
 
@@ -230,7 +231,7 @@ curl --fail-with-body --get "https://share.jedutools.io/v1/storage/objects/train
 
 ## 6. 작업 제출·확인·취소
 
-화면에서 제출하는 방법은 [학습 작업 실행](/JPUShare/3Jobs)을 참고하세요.
+화면에서 제출하는 방법은 [학습 작업 실행](/JPUShare/1Web/3Jobs)을 참고하세요.
 
 ### 실행 환경 고르기 (platform:read)
 
@@ -248,7 +249,7 @@ curl --fail-with-body 'https://share.jedutools.io/v1/workspace-profiles' \
 
 ### 제출 (jobs:submit)
 
-`POST /v1/jobs`는 `multipart/form-data`입니다. 코드 원본은 ZIP 파일(`artifact`) 또는 Git 주소(`git_url`) 중 **하나만** 지정합니다. 아래 예제의 `code.zip`은 [학습 작업 실행](/JPUShare/3Jobs)의 `main.py` 예제를 압축한 것입니다.
+`POST /v1/jobs`는 `multipart/form-data`입니다. 코드 원본은 ZIP 파일(`artifact`) 또는 Git 주소(`git_url`) 중 **하나만** 지정합니다. 아래 예제의 `code.zip`은 [학습 작업 실행](/JPUShare/1Web/3Jobs)의 `main.py` 예제를 압축한 것입니다.
 
 <!-- doc-exec: C07 expect=200 -->
 
@@ -344,7 +345,7 @@ curl --fail-with-body "https://share.jedutools.io/v1/jobs/$JOB_ID/results" \
   -H "Authorization: Bearer $JPUSHARE_API_KEY"
 ```
 
-응답의 `objects` 각 항목은 `key`, `size`, `last_modified`, `url`, `expires_at`이고, `next_cursor`, `retention_days` 등이 함께 옵니다(선택 쿼리 `limit`, `cursor`). `url`은 만료되는 임시 다운로드 주소이므로, 만료되면 결과 목록을 다시 조회해 새 주소를 받으세요. 프로그램이 실행된 뒤 실패한 작업도 `logs/stdout.log`, `logs/stderr.log`, `exit_code.txt`가 남습니다. 실행 전 준비 단계에서 실패한 작업(`FAILED_ENV` 등)은 결과가 비어 있을 수 있으므로 `last_error_message`를 봅니다. 전체를 한 파일로 받으려면 `GET /v1/jobs/{id}/results-zip`(완료된 작업, 2 GiB까지)을 씁니다. **내 폴더**로 낸 작업의 결과는 끝난 뒤 30일이 지나면 정리됩니다. 화면에서 보는 방법은 [결과 확인과 다운로드](/JPUShare/4Results)를 참고하세요.
+응답의 `objects` 각 항목은 `key`, `size`, `last_modified`, `url`, `expires_at`이고, `next_cursor`, `retention_days` 등이 함께 옵니다(선택 쿼리 `limit`, `cursor`). `url`은 만료되는 임시 다운로드 주소이므로, 만료되면 결과 목록을 다시 조회해 새 주소를 받으세요. 프로그램이 실행된 뒤 실패한 작업도 `logs/stdout.log`, `logs/stderr.log`, `exit_code.txt`가 남습니다. 실행 전 준비 단계에서 실패한 작업(`FAILED_ENV` 등)은 결과가 비어 있을 수 있으므로 `last_error_message`를 봅니다. 전체를 한 파일로 받으려면 `GET /v1/jobs/{id}/results-zip`(완료된 작업, 2 GiB까지)을 씁니다. **내 폴더**로 낸 작업의 결과는 끝난 뒤 30일이 지나면 정리됩니다. 화면에서 보는 방법은 [결과 확인과 다운로드](/JPUShare/1Web/4Results)를 참고하세요.
 
 ### 취소 (jobs:cancel)
 
@@ -406,6 +407,6 @@ curl -sS 'https://share.jedutools.io/v1/api-keys' \
 - **파괴적 동작(삭제·취소·순서 변경)은 사람의 확인을 받은 뒤 실행하세요.**
 - **만료를 미리 확인하세요.** 키는 최대 90일까지 유효하며 만료되면 401이 반환됩니다. 오래 도는 자동화는 만료 전 재발급 절차를 운영자와 맞춰 두세요.
 
-인증 오류, 요청 제한, 결과 다운로드 오류는 [문제 해결](/JPUShare/6Troubleshooting)을 참고하세요.
+인증 오류, 요청 제한, 결과 다운로드 오류는 [문제 해결](/JPUShare/1Web/5Troubleshooting)을 참고하세요.
 
 [JPUShare 안내로 돌아가기](/JPUShare)

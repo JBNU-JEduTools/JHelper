@@ -42,3 +42,8 @@
 
 /manifest.webmanifest
   Access-Control-Allow-Origin: https://jhelper.jedutools.io
+
+# Agent-readable index (llms.txt) — plain UTF-8 text, always fresh
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate

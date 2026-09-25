@@ -1,0 +1,16 @@
+# JHelper — Cloudflare Pages redirects
+# JPUShare 문서를 웹/에이전트 두 갈래로 옮기며(2026-09-25) 옛 주소를 새 주소로 넘긴다.
+/JPUShare/1GettingStarted /JPUShare/1Web/1GettingStarted 301
+/JPUShare/1GettingStarted/ /JPUShare/1Web/1GettingStarted/ 301
+/JPUShare/2Datasets /JPUShare/1Web/2Datasets 301
+/JPUShare/2Datasets/ /JPUShare/1Web/2Datasets/ 301
+/JPUShare/3Jobs /JPUShare/1Web/3Jobs 301
+/JPUShare/3Jobs/ /JPUShare/1Web/3Jobs/ 301
+/JPUShare/4Results /JPUShare/1Web/4Results 301
+/JPUShare/4Results/ /JPUShare/1Web/4Results/ 301
+/JPUShare/5API /JPUShare/2Agent/2API 301
+/JPUShare/5API/ /JPUShare/2Agent/2API/ 301
+/JPUShare/6Troubleshooting /JPUShare/1Web/5Troubleshooting 301
+/JPUShare/6Troubleshooting/ /JPUShare/1Web/5Troubleshooting/ 301
+/JPUShare/7AgentApi /JPUShare/2Agent/2API 301
+/JPUShare/7AgentApi/ /JPUShare/2Agent/2API/ 301
