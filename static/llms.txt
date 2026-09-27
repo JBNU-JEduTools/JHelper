@@ -5,7 +5,7 @@
 ## 에이전트용
 
 - [JPUShare 스킬 SKILL.md](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/skills/jpushare/SKILL.md): 에이전트가 설치해 따르는 절차서 — 키 설정, 연결 확인, 허용 범위, 업로드, 작업 제출, 결과, 오류 코드
-- [에이전트 연결하기](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/content/JPUShare/Agent/Connect.mdx): 사람이 따라 하는 설치·키 넣기 안내(설치 명령과 복사용 프롬프트). 키를 넣는 `export` 명령은 사람이 실행합니다 — 에이전트가 실행하면 넣어 둔 키를 덮어씁니다
+- [에이전트 연결하기](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/content/JPUShare/Agent/Connect.mdx): 사람이 따라 하는 설치·키 넣기 안내(설치 명령과 복사용 프롬프트). 키를 넣는 `export` 명령은 사람이 실행합니다 — `JPUSHARE_API_KEY`가 이미 있으면 에이전트는 덮어쓰지 않습니다
 - [API 사용법](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/content/JPUShare/Agent/API.mdx): 인증, 허용 범위별 경로, 저장 위치, 업로드, 작업 제출·조회·취소, 오류 코드 참조
 
 ## 사람용 웹 사용 안내

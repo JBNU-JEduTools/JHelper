@@ -16,11 +16,11 @@ JPUShare는 연구실 구성원이 GPU 서버를 함께 쓰는 서비스다. 이
 - **설치**: 이 파일이 에이전트의 스킬 폴더에 있으면 설치된 것이다. 없으면 `npx skills add JBNU-JEduTools/JHelper --skill jpushare`로 설치한다(에이전트를 지정하려면 `-a claude-code`, `-a codex` 등).
 - **키가 있는지 확인**: 환경 변수 `JPUSHARE_API_KEY`가 비어 있으면 작업을 시작하지 말고 사람에게 다음을 안내한다.
   1. JPUShare(https://share.jedutools.io)에 로그인한다.
-  2. 왼쪽 위 **내 정보/설정** → **API 키 발급**에서 키 이름과 유효 기간을 정하고, 할 일에 필요한 허용 범위만 고른다(2절 표). 연결 확인(`GET /v1/me`)에는 `account:read`가 필요하다.
+  2. 왼쪽 위 **내 정보/설정** → **API 키 발급**에서 키 이름과 유효 기간을 정하고, 할 일에 필요한 허용 범위만 고른다(2절 표). 읽기 범위는 미리 선택되어 있어 필요 없으면 해제하고, 쓰기 범위(`jobs:submit` 등)는 직접 켠다. 연결 확인(`GET /v1/me`)에는 `account:read`가 필요하다.
   3. **API 키 발급**을 누르고(작업 제출처럼 권한이 큰 범위를 고르면 **키 허용 범위 확인** 창에서 **확인 후 발급**), 한 번만 보이는 `jpk_...` 원문을 복사한다.
   4. 터미널에서 `export JPUSHARE_API_KEY='jpk_...'`를 실행한 뒤 **그 터미널에서 에이전트를 다시 시작**한다. 이미 켜져 있던 에이전트는 나중에 export한 값을 모른다.
 - **에이전트는 키를 스스로 만들 수 없다.** 키 발급·목록·폐기(`/v1/api-keys`)는 웹 로그인 전용이라 키로 부르면 403 `JWT_REQUIRED`다.
-- **사람이 키를 채팅에 붙여 넣은 경우**: 막지는 않는다. 다만 "붙여 넣은 키는 AI 서비스 쪽 대화 기록에 남습니다. 다음부터는 환경 변수로 넘기는 편이 안전합니다"라고 한 번 알린다. 그 키는 이 세션의 환경 변수(`export JPUSHARE_API_KEY=...`)로만 쓰고, 파일·커밋·출력에 다시 쓰지 않는다.
+- **사람이 키를 채팅에 붙여 넣은 경우**: 막지는 않는다. 먼저 "붙여 넣은 키는 AI 서비스 쪽 대화 기록에 남습니다. 터미널에서 `export JPUSHARE_API_KEY=...`를 실행한 뒤 에이전트를 다시 시작하는 편이 안전합니다"라고 한 번 권한다. 사람이 그대로 진행하라고 하면 명령에 넣어 쓰되, 파일·커밋·출력에는 남기지 않는다.
 - **연결 확인**: 키가 있으면 먼저 `GET /v1/me`를 부른다(1절 예제).
   - 200이면 `username`, `lab`, `actions`(이 키로 할 수 있는 동작)를 사람에게 짧게 알린다.
   - 401이면 키가 만료·폐기됐거나 잘못 복사된 것이다 → 사람에게 새 키를 요청한다.
@@ -242,7 +242,7 @@ curl -s "$BASE/v1/maintenance/status"                                           
 <!-- doc-exec: C11 expect=403 -->
 
 ```bash
-# account:read 만 가진 키 → 403 API_KEY_SCOPE_REQUIRED
+# READONLY_API_KEY = account:read 만 가진 다른 키(설명용 — 이런 키로 제출하면) → 403 API_KEY_SCOPE_REQUIRED
 curl -sS "$BASE/v1/jobs" -H "Authorization: Bearer $READONLY_API_KEY" -F 'command=python' -F 'tier=jpu-60'
 ```
 
