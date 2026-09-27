@@ -16,7 +16,7 @@ module.exports = {
       }
     ],
     sidebarConfig: {
-      forcedNavOrder: ['/JCloud', '/JPUShare', '/Litmus', '/JCode', '/JFlow', '/JHelper', '/JIGSSO (통합 로그인)', '/Portal', '/AWSAcademy'],
+      forcedNavOrder: ['/JCloud', '/JPUShare', '/Litmus', '/JCode', '/JFlow', '/JHelper', '/Portal', '/JIGSSO', '/AWSAcademy'],
       ignoreIndex: false
     }
   },
