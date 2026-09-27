@@ -1,13 +1,13 @@
 ---
 title: 'API 사용법'
-description: 'jpk_ API 키 발급과 허용 범위, 파일 업로드·다운로드, 작업 제출·조회·취소, 로그·결과, 오류 코드까지 JPUShare API 사용법을 안내합니다.'
+description: 'jpk_ API 키의 허용 범위와 호출 경로, 파일 업로드·다운로드, 작업 제출·조회·취소, 로그·결과, 오류 코드까지 JPUShare API 사용법을 안내합니다.'
 slug: 'JPUShare/2Agent/2API'
 ---
 
-터미널, 스크립트, CI, 자동화 에이전트에서 JPUShare를 쓸 때는 사용자 API 키(`jpk_`로 시작)로 API를 호출합니다. 사람이 직접 부르든 에이전트가 부르든 키와 호출 방법은 같습니다. 이 문서는 키 발급부터 파일 업로드, 작업 제출·조회, 결과 받기까지의 절차를 설명합니다.
+터미널, 스크립트, CI, 자동화 에이전트에서 JPUShare를 쓸 때는 사용자 API 키(`jpk_`로 시작)로 API를 호출합니다. 사람이 직접 부르든 에이전트가 부르든 키와 호출 방법은 같습니다.
 
 API 기본 주소는 `https://share.jedutools.io`입니다. 먼저 [시작하기](/JPUShare/1Web/1GettingStarted)에서 로그인과 연구실 소속을 확인합니다.
-이 문서의 예제는 운영 사이트에서 실제로 실행해 확인한 것입니다(2026년 9월 23일).
+이 문서의 예제는 운영 사이트에서 실제로 실행해 확인한 것입니다(2026년 9월 27일).
 
 ## 1. 인증 방식 구분하기
 
@@ -20,47 +20,37 @@ API 기본 주소는 `https://share.jedutools.io`입니다. 먼저 [시작하기
 
 > API 키는 발급한 사용자 본인의 자격 증명입니다. 키를 가진 프로그램은 그 사용자로 인증되며, 키의 허용 범위(scope)는 그 사용자의 권한을 **좁힐 뿐 넓히지 않습니다**. 키는 비밀번호처럼 보관하고, 소스 코드·프롬프트·로그·공유 문서·오류 문의에 원문을 넣지 마세요.
 
-## 2. API 키 발급받기
+## 2. API 키 발급과 허용 범위
 
-키 발급과 관리는 브라우저 로그인이 필요합니다. 에이전트가 키를 스스로 만들 수는 없으므로, 사용할 계정으로 로그인해 발급한 뒤 에이전트에 전달합니다.
+키 발급 절차는 [에이전트 연결하기](/JPUShare/2Agent/1Connect) 1절을 참고하세요. 키 발급·목록·폐기(`/v1/api-keys`)는 브라우저에 로그인한 상태에서만 할 수 있습니다.
 
-![내 정보/설정의 API 키 발급 판 — 키 이름·유효 기간·허용 범위(앞부분)](../images/me-api-key.png)
+활성 키는 사용자당 최대 5개이고, 유효 기간은 1~90일(기본 30일)입니다. 키를 잃어버렸거나 노출했다면 **내 정보/설정**에서 폐기하고 새로 발급합니다. 권한은 요청마다 다시 평가되므로 폐기·만료·계정 비활성화·연구실 역할 변경은 다음 요청부터 바로 적용됩니다.
 
-1. [JPUShare](https://share.jedutools.io)에 로그인합니다.
-2. 왼쪽 위의 **내 정보/설정**을 엽니다.
-3. **API 키 발급** 판에 키 이름과 유효 기간(1~90일, 기본 30일)을 입력합니다.
-4. **API 키 허용 범위**에서 필요한 범위만 선택합니다.
-5. **API 키 발급**을 누릅니다. `jobs:submit`처럼 권한이 큰 범위를 골랐다면 **키 허용 범위 확인** 창에서 **확인 후 발급**을 누릅니다.
-6. 표시되는 `jpk_...` 원문을 즉시 안전한 곳에 저장합니다. 원문은 이 화면에서 한 번만 보입니다.
+### 허용 범위와 호출할 수 있는 경로
 
-![발급 직후 한 번만 보이는 키 원문(값은 가림)](../images/me-api-key-issued.png)
+범위는 할 일에 필요한 것만 고릅니다. 범위는 발급 후 바꿀 수 없으므로 부족하면 새로 발급합니다.
+아래 표의 경로만 API 키로 호출할 수 있습니다. 표에 없는 경로(관리자·토론·키 관리·연구실 가입 관련 등)를 키로 부르면 403 `JWT_REQUIRED`가 반환됩니다.
 
-활성 키는 사용자당 최대 5개입니다. 키를 잃어버렸거나 노출했다면 같은 화면에서 폐기하고 새로 발급합니다. 폐기·만료·계정 비활성화·연구실 역할 변경은 다음 요청부터 바로 적용됩니다.
+| 범위 | 할 수 있는 일 | 경로 |
+| --- | --- | --- |
+| `account:read` | 내 계정·소속 정보 조회 | `GET /v1/me`, `GET /v1/auth/me` |
+| `platform:read` | GPU 서버·실행 환경·플랫폼 통계 조회 | `GET /v1/tiers`, `GET /v1/workers`, `GET /v1/workers/{tier}/gpu/history`, `GET /v1/workspace-profiles`, `GET /v1/platform/stats`, `GET /v1/platform/queue-snapshot` |
+| `jobs:read` | 내 작업 목록·상세·로그·GPU 사용량·결과 조회 | `GET /v1/jobs`, `GET /v1/jobs/{id}`, `GET /v1/jobs/{id}/gpu`, `GET /v1/jobs/{id}/gpu/history`, `GET /v1/jobs/{id}/log`, `GET /v1/jobs/{id}/results`, `GET /v1/jobs/{id}/results-zip` |
+| `jobs:submit` | 작업 제출 | `POST /v1/jobs` |
+| `jobs:cancel` | 내 작업 취소 | `POST /v1/jobs/{id}/cancel` |
+| `queue:read` | 내 대기열 조회 | `GET /v1/queue` |
+| `queue:reorder` | 내 대기열 순서 변경 | `PUT /v1/queue/reorder` |
+| `storage:read` | 파일 목록 조회·다운로드 주소 발급 | `GET /v1/storage`, `GET /v1/storage/objects`, `GET /v1/storage/objects/{key}/url` |
+| `storage:write` | 파일 업로드·폴더 생성·복사 | `POST /v1/storage/upload-url`, `POST /v1/storage/folders`, `POST /v1/storage/copy`, `POST /v1/storage/multipart/init`·`part`·`complete`·`abort` |
+| `storage:organize` | 파일·폴더 이동·이름 변경 | `POST /v1/storage/move`, `POST /v1/storage/rename` 등 |
+| `storage:delete` | 파일·폴더 삭제 | `DELETE /v1/storage/objects/{key}`, `POST /v1/storage/folders/delete` 등 |
+| `lab:read` | 소속 연구실·구성원·연구실 작업·사용량 조회 | `GET /v1/labs/me`, `GET /v1/labs/me/members`, `GET /v1/labs/me/jobs`, `GET /v1/labs/me/usage` |
 
-### 허용 범위 고르기
-
-범위는 할 일에 필요한 것만 고릅니다. 선택할 수 있는 범위는 발급자의 권한에 따라 달라집니다 — 연구실 소속이 없는 계정은 `account:read`만 위임할 수 있고, 연구실 구성원은 아래 범위 전체를 위임할 수 있습니다.
-
-| 범위 | 할 수 있는 일 |
-| --- | --- |
-| `account:read` | 내 계정·소속 정보 조회 (`/v1/me`) |
-| `platform:read` | GPU 서버·실행 환경·플랫폼 통계·대기열 스냅샷 조회 |
-| `jobs:read` | 내 작업 목록·상세·로그·GPU 사용량·결과 조회 |
-| `jobs:submit` | 작업 제출 |
-| `jobs:cancel` | 내 작업 취소 |
-| `queue:read` | 내 대기열 조회 |
-| `queue:reorder` | 내 대기열 순서 변경 |
-| `storage:read` | 저장 공간 파일 목록 조회·다운로드 주소 발급 |
-| `storage:write` | 파일 업로드·폴더 생성·복사 |
-| `storage:organize` | 파일·폴더 이동·이름 변경 |
-| `storage:delete` | 파일·폴더 삭제 |
-| `lab:read` | 소속 연구실·구성원·연구실 작업·사용량 조회 |
-
-범위는 발급 후 바꿀 수 없으므로 부족하면 새로 발급합니다. 읽기만 하는 스크립트라면 `jobs:submit`·`storage:write` 같은 쓰기 범위는 빼는 것이 안전합니다.
+인증 없이 호출할 수 있는 공개 경로는 `GET /v1/auth/config`와 `GET /v1/maintenance/status`뿐입니다.
 
 ## 3. 키로 호출하기
 
-발급받은 키를 환경 변수에 넣고 모든 요청에 Bearer로 붙입니다. 이 문서의 예제는 Bash 기준이며, `JPUSHARE_API_KEY`와 `JOB_ID`는 본인의 유효한 값으로 설정한 환경 변수라고 가정합니다.
+발급받은 키를 환경 변수에 넣고 모든 요청에 Bearer로 붙입니다. 이 문서의 예제는 Bash 기준이며, `JPUSHARE_API_KEY`와 `JOB_ID`는 본인의 값으로 설정한 환경 변수라고 가정합니다.
 
 ```bash
 export JPUSHARE_API_KEY='jpk_...'
@@ -73,28 +63,7 @@ curl --fail-with-body 'https://share.jedutools.io/v1/me' \
   -H "Authorization: Bearer $JPUSHARE_API_KEY"
 ```
 
-`GET /v1/me`는 키와 계정이 유효한지 확인하는 가장 간단한 호출입니다. 응답에는 `sub`, `username`, `lab`, `membership`, `actions` 등이 항상 포함되며, 값이 없으면 `null`입니다. `username`과 `lab`으로 키가 누구의 것인지 알 수 있습니다. `actions`는 **이 키로** 할 수 있는 동작 목록입니다 — 계정 권한과 키 범위의 교집합이라, 읽기 전용 키면 `account.read`처럼 좁게 나옵니다.
-
-### 키로 부를 수 있는 경로
-
-키의 허용 범위와 무관하게, 아래 표의 경로만 API 키로 호출할 수 있습니다. 표에 없는 경로(관리자·토론·키 관리·연구실 가입 관련 등)는 브라우저 로그인 토큰 전용이며 키로 호출하면 403 `JWT_REQUIRED`가 반환됩니다.
-
-| 범위 | 경로 |
-| --- | --- |
-| `account:read` | `GET /v1/me`, `GET /v1/auth/me` |
-| `platform:read` | `GET /v1/tiers`, `GET /v1/workers`, `GET /v1/workers/{tier}/gpu/history`, `GET /v1/workspace-profiles`, `GET /v1/platform/stats`, `GET /v1/platform/queue-snapshot` |
-| `jobs:read` | `GET /v1/jobs`, `GET /v1/jobs/{id}`, `GET /v1/jobs/{id}/gpu`, `GET /v1/jobs/{id}/gpu/history`, `GET /v1/jobs/{id}/log`, `GET /v1/jobs/{id}/results`, `GET /v1/jobs/{id}/results-zip` |
-| `jobs:submit` | `POST /v1/jobs` |
-| `jobs:cancel` | `POST /v1/jobs/{id}/cancel` |
-| `queue:read` | `GET /v1/queue` |
-| `queue:reorder` | `PUT /v1/queue/reorder` |
-| `storage:read` | `GET /v1/storage`, `GET /v1/storage/objects`, `GET /v1/storage/objects/{key}/url` |
-| `storage:write` | `POST /v1/storage/upload-url`, `POST /v1/storage/folders`, `POST /v1/storage/copy`, `POST /v1/storage/multipart/init`·`part`·`complete`·`abort` |
-| `storage:organize` | `POST /v1/storage/move`, `POST /v1/storage/rename` 등 |
-| `storage:delete` | `DELETE /v1/storage/objects/{key}`, `POST /v1/storage/folders/delete` 등 |
-| `lab:read` | `GET /v1/labs/me`, `GET /v1/labs/me/members`, `GET /v1/labs/me/jobs`, `GET /v1/labs/me/usage` |
-
-인증 없이 누구나 호출할 수 있는 공개 경로는 `GET /v1/auth/config`와 `GET /v1/maintenance/status`뿐입니다.
+`GET /v1/me`로 키가 유효한지 확인합니다. 응답의 `username`과 `lab`으로 키가 누구의 것인지 알 수 있습니다. `actions`는 **이 키로** 할 수 있는 동작이며, 계정 권한과 키 범위의 교집합입니다.
 
 ## 4. 저장 공간 위치 지정 규칙
 
@@ -103,9 +72,9 @@ curl --fail-with-body 'https://share.jedutools.io/v1/me' \
 | `scope` | `folder` | 화면 이름 | 용도 |
 | --- | --- | --- | --- |
 | `shared` | `data` | 연구실 공유 / data | 연구실 공유 데이터(작업 입력용) |
-| `shared` | `result` | 연구실 공유 / result | 연구실 공유 결과(`results/작업 ID` 폴더, 30일 보관) |
+| `shared` | `result` | 연구실 공유 / result | 연구실 공유 결과(`results/작업 ID` 폴더) |
 | `private` | `data` | 내 폴더 / data | 나만 보는 데이터 |
-| `private` | `result` | 내 폴더 / result | 나만 보는 결과(작업 ID 폴더, 30일 보관) |
+| `private` | `result` | 내 폴더 / result | 나만 보는 결과(작업 ID 폴더) |
 
 표 밖의 조합은 400 `INVALID_LOCATION`입니다. 파일 키(`key`, `prefix`)는 항상 이 위치 기준의 **상대 경로**입니다.
 
@@ -346,7 +315,10 @@ curl --fail-with-body "https://share.jedutools.io/v1/jobs/$JOB_ID/results" \
   -H "Authorization: Bearer $JPUSHARE_API_KEY"
 ```
 
-응답의 `objects` 각 항목은 `key`, `size`, `last_modified`, `url`, `expires_at`이고, `next_cursor`, `retention_days` 등이 함께 옵니다(선택 쿼리 `limit`, `cursor`). `url`은 만료되는 임시 다운로드 주소이므로, 만료되면 결과 목록을 다시 조회해 새 주소를 받으세요. 프로그램이 실행된 뒤 실패한 작업도 `logs/stdout.log`, `logs/stderr.log`, `exit_code.txt`가 남습니다. 실행 전 준비 단계에서 실패한 작업(`FAILED_ENV` 등)은 결과가 비어 있을 수 있으므로 `last_error_message`를 봅니다. 전체를 한 파일로 받으려면 `GET /v1/jobs/{id}/results-zip`(완료된 작업, 2 GiB까지)을 씁니다. **내 폴더**로 낸 작업의 결과는 끝난 뒤 30일이 지나면 정리됩니다. 화면에서 보는 방법은 [결과 확인과 다운로드](/JPUShare/1Web/4Results)를 참고하세요.
+- 응답의 `objects` 각 항목은 `key`, `size`, `last_modified`, `url`, `expires_at`입니다. 목록이 길면 응답의 `next_cursor`를 다음 요청의 `cursor`에 넣습니다. `url`은 만료되는 임시 주소이므로 만료되면 목록을 다시 받습니다.
+- 프로그램이 실행된 뒤 실패한 작업도 `logs/stdout.log`, `logs/stderr.log`, `exit_code.txt`가 남습니다. 준비 단계에서 실패한 작업(`FAILED_ENV` 등)은 결과가 비어 있을 수 있으니 `last_error_message`를 봅니다.
+- 전체를 한 파일로 받으려면 `GET /v1/jobs/{id}/results-zip`(완료된 작업, 2 GiB까지)을 씁니다.
+- 결과는 결과 위치와 관계없이 작업이 끝나고 30일이 지나면 정리됩니다.
 
 ### 취소 (jobs:cancel)
 
@@ -362,15 +334,17 @@ curl --fail-with-body -X POST "https://share.jedutools.io/v1/jobs/$JOB_ID/cancel
 | 상태·코드 | 의미와 대응 |
 | --- | --- |
 | 401 | 키가 없거나 만료·폐기됨. `Authorization: Bearer jpk_...` 형식과 키 상태를 확인합니다. |
-| 403 `JWT_REQUIRED` | 그 경로는 API 키로 호출할 수 없습니다. 키 관리·관리자 경로는 브라우저 로그인 토큰이 필요합니다. |
+| 403 `JWT_REQUIRED` | 그 경로는 API 키로 호출할 수 없습니다(2절 표 밖). 브라우저 로그인 토큰이 필요합니다. |
 | 403 `API_KEY_SCOPE_REQUIRED` | 키에 그 경로의 범위가 없습니다. 필요한 범위를 포함해 새 키를 발급받습니다. |
 | 403 `API_KEY_ROUTE_FORBIDDEN` | 분류되지 않은 경로입니다. 호출 경로와 메서드를 확인합니다. |
+| 403 (그 밖) | 해당 작업·저장 공간에 접근할 권한이 있는지 확인합니다. |
 | 403 `NO_LAB` | 연구실 소속이 없어 작업 제출이 거절되었습니다. 계정의 연구실 참가 상태를 확인합니다. |
 | 403 `SignatureDoesNotMatch` / `AccessDenied` (XML) | 업로드 주소로 PUT 할 때 발급 응답의 `headers`를 빠뜨렸습니다. |
 | 400 `INVALID_LOCATION` | `scope`/`folder` 조합이 잘못되었습니다. 네 가지 조합만 허용됩니다. |
 | 400 `MUST_USE_MULTIPART` / `USE_SINGLE_PUT` | 파일 크기에 맞지 않는 업로드 방식입니다. 256 MiB 초과는 멀티파트, 이하는 단일 PUT. |
 | 400 `VALIDATION_FAILED` / `WORKSPACE_GPU_INCOMPATIBLE` | 실행 환경이 그 GPU 서버(`tier`)의 GPU 세대를 지원하지 않습니다. 호환 규칙(6절)에 맞는 환경이나 GPU 서버를 고릅니다. |
 | 400 `VALIDATION_FAILED` / `WORKER_ACCOUNT_MISSING` | 그 GPU 서버에 실행 계정이 아직 없습니다(가입 직후 준비 일부 실패). 다른 GPU 서버로 내거나 잠시 뒤 재시도하고, 계속되면 담당자에게 알립니다. |
+| 400·422 (그 밖) | 응답의 `code`, `errors`, `detail`을 보고 요청 값을 고칩니다. |
 | 429 | 요청이 너무 잦습니다. 전역 제한은 **평문 본문 + `Retry-After` 헤더**이고(JSON으로 파싱하지 마세요), `JOIN_RATE_LIMITED`·`LOG_STREAM_LIMIT`은 JSON 봉투입니다. 표시된 시간만큼 쉬고 재시도합니다. |
 | 503 `SERVICE_MAINTENANCE` | 점검 중입니다. `GET /v1/maintenance/status`(공개)로 상태를 확인하고 종료 후 재시도합니다. |
 
@@ -396,18 +370,13 @@ curl -sS 'https://share.jedutools.io/v1/api-keys' \
   -H "Authorization: Bearer $JPUSHARE_API_KEY"
 ```
 
-키가 정상인데 특정 경로만 계속 거절되면, 그 경로가 키로 호출 가능한 경로인지 3절의 표에서 먼저 확인합니다. 범위는 발급 후에 바꿀 수 없으므로 부족한 범위는 새 키로 발급해야 합니다.
-
-`/docs`, `/redoc`, `/openapi.json`은 API 문서 공개가 설정된 환경에서만 열립니다. 이 주소의 404만으로 서비스 장애라고 판단하지 마세요.
-
 ## 8. 주의할 것
 
 - **LLM 기능은 현재 제공하지 않습니다.** `/v1/llm/*` 경로는 503 `LLM_DISABLED`입니다.
-- **키 관리는 로그인 토큰 전용입니다.** 키 발급·목록·폐기(`POST/GET/DELETE /v1/api-keys`)는 브라우저 로그인 세션에서만 가능하므로 에이전트가 자기 키를 관리할 수는 없습니다.
-- **권한은 매 요청마다 다시 평가됩니다.** 키를 발급한 뒤 연구실 소속이나 역할이 바뀌면 다음 요청부터 새 권한이 적용됩니다.
 - **파괴적 동작(삭제·취소·순서 변경)은 사람의 확인을 받은 뒤 실행하세요.**
+- **`/docs`·`/redoc`·`/openapi.json`은 API 문서 공개가 설정된 환경에서만 열립니다.** 이 주소의 404만으로 서비스 장애라고 판단하지 마세요.
 - **만료를 미리 확인하세요.** 키는 최대 90일까지 유효하며 만료되면 401이 반환됩니다. 오래 도는 자동화는 만료 전 재발급 절차를 운영자와 맞춰 두세요.
 
-인증 오류, 요청 제한, 결과 다운로드 오류는 [문제 해결](/JPUShare/1Web/5Troubleshooting)을 참고하세요.
+결과 파일이 보이지 않거나 다운로드가 안 되면 [문제 해결](/JPUShare/1Web/5Troubleshooting)을 참고하세요.
 
 [JPUShare 안내로 돌아가기](/JPUShare)
