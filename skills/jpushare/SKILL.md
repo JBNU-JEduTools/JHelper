@@ -164,6 +164,7 @@ curl --fail-with-body "$BASE/v1/jobs" \
 JOB_ID=$(jq -r .job_id job.json)
 ```
 
+- `description`(작업 목적, 500자 이내)은 **필수**다. 비었거나 공백뿐이면 400 `DESCRIPTION_REQUIRED` → 사람이 말한 목적을 한 줄로 적어 다시 낸다.
 - `tier`(GPU 서버)는 `GET /v1/tiers`로 지금 값을 확인한다. GPU 수는 GPU 서버가 정한다(`num_gpus`는 무시). `timeout_seconds`는 60~259200.
 - `result_location`: `shared` 또는 `private`. 생략하면 채널 중 `private`가 하나라도 있으면 `private`, 아니면 `shared`.
 - `channels[].name`은 코드에서 `JOB_CHANNEL_<이름>` 환경 변수로 읽는다.
@@ -231,6 +232,7 @@ curl -s "$BASE/v1/maintenance/status"                                           
 | 400 `MUST_USE_MULTIPART` / `USE_SINGLE_PUT` | 크기와 업로드 방식이 맞지 않는다(경계 256 MiB) |
 | 400 `VALIDATION_FAILED` + `WORKSPACE_GPU_INCOMPATIBLE` | 실행 환경이 그 GPU 서버의 GPU 세대를 지원하지 않는다 → 호환 조건(3절)에 맞게 다시 고른다 |
 | 400 `VALIDATION_FAILED` + `WORKER_ACCOUNT_MISSING` | 그 GPU 서버에 사용자 실행 계정이 아직 없다(가입 직후 준비 일부 실패). 다른 GPU 서버로 내거나 잠시 뒤 다시 시도하고, 반복되면 사람에게 운영자 확인을 요청한다 |
+| 400 `DESCRIPTION_REQUIRED` | 작업 제출에 `description`이 없다 — 작업 목적을 적어 다시 낸다 |
 | 400 `VALIDATION_FAILED` 기타 | 제출 필드 검증 실패 — `errors[].code`·`field`로 고친다 |
 | 429 | 두 종류다. 전역 제한은 **평문 본문 + `Retry-After` 헤더**(JSON으로 파싱하지 않는다), `JOIN_RATE_LIMITED`·`LOG_STREAM_LIMIT`은 JSON 봉투다. 표시된 시간만큼 기다린 뒤 다시 시도한다 |
 | 503 `SERVICE_MAINTENANCE` | 점검 중 — `GET /v1/maintenance/status`를 보고 끝난 뒤 다시 시도한다 |

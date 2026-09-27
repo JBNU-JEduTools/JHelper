@@ -271,6 +271,7 @@ curl --fail-with-body 'https://share.jedutools.io/v1/jobs' \
 JOB_ID=$(jq -r .job_id job.json)
 ```
 
+- `description`(작업 목적, 500자 이내)은 모든 GPU 서버에서 필수입니다. 비었거나 공백뿐이면 400 `DESCRIPTION_REQUIRED`가 반환됩니다.
 - `args`와 `channels`는 JSON 문자열로 전달합니다.
 - `channels`의 각 항목은 `name`(코드에서 `JOB_CHANNEL_<이름>` 환경 변수로 접근), `scope`, `folder`, `prefix`, `size_gb`를 가집니다.
 - `result_location`은 결과를 둘 자리로 `shared`(연구실 공유) 또는 `private`(내 폴더)입니다. 생략하면 입력 채널을 따라갑니다 — `private` 채널이 하나라도 있으면 `private`, 아니면 `shared`.
