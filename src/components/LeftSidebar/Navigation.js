@@ -79,13 +79,17 @@ const calculateTreeData = (edges, sidebarConfig) => {
       }
       prevItems = tmp.items;
     }
-    prevItems.forEach(item => {
-      item.items = item.items.sort(function(a, b) {
-        if (a.label < b.label) return -1;
-        if (a.label > b.label) return 1;
-        return 0;
+    const sortByLabel = items => {
+      items.forEach(item => {
+        item.items = item.items.sort(function(a, b) {
+          if (a.label < b.label) return -1;
+          if (a.label > b.label) return 1;
+          return 0;
+        });
+        sortByLabel(item.items);
       });
-    });
+    };
+    sortByLabel(prevItems);
     const index = prevItems.findIndex(({ label }) => label === parts[parts.length - 1]);
     accu.items.unshift(prevItems.splice(index, 1)[0]);
     return accu;
