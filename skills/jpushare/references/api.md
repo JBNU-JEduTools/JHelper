@@ -26,9 +26,9 @@ SKILL.md의 절차에서 세부가 필요할 때 읽는다. 기본 주소는 `ht
 | `queue:read` | `GET /v1/queue` |
 | `queue:reorder` | `PUT /v1/queue/reorder` |
 | `storage:read` | `GET /v1/storage`, `GET /v1/storage/objects`, `GET /v1/storage/objects/{key}/url` |
-| `storage:write` | `POST /v1/storage/upload-url`, `POST /v1/storage/folders`, `POST /v1/storage/copy`, `POST /v1/storage/multipart/{init,part,complete,abort}` |
-| `storage:organize` | `POST /v1/storage/move`, `POST /v1/storage/rename` 등 |
-| `storage:delete` | `DELETE /v1/storage/objects/{key}`, `POST /v1/storage/folders/delete` 등 |
+| `storage:write` | `POST /v1/storage/upload-url`, `POST /v1/storage/folders`, `POST /v1/storage/copy`, `POST /v1/storage/copy-preview`, `POST /v1/storage/multi-copy`, `POST /v1/storage/multi-copy-preview`, `POST /v1/storage/multipart/{init,part,complete,abort}` |
+| `storage:organize` | `POST /v1/storage/move`, `POST /v1/storage/move-preview`, `POST /v1/storage/multi-move`, `POST /v1/storage/multi-move-preview`, `POST /v1/storage/rename`, `POST /v1/storage/rename-preview` |
+| `storage:delete` | `DELETE /v1/storage/objects/{key}`, `POST /v1/storage/folders/delete`, `POST /v1/storage/folders/delete-preview`, `POST /v1/storage/multi-delete`, `POST /v1/storage/multi-delete-preview` |
 | `lab:read` | `GET /v1/labs/me`, `GET /v1/labs/me/members`, `GET /v1/labs/me/jobs`, `GET /v1/labs/me/usage` |
 
 ## 저장 위치(scope/folder)
@@ -78,14 +78,14 @@ done | jq -s --arg id "$UPLOAD_ID" '{upload_id:$id, parts:.}' > complete.json
 | `tier` | GPU 서버 이름(`GET /v1/tiers`). GPU 수는 GPU 서버가 정하며 `num_gpus`는 무시된다 |
 | `workspace_snapshot_id` | 실행 환경의 `current_snapshot_id` |
 | `timeout_seconds` | 60~259200 |
-| `result_location` | `shared` 또는 `private`. 생략하면 `private` 채널이 하나라도 있을 때 `private` |
+| `result_location` | `shared` 또는 `private`. 생략하면 `private` 채널이 하나라도 있을 때 `private`, 아니면 `shared` |
 | `channels` | 입력 데이터 JSON 배열: `name`, `scope`, `folder`, `prefix`, `size_gb` |
 
 응답은 `job_id`, `state`, `priority`, `tier`, `queue_position`, `warnings`다. 로그를 따라가려면 `GET /v1/jobs/{id}/log?stream=stdout&follow=1`(SSE, 한 연결 15분)을 쓴다. 아직 시작하지 않은 작업의 로그는 404 `NO_ATTEMPT`다.
 
 ## 응답 봉투와 목록 넘기기
 
-일반 오류는 `code`·`error`·`message`(경우에 따라 `request_id`), 제출 검증 오류는 `status:"VALIDATION_FAILED"`와 `errors[]`(`code`·`field`·`message`·`detail`)다. 목록은 `?cursor=&limit=`로 받고, 응답의 `next_cursor`를 다음 `cursor`에 넣는다. `null`이면 마지막이다.
+일반 오류는 `code`·`error`·`message`(경우에 따라 `request_id`), 제출 검증 오류는 `status:"VALIDATION_FAILED"`와 `errors[]`(`code`·`field`·`message`·`detail`)다. 점검 중 503은 `code` 없이 `error:"SERVICE_MAINTENANCE"`·`message`·`maintenance`다. 목록은 `?cursor=&limit=`로 받고, 응답의 `next_cursor`를 다음 `cursor`에 넣는다. `null`이면 마지막이다.
 
 ## 전체 오류 표
 

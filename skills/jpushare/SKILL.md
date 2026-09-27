@@ -1,6 +1,6 @@
 ---
 name: jpushare
-description: JPUShare(share.jedutools.io)에 사용자 대신 GPU 작업을 제출하고 상태·로그·결과를 받으며, 연구실 저장 공간에 파일을 올리고 내려받는다. 사용자가 "JPUShare에 작업 올려줘", "GPU 작업 결과 받아줘", "JPUShare 저장 공간에 업로드해 줘", "GPU 서버 상황 알려줘"처럼 JPUShare 작업·저장 공간·GPU 서버·대기열을 부탁할 때 쓴다. 사용자가 웹에서 발급한 API 키(환경 변수 JPUSHARE_API_KEY)가 필요하다.
+description: JPUShare(share.jedutools.io)에 사용자 대신 GPU 작업을 제출하고 상태·로그·결과를 받으며, 연구실 저장 공간에 파일을 올리고 내려받는다. 키 발급·연구실 가입·관리자 기능은 다루지 않는다. 사용자가 "JPUShare에 작업 올려줘", "GPU 작업 결과 받아줘", "JPUShare 저장 공간에 업로드해 줘", "GPU 서버 상황 알려줘"처럼 JPUShare 작업·저장 공간·GPU 서버·대기열을 부탁할 때 쓴다. 사용자가 웹에서 발급한 API 키(환경 변수 JPUSHARE_API_KEY)가 필요하다.
 ---
 
 # JPUShare
@@ -50,7 +50,9 @@ curl --fail-with-body "$BASE/v1/me" -H "Authorization: Bearer $JPUSHARE_API_KEY"
 
 ### 1단계 — GPU 서버와 실행 환경
 
-`GET /v1/tiers`로 GPU 서버(`name`, `compute_capability`)를, `GET /v1/workspace-profiles`로 실행 환경(`current_snapshot_id`, `supported_compute_caps`)을 받는다. `supported_compute_caps` 중 GPU 서버의 `compute_capability`와 점 앞 숫자가 같고 점 뒤 숫자가 그 이하인 값이 있는 환경만 쓴다. 그 환경의 `current_snapshot_id`가 `workspace_snapshot_id`다.
+`GET /v1/tiers`로 GPU 서버(`name`, `compute_capability`)를, `GET /v1/workspace-profiles`로 실행 환경(`current_snapshot_id`, `supported_compute_caps`)을 받는다. `supported_compute_caps` 중 GPU 서버의 `compute_capability`와 점 앞 숫자가 같고 점 뒤 숫자가 그 이하인 값이 있는 환경만 쓴다. 둘 중 하나라도 `null`이면 서버가 판정하지 않고 받아 준다.
+
+출력: `TIER`(고른 GPU 서버의 `name`), `SNAPSHOT_ID`(그 환경의 `current_snapshot_id`). 3단계 예제의 `jpu-60`·`$SNAPSHOT_ID` 자리에 이 값을 넣는다.
 
 ### 2단계 — 입력 데이터 업로드 (storage:write)
 
@@ -126,7 +128,7 @@ curl --fail-with-body "$BASE/v1/jobs/$JOB_ID" -H "Authorization: Bearer $JPUSHAR
 
 - 진행 중: `USER_QUEUE_WAIT`·`GLOBAL_QUEUE_WAIT`·`ESCALATION_WAIT`(대기), `ASSIGNED`, `RUNNING`, `CANCEL_REQUESTED`.
 - 종료 상태(10개, 이후 바뀌지 않음): `SUCCEEDED`, `FAILED_RUNTIME`, `FAILED_ENV`, `FAILED_OOM_CONFIRMED`, `FAILED_OOM_SUSPECT`, `TIMED_OUT`, `CANCELLED`, `KILLED_BY_ADMIN`, `FAILED_SUBMISSION`, `UPLOAD_FAILED`.
-- `SUCCEEDED`가 아니면 `last_error_code`와 `last_error_message`(콘솔의 "실패 사유")를 사람에게 전하고 stderr 로그를 읽어 원인을 설명한다.
+- `SUCCEEDED`가 아니면 `last_error_code`와 `last_error_message`(콘솔의 "실패 사유")를 사람에게 전하고 stderr 로그를 읽어 원인을 설명한다. 준비 단계에서 실패한 작업(`FAILED_ENV` 등)은 로그가 없을 수 있다(404 `NO_ATTEMPT`) → `last_error_message`만 전한다.
 
 ### 5단계 — 로그와 결과
 
@@ -146,12 +148,12 @@ curl --fail-with-body "$BASE/v1/jobs/$JOB_ID/log?stream=stderr" -H "Authorizatio
 ## 3. 그 밖의 호출
 
 - GPU 서버 현황: `GET /v1/tiers`, `GET /v1/workers`. 내 대기열: `GET /v1/queue`(`queue:read`). 점검 상태: `GET /v1/maintenance/status`(인증 불필요).
-- 파일 목록: `GET /v1/storage/objects?scope=…&folder=…&prefix=…`. 다운로드 주소: `GET /v1/storage/objects/{key}/url?scope=…&folder=…`.
+- 파일 목록: `GET /v1/storage/objects?scope=…&folder=…&prefix=…`. 다운로드 주소: `GET /v1/storage/objects/{key}/url?scope=…&folder=…`(둘 다 `storage:read`).
 - 취소: `POST /v1/jobs/{id}/cancel`(`jobs:cancel`) — 사람이 확인한 뒤에만 부른다.
 
 ## 4. 오류가 나면
 
-HTTP 상태와 `code`를 함께 보고 분기한다. 자주 만나는 것만 적는다. 전체 표는 [references/api.md](references/api.md)에 있다.
+HTTP 상태와 본문을 함께 보고 분기한다. 일반 오류는 `code`, 제출 검증 오류는 `status:"VALIDATION_FAILED"`와 `errors[].code`, 점검 중 503은 `error` 값을 본다. 자주 만나는 것만 적는다. 전체 표는 [references/api.md](references/api.md)에 있다.
 
 | 상태·코드 | 대응 |
 |---|---|
@@ -178,6 +180,6 @@ curl -sS "$BASE/v1/jobs" -H "Authorization: Bearer $READONLY_API_KEY" -F 'comman
 
 - 키 발급·폐기는 사람이 한다. 만료되거나 범위가 모자라면 사람에게 요청한다.
 - 필요한 범위만 요청한다. 읽기만 할 거면 쓰기 범위를 달라고 하지 않는다.
-- 삭제·취소·대기열 순서 변경은 사람이 확인한 뒤에만 한다. 삭제·이동 전에는 `*-preview` 경로로 영향 범위를 먼저 보여 준다.
+- 삭제·취소·대기열 순서 변경은 사람이 확인한 뒤에만 한다. 삭제·이동·복사 전에는 짝이 되는 `*-preview` 경로([references/api.md](references/api.md)의 범위 표)로 영향 범위를 먼저 보여 준다.
 - 키 원문을 파일·로그·보고·커밋에 쓰지 않는다.
 - `/v1/llm/*`는 부르지 않는다(503 `LLM_DISABLED`).
