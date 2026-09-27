@@ -77,7 +77,7 @@ curl --fail-with-body "$BASE/v1/me" -H "Authorization: Bearer $JPUSHARE_API_KEY"
 | `scope` | `folder` | 용도 |
 |---|---|---|
 | `shared` | `data` | 연구실 공유 데이터(작업 입력) |
-| `shared` | `result` | 연구실 공유 결과 |
+| `shared` | `result` | 연구실 공유 결과(`results/<작업 ID>/` 폴더, 작업이 끝나고 30일 뒤 정리) |
 | `private` | `data` | 나만 보는 데이터 |
 | `private` | `result` | 나만 보는 결과(작업 ID 폴더, 작업이 끝나고 30일 뒤 정리) |
 
