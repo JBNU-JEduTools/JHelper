@@ -79,13 +79,13 @@ done | jq -s --arg id "$UPLOAD_ID" '{upload_id:$id, parts:.}' > complete.json
 | `workspace_snapshot_id` | 실행 환경의 `current_snapshot_id` |
 | `timeout_seconds` | 60~259200 |
 | `result_location` | `shared` 또는 `private`. 생략하면 `private` 채널이 하나라도 있을 때 `private`, 아니면 `shared` |
-| `channels` | 입력 데이터 JSON 배열: `name`, `scope`, `folder`, `prefix`, `size_gb` |
+| `channels` | 입력 데이터 JSON 배열: `name`, `scope`, `folder`, `prefix`, `size_gb`. `/data/in/<name>`에 붙고 `JOB_CHANNEL_<NAME>`(대문자, `-`→`_`)으로 읽는다 |
 
-응답은 `job_id`, `state`, `priority`, `tier`, `queue_position`, `warnings`다. 로그를 따라가려면 `GET /v1/jobs/{id}/log?stream=stdout&follow=1`(SSE, 한 연결 15분)을 쓴다. 아직 시작하지 않은 작업의 로그는 404 `NO_ATTEMPT`다.
+응답은 `job_id`, `state`, `priority`, `tier`, `queue_position`, `warnings`다. 상세(`GET /v1/jobs/{id}`)에는 `created_at`·`started_at`·`finished_at`(UTC, 아직 없으면 `null`), `escalation_count`, `channels[].env_name`, `attempts`, `events`가 있다. 메모리 부족이 확정된 시도는 한 단계 큰 GPU 서버로 자동 재투입되고(`JOB_OOM_REQUEUED`, `escalation_count` +1), 더 큰 서버가 없으면 `FAILED_OOM_CONFIRMED`다. `timeout_seconds`는 시도마다 적용된다. 로그를 따라가려면 `GET /v1/jobs/{id}/log?stream=stdout&follow=1`(SSE, 한 연결 15분)을 쓴다. 아직 시작하지 않은 작업의 로그는 404 `NO_ATTEMPT`다.
 
 ## 응답 봉투와 목록 넘기기
 
-일반 오류는 `code`·`error`·`message`(경우에 따라 `request_id`), 제출 검증 오류는 `status:"VALIDATION_FAILED"`와 `errors[]`(`code`·`field`·`message`·`detail`)다. 점검 중 503은 `code` 없이 `error:"SERVICE_MAINTENANCE"`·`message`·`maintenance`다. 목록은 `?cursor=&limit=`로 받고, 응답의 `next_cursor`를 다음 `cursor`에 넣는다. `null`이면 마지막이다.
+일반 오류는 `code`·`error`·`message`(경우에 따라 `request_id`), 제출 검증 오류는 400 `status:"VALIDATION_FAILED"`와 `errors[]`(`code`·`field`·`message`·`detail`), 요청 모양 오류(UUID가 아닌 작업 ID 등)는 422 `code:"VALIDATION_ERROR"`와 `errors[]`(`loc`·`field`·`message`·`type`)다. 점검 중 503은 `code` 없이 `error:"SERVICE_MAINTENANCE"`·`message`·`maintenance`다. 목록은 `?cursor=&limit=`로 받고, 응답의 `next_cursor`를 같은 조건의 다음 요청 `cursor`에 그대로 넣는다. `null`이면 마지막이다. 파일 목록(`GET /v1/storage/objects`)의 cursor는 같은 `scope`·`folder`·`prefix`에서만 유효하고, 아니면 400 `INVALID_CURSOR`다. `GET /v1/platform/stats`의 `gpus`(`total`·`idle`·`busy`·`down`)는 GPU 서버 기준이다.
 
 ## 전체 오류 표
 
