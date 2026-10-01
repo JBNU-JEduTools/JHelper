@@ -113,6 +113,7 @@ JOB_ID=$(jq -r .job_id job.json)
 
 - `description`(작업 목적, 500자 이내)은 필수다. 사람이 말한 목적을 한 줄로 적는다.
 - `args`·`channels`는 JSON 문자열이다. 채널은 `/data/in/<name>`에 붙고, 코드는 `JOB_CHANNEL_<NAME>`으로 읽는다 — 이름은 대문자, `-`는 `_`(`train` → `JOB_CHANNEL_TRAIN`, `val-a` → `JOB_CHANNEL_VAL_A`). 정확한 이름은 작업 상세의 `channels[].env_name`이다. 잘못 읽어도 코드가 0으로 끝나면 `SUCCEEDED`이므로 사람 코드의 변수 이름을 먼저 맞춘다.
+- `args`를 비우면 `command` 한 줄을 작업 안의 bash가 해석한다(`a && b`, `VAR=1 cmd`). `args`를 주면 셸 없이 실행한다. 작업 안에서는 인터넷이 안 되므로 `pip install`·`git clone`·모델 내려받기를 명령에 넣지 않는다. 필요한 패키지가 실행 환경에 없으면 사람에게 알린다.
 - `result_location`은 `shared` 또는 `private`다. 코드는 결과를 `/output` 아래에 써야 회수된다.
 - `timeout_seconds`는 60~259200이다. GPU 수는 GPU 서버가 정한다.
 
@@ -129,7 +130,7 @@ curl --fail-with-body "$BASE/v1/jobs/$JOB_ID" -H "Authorization: Bearer $JPUSHAR
 - 진행 중: `USER_QUEUE_WAIT`·`GLOBAL_QUEUE_WAIT`·`ESCALATION_WAIT`(대기), `ASSIGNED`, `RUNNING`, `CANCEL_REQUESTED`.
 - 종료 상태(10개, 이후 바뀌지 않음): `SUCCEEDED`, `FAILED_RUNTIME`, `FAILED_ENV`, `FAILED_OOM_CONFIRMED`, `FAILED_OOM_SUSPECT`, `TIMED_OUT`, `CANCELLED`, `KILLED_BY_ADMIN`, `FAILED_SUBMISSION`, `UPLOAD_FAILED`.
 - `SUCCEEDED`가 아니면 `last_error_code`와 `last_error_message`(콘솔의 "실패 사유")를 사람에게 전하고 stderr 로그를 읽어 원인을 설명한다. 준비 단계에서 실패한 작업(`FAILED_ENV` 등)은 로그가 없을 수 있다(404 `NO_ATTEMPT`) → `last_error_message`만 전한다.
-- GPU 메모리 부족이 확정되면 작업은 한 단계 큰 GPU 서버로 자동 재투입된다(`events`의 `JOB_OOM_REQUEUED`, `escalation_count` 증가). 가장 큰 서버까지 반복되고 `timeout_seconds`는 시도마다 다시 적용되므로, 메모리가 계속 새는 코드면 사람에게 알리고 취소할지 묻는다.
+- GPU 메모리 부족이 확정되면 작업은 실행 환경이 지원하는 한 단계 큰 GPU 서버로 자동 재투입된다(`events`의 `JOB_OOM_REQUEUED`, `escalation_count` 증가). 가장 큰 서버까지 반복되고 `timeout_seconds`는 시도마다 다시 적용되므로, 메모리가 계속 새는 코드면 사람에게 알리고 취소할지 묻는다.
 
 ### 5단계 — 로그와 결과
 

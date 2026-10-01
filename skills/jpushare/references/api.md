@@ -73,7 +73,7 @@ done | jq -s --arg id "$UPLOAD_ID" '{upload_id:$id, parts:.}' > complete.json
 | 필드 | 뜻 |
 |---|---|
 | `artifact` / `git_url`(+`git_ref`) | 코드. 둘 중 하나만. ZIP은 500 MiB 이하, Git은 HTTPS·허용 호스트, 주소에 자격 증명을 넣지 않는다 |
-| `command`, `args` | 실행 명령과 인수(`args`는 JSON 배열 문자열) |
+| `command`, `args` | 실행 명령과 인수(`args`는 JSON 배열 문자열). `args`가 비면 `command` 한 줄을 작업 안의 `bash -c`가 해석하고, 있으면 셸 없이 실행한다. 작업 안에서는 인터넷이 안 된다 |
 | `name`, `work_type`, `description` | 작업 이름, 종류(`training` 등), 목적(필수, 500자 이내) |
 | `tier` | GPU 서버 이름(`GET /v1/tiers`). GPU 수는 GPU 서버가 정하며 `num_gpus`는 무시된다 |
 | `workspace_snapshot_id` | 실행 환경의 `current_snapshot_id` |
@@ -81,7 +81,7 @@ done | jq -s --arg id "$UPLOAD_ID" '{upload_id:$id, parts:.}' > complete.json
 | `result_location` | `shared` 또는 `private`. 생략하면 `private` 채널이 하나라도 있을 때 `private`, 아니면 `shared` |
 | `channels` | 입력 데이터 JSON 배열: `name`, `scope`, `folder`, `prefix`, `size_gb`. `/data/in/<name>`에 붙고 `JOB_CHANNEL_<NAME>`(대문자, `-`→`_`)으로 읽는다 |
 
-응답은 `job_id`, `state`, `priority`, `tier`, `queue_position`, `warnings`다. 상세(`GET /v1/jobs/{id}`)에는 `created_at`·`started_at`·`finished_at`(UTC, 아직 없으면 `null`), `escalation_count`, `channels[].env_name`, `attempts`, `events`가 있다. 메모리 부족이 확정된 시도는 한 단계 큰 GPU 서버로 자동 재투입되고(`JOB_OOM_REQUEUED`, `escalation_count` +1), 더 큰 서버가 없으면 `FAILED_OOM_CONFIRMED`다. `timeout_seconds`는 시도마다 적용된다. 로그를 따라가려면 `GET /v1/jobs/{id}/log?stream=stdout&follow=1`(SSE, 한 연결 15분)을 쓴다. 아직 시작하지 않은 작업의 로그는 404 `NO_ATTEMPT`다.
+응답은 `job_id`, `state`, `priority`, `tier`, `queue_position`, `warnings`다. 상세(`GET /v1/jobs/{id}`)에는 `created_at`·`started_at`·`finished_at`(UTC, 아직 없으면 `null`), `escalation_count`, `channels[].env_name`, `attempts`, `events`가 있다. 메모리 부족이 확정된 시도는 실행 환경이 지원하는 한 단계 큰 GPU 서버로 자동 재투입되고(`JOB_OOM_REQUEUED`, `escalation_count` +1), 더 큰 서버가 없으면 `FAILED_OOM_CONFIRMED`다. `timeout_seconds`는 시도마다 적용된다. 로그를 따라가려면 `GET /v1/jobs/{id}/log?stream=stdout&follow=1`(SSE, 한 연결 15분)을 쓴다. 아직 시작하지 않은 작업의 로그는 404 `NO_ATTEMPT`다.
 
 ## 응답 봉투와 목록 넘기기
 
