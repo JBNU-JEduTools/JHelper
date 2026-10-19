@@ -248,7 +248,7 @@ JOB_ID=$(jq -r .job_id job.json)
 - `channels`의 각 항목은 `name`, `scope`, `folder`, `prefix`, `size_gb`를 가집니다. 입력 데이터는 `/data/in/<name>`에 읽기 전용으로 붙고, 코드는 환경 변수 `JOB_CHANNEL_<NAME>`으로 그 경로를 찾습니다. 이름은 대문자로 바뀌고 `-`는 `_`가 됩니다(`train` → `JOB_CHANNEL_TRAIN`, `val-a` → `JOB_CHANNEL_VAL_A`). 정확한 변수 이름은 작업 상세의 `channels[].env_name`에 있고, `JOB_CHANNELS`에는 원래 이름이 쉼표로 나열됩니다. 변수를 잘못 읽어도 코드가 0으로 끝나면 작업은 `SUCCEEDED`입니다.
 - `result_location`은 결과를 둘 자리로 `shared`(연구실 공유) 또는 `private`(내 폴더)입니다. 생략하면 입력 채널을 따라갑니다 — `private` 채널이 하나라도 있으면 `private`, 아니면 `shared`.
 - `tier`는 `GET /v1/tiers`로 현재 선택 가능한 값을 확인합니다. GPU 수는 GPU 서버(`tier`)가 정하며 `num_gpus`는 무시됩니다.
-- `timeout_seconds`는 60~259200초(최대 72시간)입니다. 화면은 시간 단위 1~72로만 받습니다.
+- `timeout_seconds`는 60~604800초(최대 7일)입니다. 화면은 시간 단위 1~168로만 받습니다.
 - 응답은 `job_id`, `state`, `priority`, `tier`, `queue_position`, `warnings`를 포함합니다.
 - 연구실 소속이 없으면 본문 검사 전에 403 `NO_LAB`이 반환됩니다.
 
