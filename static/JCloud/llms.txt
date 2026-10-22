@@ -1,6 +1,6 @@
 # JCloud
 
-> JCloud(https://jcloud.jedutools.io)는 전북대학교 컴퓨터공학부가 운영하는 OpenStack 기반 교육·연구용 클라우드입니다. 학생은 웹 콘솔에서 키 페어를 만들고 인스턴스(가상머신)를 생성한 뒤, 프로젝트 접속 주소와 포트로 SSH 접속합니다. 아래 원문은 JHelper 저장소의 MDX(.mdx) 파일입니다.
+> JCloud(https://jcloud.jedutools.io)는 JEduTools 서비스 중 하나로, 전북대학교 운영체제 연구실이 관리하는 OpenStack 기반 교육·연구용 클라우드입니다. 학생은 웹 콘솔에서 키 페어를 만들고 인스턴스(가상머신)를 생성한 뒤, 프로젝트 접속 주소와 포트로 SSH 접속합니다. 아래 원문은 JHelper 저장소의 MDX(.mdx) 파일입니다.
 
 읽기 전에 알아 둘 점:
 
