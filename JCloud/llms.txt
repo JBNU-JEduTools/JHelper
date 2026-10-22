@@ -1,0 +1,20 @@
+# JCloud
+
+> JCloud(https://jcloud.jedutools.io)는 JEduTools 서비스 중 하나로, 전북대학교 운영체제 연구실이 관리하는 OpenStack 기반 교육·연구용 클라우드입니다. 학생은 웹 콘솔에서 키 페어를 만들고 인스턴스(가상머신)를 생성한 뒤, 프로젝트 접속 주소와 포트로 SSH 접속합니다. 아래 원문은 JHelper 저장소의 MDX(.mdx) 파일입니다.
+
+읽기 전에 알아 둘 점:
+
+- SSH는 22번이 아니라 7777 포트를 씁니다. Ubuntu 이미지의 기본 사용자는 `ubuntu`이고, 인증은 키 페어 pem 파일로 합니다.
+- 접속 주소와 공인 포트 계산 규칙은 프로젝트마다 다릅니다. students 프로젝트는 `s.jedutools.io`, guest 프로젝트는 `g.jedutools.io`이고, 그 외 프로젝트는 프로젝트별 공인 IP입니다. 포트는 "접속 주소" 문서의 규칙으로 계산합니다.
+- 각 문서 상단의 동영상·슬라이드는 구 클러스터 기준 자료라서 현재 화면·절차와 다를 수 있습니다. 절차는 문서 본문을 따르세요.
+
+## 사용 안내
+
+- [JCloud 소개](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/content/JCloud.mdx): 서비스 개요, 운영 현황, 시스템 구성, 제공 자원(가상머신·네트워크·스토리지)
+- [JCloud 사용 가이드](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/content/JCloud/JCloudUserGuide.mdx): 사용 등록, 로그인(전북대 구성원은 통합 로그인, 외부 구성원은 별도 계정), 키 페어 만들기, 인스턴스 만들기(students 프로젝트 빠른 생성 폼, 그 외 프로젝트 단계별 생성 폼)
+- [JCloud 접속 주소](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/content/JCloud/JCloudPortGuide.mdx): 프로젝트별 접속 주소, "SSH 접속 명령 복사" 버튼, 서비스별(SSH·HTTP·HTTPS·3000·8080) 공인 포트 계산 규칙과 예제
+- [JCloud SSH 접속 방법](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/content/JCloud/JCloudSSHGuide.mdx): ssh 명령 형식, 7777 포트, 기본 사용자, 키 페어 사용, XShell 접속
+
+## Optional
+
+- [JIGSSO 사용자 매뉴얼](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/content/JIGSSO/JIGSSOUserManual.mdx): JCloud 로그인에 쓰는 JEduTools 통합 로그인 사용법
