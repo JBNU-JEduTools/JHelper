@@ -29,6 +29,18 @@ code.zip
 
 입력은 읽기 전용입니다. 작업 공간과 임시 공간은 작업이 끝나면 정리되므로 보관할 파일은 `/output` 아래에 씁니다.
 
+작업 안의 `/tmp`와 홈 디렉터리(`~`)는 64 MiB짜리 작은 메모리 공간입니다. 그래서 임시 파일과 도구 캐시가 임시 공간(`JOB_SCRATCH_DIR`) 아래로 가도록 아래 환경 변수가 미리 설정되어 있습니다.
+
+| 미리 설정되는 환경 변수 | 값 | 따르는 도구 |
+| --- | --- | --- |
+| `TMPDIR` | `/scratch/tmp` | Python 임시 파일, pip 빌드, 컴파일러, torch 컴파일 캐시 |
+| `XDG_CACHE_HOME` | `/scratch/.cache` | pip 캐시, Hugging Face, torch hub·확장 빌드 |
+| `TRITON_CACHE_DIR` | `/scratch/.cache/triton` | Triton 커널 캐시 |
+| `CUDA_CACHE_PATH` | `/scratch/.cache/nv` | CUDA 컴파일 캐시 |
+| `KERAS_HOME` | `/scratch/.cache/keras` | Keras 데이터셋·가중치 |
+
+> 코드에 `/tmp/...`나 `~/...` 경로를 직접 적으면 여전히 64 MiB 안에 갇힙니다. 큰 임시 파일은 `JOB_SCRATCH_DIR` 아래에 씁니다.
+
 ## 2. 작은 Python 예제
 
 아래 내용을 `main.py`로 저장하고 ZIP 최상위에 오도록 압축합니다.

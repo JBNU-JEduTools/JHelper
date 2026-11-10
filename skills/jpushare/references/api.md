@@ -77,7 +77,8 @@ done | jq -s --arg id "$UPLOAD_ID" '{upload_id:$id, parts:.}' > complete.json
 | `name`, `work_type`, `description` | 작업 이름, 종류(`training` 등), 목적(필수, 500자 이내) |
 | `tier` | GPU 서버 이름(`GET /v1/tiers`). GPU 수는 GPU 서버가 정하며 `num_gpus`는 무시된다 |
 | `workspace_snapshot_id` | 실행 환경의 `current_snapshot_id` |
-| `timeout_seconds` | 60~259200 |
+| `timeout_seconds` | 60~604800(최대 7일) |
+| `env` | 작업에 넣을 환경 변수(JSON 객체 문자열). 플랫폼이 미리 넣는 `TMPDIR`·`XDG_CACHE_HOME`·`TRITON_CACHE_DIR`·`CUDA_CACHE_PATH`·`KERAS_HOME`(모두 `/scratch` 아래)과 이름이 같으면 이 값이 쓰인다. 예약 이름(`PATH`·`HOME`·`USER`·`LD_PRELOAD`·`LD_LIBRARY_PATH`·`CUDA_VISIBLE_DEVICES`, `JOB_`·`EXECUTION_`·`WORKSPACE_`·`APPTAINER_`·`SLURM_`로 시작하는 이름)이나 토큰처럼 보이는 값은 400 `INVALID_ENV`다 |
 | `result_location` | `shared` 또는 `private`. 생략하면 `private` 채널이 하나라도 있을 때 `private`, 아니면 `shared` |
 | `channels` | 입력 데이터 JSON 배열: `name`, `scope`, `folder`, `prefix`, `size_gb`. `/data/in/<name>`에 붙고 `JOB_CHANNEL_<NAME>`(대문자, `-`→`_`)으로 읽는다 |
 
