@@ -7,7 +7,9 @@ SKILL.md의 절차에서 세부가 필요할 때 읽는다. 기본 주소는 `ht
 - 허용 범위와 호출할 수 있는 경로
 - 저장 위치(scope/folder)
 - 멀티파트 업로드(256 MiB 초과)
+- 오래 걸리는 저장 공간 작업(이동·복사·삭제)
 - 작업 제출 필드
+- 작업 안 환경 변수
 - 응답 봉투와 목록 넘기기
 - 전체 오류 표
 
@@ -18,18 +20,18 @@ SKILL.md의 절차에서 세부가 필요할 때 읽는다. 기본 주소는 `ht
 
 | 허용 범위 | 경로 |
 |---|---|
-| `account:read` | `GET /v1/me`, `GET /v1/auth/me` |
+| `account:read` | `GET /v1/me`, `GET /v1/auth/me`, `GET /v1/me/research-profile` |
 | `platform:read` | `GET /v1/tiers`, `GET /v1/workers`, `GET /v1/workers/{tier}/gpu/history`, `GET /v1/workspace-profiles`, `GET /v1/platform/stats`, `GET /v1/platform/queue-snapshot` |
-| `jobs:read` | `GET /v1/jobs`, `GET /v1/jobs/{id}`, `GET /v1/jobs/{id}/gpu`, `GET /v1/jobs/{id}/gpu/history`, `GET /v1/jobs/{id}/log`, `GET /v1/jobs/{id}/results`, `GET /v1/jobs/{id}/results-zip` |
+| `jobs:read` | `GET /v1/jobs`, `GET /v1/jobs/{id}`, `GET /v1/jobs/{id}/gpu`, `GET /v1/jobs/{id}/gpu/history`, `GET /v1/jobs/{id}/log`, `GET /v1/jobs/{id}/results`, `GET /v1/jobs/{id}/results-zip`, `GET /v1/jobs/{id}/feedback` |
 | `jobs:submit` | `POST /v1/jobs` |
-| `jobs:cancel` | `POST /v1/jobs/{id}/cancel` |
+| `jobs:cancel` | `POST /v1/jobs/{id}/cancel`, `PUT /v1/jobs/{id}/feedback` |
 | `queue:read` | `GET /v1/queue` |
 | `queue:reorder` | `PUT /v1/queue/reorder` |
-| `storage:read` | `GET /v1/storage`, `GET /v1/storage/objects`, `GET /v1/storage/objects/{key}/url` |
-| `storage:write` | `POST /v1/storage/upload-url`, `POST /v1/storage/folders`, `POST /v1/storage/copy`, `POST /v1/storage/copy-preview`, `POST /v1/storage/multi-copy`, `POST /v1/storage/multi-copy-preview`, `POST /v1/storage/multipart/{init,part,complete,abort}` |
-| `storage:organize` | `POST /v1/storage/move`, `POST /v1/storage/move-preview`, `POST /v1/storage/multi-move`, `POST /v1/storage/multi-move-preview`, `POST /v1/storage/rename`, `POST /v1/storage/rename-preview` |
-| `storage:delete` | `DELETE /v1/storage/objects/{key}`, `POST /v1/storage/folders/delete`, `POST /v1/storage/folders/delete-preview`, `POST /v1/storage/multi-delete`, `POST /v1/storage/multi-delete-preview` |
-| `lab:read` | `GET /v1/labs/me`, `GET /v1/labs/me/members`, `GET /v1/labs/me/jobs`, `GET /v1/labs/me/usage` |
+| `storage:read` | `GET /v1/storage`, `GET /v1/storage/usage`, `GET /v1/storage/objects`, `GET /v1/storage/objects/{key}/url` |
+| `storage:write` | `POST /v1/storage/upload-url`, `POST /v1/storage/folders`, `POST /v1/storage/copy`, `POST /v1/storage/copy-preview`, `POST /v1/storage/multi-copy`, `POST /v1/storage/multi-copy-preview`, `GET /v1/storage/{copy,multi-copy}/{task_id}`, `POST /v1/storage/multipart/{init,part,complete,abort}` |
+| `storage:organize` | `POST /v1/storage/move`, `POST /v1/storage/move-preview`, `POST /v1/storage/multi-move`, `POST /v1/storage/multi-move-preview`, `POST /v1/storage/rename`, `POST /v1/storage/rename-preview`, `GET /v1/storage/{move,multi-move,rename}/{task_id}` |
+| `storage:delete` | `DELETE /v1/storage/objects/{key}`, `POST /v1/storage/folders/delete`, `POST /v1/storage/folders/delete-preview`, `POST /v1/storage/multi-delete`, `POST /v1/storage/multi-delete-preview`, `GET /v1/storage/folders/delete/{task_id}`, `GET /v1/storage/multi-delete/{task_id}` |
+| `lab:read` | `GET /v1/labs/me`, `GET /v1/labs/me/members`, `GET /v1/labs/me/jobs`, `GET /v1/labs/me/jobs/{id}`, `GET /v1/labs/me/usage` |
 
 ## 저장 위치(scope/folder)
 
@@ -42,7 +44,16 @@ SKILL.md의 절차에서 세부가 필요할 때 읽는다. 기본 주소는 `ht
 | `private` | `data` | 나만 보는 데이터 |
 | `private` | `result` | 나만 보는 결과(`<작업 ID>/`) |
 
-결과는 위치와 관계없이 작업이 끝나고 30일 뒤 정리된다. `GET /v1/storage`는 `quota_gb`·`used_gb`(GiB)와 자리별 사용량을 준다. 목록 항목의 `size`는 바이트, `is_prefix=true`는 폴더다.
+결과는 위치와 관계없이 작업이 끝나고 30일 뒤 정리된다. `GET /v1/storage`는 `quota_gb`·`used_gb`(GiB)와 자리별 사용량을 준다. 목록 항목의 `size`는 바이트, `is_prefix=true`는 폴더다. 폴더 하나의 크기는 `GET /v1/storage/usage?scope=…&folder=…&prefix=…` → `{bytes, objects}`.
+
+## 오래 걸리는 저장 공간 작업(이동·복사·삭제)
+
+폴더 이동·복사·이름 바꾸기·폴더 삭제와 여러 항목 이동·복사·삭제는 바로 끝나지 않는다. 시작 `POST`는 `task_id`를 주고 서버가 뒤에서 처리한다. 시작 전에 짝이 되는 `*-preview`로 영향 범위를 사람에게 보여 준다.
+
+1. 같은 이름의 상태 경로(`GET /v1/storage/move/{task_id}` 등, 범위 표)를 5~10초 간격으로 부른다. 응답에는 `total`과 진행 수(`copied`·`deleted`)가 있다.
+2. `done`이 true가 될 때까지 기다린다. `error`는 실행 중에도 채워질 수 있으니 그것만 보고 멈추지 않는다.
+3. `done`이 true인데 `error`가 null이 아니면 일부 항목이 실패한 것이다(값은 처음 실패한 항목 이름). 파일 목록으로 결과를 확인해 사람에게 알린다.
+4. 404 `TASK_NOT_FOUND`는 서버가 재시작돼 진행 상태를 잃었다는 뜻이다. 이동은 복사 뒤 삭제라 중간 상태일 수 있다 → 파일 목록으로 확인하기 전에는 같은 작업을 다시 시작하지 않는다.
 
 ## 멀티파트 업로드(256 MiB 초과)
 
@@ -82,7 +93,26 @@ done | jq -s --arg id "$UPLOAD_ID" '{upload_id:$id, parts:.}' > complete.json
 | `result_location` | `shared` 또는 `private`. 생략하면 `private` 채널이 하나라도 있을 때 `private`, 아니면 `shared` |
 | `channels` | 입력 데이터 JSON 배열: `name`, `scope`, `folder`, `prefix`, `size_gb`. `/data/in/<name>`에 붙고 `JOB_CHANNEL_<NAME>`(대문자, `-`→`_`)으로 읽는다 |
 
+작업 평가: 끝난 작업에 별점을 남길 수 있다. `PUT /v1/jobs/{id}/feedback` 본문 `{"rating":1~5,"comment":"…"}`(1000자 이내). 끝나지 않은 작업은 409 `JOB_NOT_FINISHED`다. 이 경로는 `jobs:cancel` 범위가 필요하므로 사람이 별점을 남겨 달라고 했을 때만 그 범위를 요청한다.
+
 응답은 `job_id`, `state`, `priority`, `tier`, `queue_position`, `warnings`다. 상세(`GET /v1/jobs/{id}`)에는 `created_at`·`started_at`·`finished_at`(UTC, 아직 없으면 `null`), `escalation_count`, `channels[].env_name`, `attempts`, `events`가 있다. 메모리 부족이 확정된 시도는 실행 환경이 지원하는 한 단계 큰 GPU 서버로 자동 재투입되고(`JOB_OOM_REQUEUED`, `escalation_count` +1), 더 큰 서버가 없으면 `FAILED_OOM_CONFIRMED`다. `timeout_seconds`는 시도마다 적용된다. 로그를 따라가려면 `GET /v1/jobs/{id}/log?stream=stdout&follow=1`(SSE, 한 연결 15분)을 쓴다. 아직 시작하지 않은 작업의 로그는 404 `NO_ATTEMPT`다.
+
+## 작업 안 환경 변수
+
+사용자 코드가 읽어도 되는 것만 적는다. 경로를 코드에 직접 적지 말고 이 변수로 읽게 한다.
+
+| 변수 | 값 |
+|---|---|
+| `JOB_ID`, `JOB_ATTEMPT` | 작업 ID, 시도 번호(메모리 부족 재투입 때 늘어난다) |
+| `JOB_LAB`, `NUM_GPUS` | 연구실, 받은 GPU 수 |
+| `JOB_WORKSPACE_DIR` | 코드가 풀린 곳(`/workspace`) |
+| `JOB_INPUT_DIR`, `JOB_CHANNELS` | 입력 채널이 붙는 곳(`/data/in`), 채널 이름 목록(쉼표) |
+| `JOB_CHANNEL_<NAME>` | 채널 하나의 경로(`/data/in/<name>`) |
+| `JOB_OUTPUT_DIR` | 결과로 회수되는 곳(`/output`) |
+| `JOB_MODEL_DIR`, `JOB_OUTPUT_DATA_DIR`, `JOB_LOG_DIR` | `/output/model`, `/output/data`, `/output/logs` |
+| `JOB_CHECKPOINT_DIR` | `/checkpoints`. 결과 저장 공간이 준비된 작업에서는 실행 중 약 60초마다 결과의 `checkpoints/`로 동기화된다. 여기서 지운 파일은 결과에서도 지워지고, 결과 ZIP 2 GiB 한도에 포함된다 |
+| `JOB_SCRATCH_DIR` | 작업 중 임시 공간(`/scratch`, 끝나면 지워진다) |
+| `JOB_RESULT_URI` | 결과가 올라갈 저장 공간 주소(결과 저장 공간이 준비된 작업에만) |
 
 ## 응답 봉투와 목록 넘기기
 
@@ -107,6 +137,11 @@ done | jq -s --arg id "$UPLOAD_ID" '{upload_id:$id, parts:.}' > complete.json
 | 400 `VALIDATION_FAILED` 기타 | `errors[].code`·`field`로 고친다 |
 | 404 `UPLOAD_NOT_FOUND` | 멀티파트 `upload_id`가 없다 → 개시부터 다시 |
 | 404 `NO_ATTEMPT` | 아직 시작하지 않은 작업의 로그 |
+| 404 `NO_RESULTS` | 결과 파일이 없다 — 작업 상태와 `last_error_message`를 본다 |
+| 404 `TASK_NOT_FOUND` | 이동·복사·삭제 진행 상태를 잃었다(서버 재시작) → 파일 목록으로 확인하고, 그 전에는 다시 시작하지 않는다 |
+| 404 `FEEDBACK_NOT_FOUND` | 아직 남긴 별점이 없다 |
+| 409 `JOB_NOT_FINISHED` | 끝나지 않은 작업에는 별점을 남길 수 없다 |
+| 400 `RESULTS_TOO_LARGE` | 결과가 2 GiB를 넘어 ZIP으로 못 받는다 → `GET /v1/jobs/{id}/results`의 파일별 주소를 쓴다 |
 | 429 | 전역 제한은 평문 본문 + `Retry-After` 헤더, `JOIN_RATE_LIMITED`·`LOG_STREAM_LIMIT`은 JSON 봉투. 표시된 시간만큼 기다린다 |
 | 503 `SERVICE_MAINTENANCE` | 점검 중 — `GET /v1/maintenance/status`로 끝난 것을 확인한다 |
 | 503 `LLM_DISABLED` | LLM 기능은 제공하지 않는다 |
