@@ -153,7 +153,7 @@ curl --fail-with-body "$BASE/v1/jobs/$JOB_ID/log?stream=stderr" -H "Authorizatio
 
 - GPU 서버 현황: `GET /v1/tiers`, `GET /v1/workers`. 내 대기열: `GET /v1/queue`(`queue:read`). 점검 상태: `GET /v1/maintenance/status`(인증 불필요).
 - 파일 목록: `GET /v1/storage/objects?scope=…&folder=…&prefix=…`. 다운로드 주소: `GET /v1/storage/objects/{key}/url?scope=…&folder=…`. 폴더 크기: `GET /v1/storage/usage`(모두 `storage:read`).
-- 이동·복사·삭제는 `task_id`를 받고 뒤에서 돈다 → 끝날 때까지 상태를 확인한다([references/api.md](references/api.md)).
+- 폴더·여러 항목의 이동·복사·삭제는 `task_id`를 받고 뒤에서 돈다 → 끝날 때까지 상태를 확인한다([references/api.md](references/api.md)).
 - 취소: `POST /v1/jobs/{id}/cancel`(`jobs:cancel`) — 사람이 확인한 뒤에만 부른다.
 
 ## 4. 오류가 나면

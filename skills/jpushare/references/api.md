@@ -44,14 +44,14 @@ SKILL.md의 절차에서 세부가 필요할 때 읽는다. 기본 주소는 `ht
 | `private` | `data` | 나만 보는 데이터 |
 | `private` | `result` | 나만 보는 결과(`<작업 ID>/`) |
 
-결과는 위치와 관계없이 작업이 끝나고 30일 뒤 정리된다. `GET /v1/storage`는 `quota_gb`·`used_gb`(GiB)와 자리별 사용량을 준다. 목록 항목의 `size`는 바이트, `is_prefix=true`는 폴더다. 폴더 하나의 크기는 `GET /v1/storage/usage?scope=…&folder=…&prefix=…` → `{bytes, objects}`.
+결과는 위치와 관계없이 작업이 끝나고 30일 뒤 정리된다. `GET /v1/storage`는 `quota_gb`·`used_gb`(GiB)와 자리별 사용량을 준다. 목록 항목의 `size`는 바이트, `is_prefix=true`는 폴더다. 폴더 하나의 크기는 `GET /v1/storage/usage?scope=…&folder=…&prefix=…` → `{bytes, objects}`(아주 큰 폴더는 시간 안에 다 못 세어 실제보다 작게 나올 수 있다).
 
 ## 오래 걸리는 저장 공간 작업(이동·복사·삭제)
 
-폴더 이동·복사·이름 바꾸기·폴더 삭제와 여러 항목 이동·복사·삭제는 바로 끝나지 않는다. 시작 `POST`는 `task_id`를 주고 서버가 뒤에서 처리한다. 시작 전에 짝이 되는 `*-preview`로 영향 범위를 사람에게 보여 주고, 사람이 확인한 뒤에만 시작한다.
+폴더 이동·복사·이름 바꾸기·폴더 삭제와 여러 항목 이동·복사·삭제는 바로 끝나지 않는다(파일 하나 삭제 `DELETE /v1/storage/objects/{key}`는 바로 끝난다). 시작 `POST`는 `task_id`를 주고 서버가 뒤에서 처리한다. 시작 전에 짝이 되는 `*-preview`로 영향 범위를 사람에게 보여 주고, 사람이 확인한 뒤에만 시작한다.
 
 1. 같은 이름의 상태 경로(`GET /v1/storage/move/{task_id}` 등, 범위 표)를 5~10초 간격으로 부른다. 응답에는 `total`과 진행 수(`copied`·`deleted`)가 있다.
-2. `done`이 true가 될 때까지 기다린다. `error`는 실행 중에도 채워질 수 있으니 그것만 보고 멈추지 않는다. 진행 수가 5분 넘게 늘지 않으면 폴링을 멈추고 지금 상태를 사람에게 알린다.
+2. `done`이 true가 될 때까지 기다린다. `error`는 실행 중에도 채워질 수 있으니 그것만 보고 멈추지 않는다. 진행 수가 5분 넘게 늘지 않으면 폴링을 멈추고 지금 상태를 사람에게 알린다(작업은 서버에서 계속 돈다).
 3. `done`이 true인데 `error`가 null이 아니면 일부 항목이 실패한 것이다(값은 처음 실패한 항목 이름). 파일 목록으로 결과를 확인해 사람에게 알린다.
 4. 404 `TASK_NOT_FOUND`는 서버가 재시작돼 진행 상태를 잃었다는 뜻이다. 이동은 복사 뒤 삭제라 중간 상태일 수 있다 → 파일 목록으로 확인해 사람에게 보여 주고, 사람이 다시 하라고 할 때만 다시 시작한다.
 
@@ -137,8 +137,8 @@ done | jq -s --arg id "$UPLOAD_ID" '{upload_id:$id, parts:.}' > complete.json
 | 400 `VALIDATION_FAILED` 기타 | `errors[].code`·`field`로 고친다 |
 | 404 `UPLOAD_NOT_FOUND` | 멀티파트 `upload_id`가 없다 → 개시부터 다시 |
 | 404 `NO_ATTEMPT` | 아직 시작하지 않은 작업의 로그 |
-| 404 `NO_RESULTS` | 결과 파일이 없다 — 작업 상태와 `last_error_message`를 본다 |
-| 404 `TASK_NOT_FOUND` | 이동·복사·삭제 진행 상태를 잃었다(서버 재시작) → 파일 목록으로 확인하고, 그 전에는 다시 시작하지 않는다 |
+| 404 `NO_RESULTS` | `results-zip`에 담을 결과 파일이 없다 — 작업 상태와 `last_error_message`를 본다 |
+| 404 `TASK_NOT_FOUND` | 이동·복사·삭제 진행 상태를 잃었다(서버 재시작) → 파일 목록으로 확인해 사람에게 보여 주고, 사람이 다시 하라고 할 때만 다시 시작한다 |
 | 404 `FEEDBACK_NOT_FOUND` | 아직 남긴 별점이 없다 |
 | 409 `JOB_NOT_FINISHED` | 끝나지 않은 작업에는 별점을 남길 수 없다 |
 | 400 `RESULTS_TOO_LARGE` | 결과가 2 GiB를 넘어 ZIP으로 못 받는다 → `GET /v1/jobs/{id}/results`의 파일별 주소를 쓴다 |
