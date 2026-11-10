@@ -33,7 +33,7 @@ export BASE=https://share.jedutools.io
 curl --fail-with-body "$BASE/v1/me" -H "Authorization: Bearer $JPUSHARE_API_KEY"
 ```
 
-- 200: `username`, `lab`, `actions`(이 키로 할 수 있는 동작)를 사람에게 짧게 알린다. `lab`이 비어 있으면 연구실 소속이 없어 작업을 낼 수 없다 → 웹에서 참가를 신청하고 책임교수 또는 연구실 관리자의 승인을 받게 한다.
+- 200: `username`, `lab`, `actions`(이 키로 할 수 있는 동작)를 짧게 알린다. `lab`이 비어 있으면 연구실 소속이 없어 작업을 낼 수 없다 → 웹에서 참가를 신청하고 책임교수 또는 연구실 관리자의 승인을 받게 한다.
 - 401: 키가 만료·폐기됐거나 잘못 복사됐다 → 새 키를 요청한다.
 - 403 `API_KEY_SCOPE_REQUIRED`: `account:read`가 없다 → 그 범위를 넣은 새 키를 요청한다.
 
