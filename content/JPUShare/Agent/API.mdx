@@ -249,7 +249,7 @@ JOB_ID=$(jq -r .job_id job.json)
 - `result_location`은 결과를 둘 자리로 `shared`(연구실 공유) 또는 `private`(내 폴더)입니다. 생략하면 입력 채널을 따라갑니다 — `private` 채널이 하나라도 있으면 `private`, 아니면 `shared`.
 - `tier`는 `GET /v1/tiers`로 현재 선택 가능한 값을 확인합니다. GPU 수는 GPU 서버(`tier`)가 정하며 `num_gpus`는 무시됩니다.
 - `timeout_seconds`는 60~604800초(최대 7일)입니다. 화면은 시간 단위 1~168로만 받습니다.
-- 작업 안의 `/tmp`와 홈(`~`)은 64 MiB 메모리 공간입니다. 임시 파일·도구 캐시는 `TMPDIR=/scratch/tmp`, `XDG_CACHE_HOME=/scratch/.cache`(pip·Hugging Face·torch hub), `TRITON_CACHE_DIR=/scratch/.cache/triton`, `CUDA_CACHE_PATH=/scratch/.cache/nv`, `KERAS_HOME=/scratch/.cache/keras`로 미리 돌려 둡니다. 제출 필드 `env`(JSON 객체 문자열)에 같은 이름을 주면 그 값이 쓰입니다. `/tmp/...`·`~/...`를 코드에 직접 적은 경로는 여전히 64 MiB 안에 갇히므로 큰 파일은 `JOB_SCRATCH_DIR` 아래에 씁니다.
+- 작업 안의 `/tmp`와 홈(`~`)은 작업마다 새로 만들어지는 빈 공간이고 실행 서버 디스크 위에 있습니다. 작업이 끝나면 지워집니다. 임시 파일·도구 캐시는 `TMPDIR=/scratch/tmp`, `XDG_CACHE_HOME=/scratch/.cache`(pip·Hugging Face·torch hub), `TRITON_CACHE_DIR=/scratch/.cache/triton`, `CUDA_CACHE_PATH=/scratch/.cache/nv`, `KERAS_HOME=/scratch/.cache/keras`로 미리 돌려 둡니다. 제출 필드 `env`(JSON 객체 문자열)에 같은 이름을 주면 그 값이 쓰입니다. 남겨야 할 결과는 `/output` 아래에 씁니다.
 - 응답은 `job_id`, `state`, `priority`, `tier`, `queue_position`, `warnings`를 포함합니다.
 - 연구실 소속이 없으면 본문 검사 전에 403 `NO_LAB`이 반환됩니다.
 

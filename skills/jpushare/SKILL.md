@@ -116,7 +116,7 @@ JOB_ID=$(jq -r .job_id job.json)
 - `args`를 비우면 `command` 한 줄을 작업 안의 bash가 해석한다(`a && b`, `VAR=1 cmd`). `args`를 주면 셸 없이 실행한다. 작업 안에서는 인터넷이 안 되므로 `pip install`·`git clone`·모델 내려받기를 명령에 넣지 않는다. 필요한 패키지가 실행 환경에 없으면 사람에게 알린다.
 - `result_location`은 `shared` 또는 `private`다. 코드는 결과를 `/output` 아래에 써야 회수된다.
 - `timeout_seconds`는 60~604800(최대 7일)이다. GPU 수는 GPU 서버가 정한다.
-- 작업 안의 `/tmp`와 `~`는 64 MiB다. 임시 파일·캐시는 플랫폼이 `TMPDIR=/scratch/tmp`, `XDG_CACHE_HOME=/scratch/.cache` 등으로 돌려 둔다. 사람 코드가 `/tmp/...`·`~/...`에 큰 파일을 직접 쓰면 `JOB_SCRATCH_DIR` 아래로 바꾸자고 먼저 말한다. 로그에 `No space left on device`가 보이면 이것부터 의심한다.
+- 작업 안의 `/tmp`와 `~`는 작업마다 새로 만들어지는 빈 공간이고 실행 서버 디스크 위에 있다. 도구 캐시는 플랫폼이 `TMPDIR=/scratch/tmp`, `XDG_CACHE_HOME=/scratch/.cache` 등으로 돌려 둔다. `/tmp`·`~`·`/scratch`는 작업이 끝나면 지워지므로 남길 결과는 `/output`에 쓰게 한다.
 
 ### 4단계 — 종료 상태까지 기다리기 (jobs:read)
 
