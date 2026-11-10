@@ -1,6 +1,6 @@
 ---
 name: jpushare
-description: JPUShare(share.jedutools.io)에 사용자 대신 GPU 작업을 제출하고 상태·로그·결과를 받으며, 연구실 저장 공간 파일을 올리고 내리고 옮긴다. "JPUShare에 작업 올려줘", "GPU 서버 상황 알려줘"처럼 부탁할 때 쓴다. 키 발급·연구실 가입·관리자 기능은 다루지 않는다. 사용자가 웹에서 발급한 API 키(환경 변수 JPUSHARE_API_KEY)가 필요하다.
+description: JPUShare(share.jedutools.io)에 사용자 대신 GPU 작업을 제출하고 상태·로그·결과를 받으며, 연구실 저장 공간에 파일을 올리고 내려받고 옮긴다. "JPUShare에 작업 올려줘", "GPU 작업 결과 받아줘", "저장 공간에 업로드해 줘", "GPU 서버·대기열 상황 알려줘"처럼 부탁할 때 쓴다. 키 발급·연구실 가입·관리자 기능은 다루지 않는다. 사용자가 웹에서 발급한 API 키(환경 변수 JPUSHARE_API_KEY)가 필요하다.
 ---
 
 # JPUShare
@@ -23,7 +23,7 @@ export BASE=https://share.jedutools.io
 1. JPUShare(https://share.jedutools.io) → **내 정보/설정** → **API 키 발급**에서 필요한 허용 범위만 골라 발급한다. 연결 확인에는 `account:read`, 작업 제출·결과 받기에는 `platform:read`·`jobs:read`·`jobs:submit`이 필요하다. 권한이 큰 범위는 **키 허용 범위 확인** 창에서 **확인 후 발급**을 누른다.
 2. 터미널에서 `export JPUSHARE_API_KEY='jpk_...'`를 실행하고 **그 터미널에서 에이전트를 다시 시작**한다.
 
-키는 에이전트가 만들 수 없다(`/v1/api-keys`는 웹 로그인 전용). 사람이 키를 채팅에 붙여 넣으면 "대화 기록에 남으니 export 뒤 다시 시작하는 편이 안전합니다"라고 한 번 권하고, 그대로 진행하라고 하면 명령에만 넣어 쓴다.
+키는 에이전트가 만들 수 없다(웹 로그인 전용). 사람이 키를 채팅에 붙여 넣으면 "대화 기록에 남으니 export 뒤 다시 시작하는 편이 안전합니다"라고 한 번 권하고, 그래도 진행하라면 명령에만 넣어 쓴다.
 
 연결을 확인한다. 모든 호출에 `Authorization: Bearer $JPUSHARE_API_KEY`를 붙인다.
 
@@ -113,7 +113,7 @@ JOB_ID=$(jq -r .job_id job.json)
 ```
 
 - `description`(작업 목적, 500자 이내)은 필수다. 사람이 말한 목적을 한 줄로 적는다.
-- `args`·`channels`는 JSON 문자열이다. 채널은 `/data/in/<name>`에 붙고 코드는 `JOB_CHANNEL_<NAME>`으로 읽는다(`val-a` → `JOB_CHANNEL_VAL_A`, 정확한 이름은 상세의 `channels[].env_name`). 잘못 읽어도 코드가 0으로 끝나면 `SUCCEEDED`이므로 변수 이름을 먼저 맞춘다. 작업 안 환경 변수 전체는 [references/api.md](references/api.md)에 있다.
+- `args`·`channels`는 JSON 문자열이다. 채널은 `/data/in/<name>`에 붙고 코드는 `JOB_CHANNEL_<NAME>`으로 읽는다(`val-a` → `JOB_CHANNEL_VAL_A`, 정확한 이름은 상세의 `channels[].env_name`). 잘못 읽어도 코드가 0으로 끝나면 `SUCCEEDED`이므로, 제출 전에 사람 코드가 읽는 변수 이름이 채널 이름과 맞는지 확인한다. 작업 안 환경 변수 전체는 [references/api.md](references/api.md)에 있다.
 - `args`를 비우면 `command` 한 줄을 작업 안의 bash가 해석한다(`a && b`, `VAR=1 cmd`). `args`를 주면 셸 없이 실행한다. 작업 안에서는 인터넷이 안 되므로 `pip install`·`git clone`·모델 내려받기를 넣지 않는다. 패키지가 실행 환경에 없으면 사람에게 알린다.
 - `result_location`은 `shared` 또는 `private`다. 코드는 결과를 `/output` 아래에 써야 회수된다.
 - `timeout_seconds`는 60~604800(최대 7일)이다. GPU 수는 GPU 서버가 정한다.
@@ -131,7 +131,7 @@ curl --fail-with-body "$BASE/v1/jobs/$JOB_ID" -H "Authorization: Bearer $JPUSHAR
 
 - 진행 중: `USER_QUEUE_WAIT`·`GLOBAL_QUEUE_WAIT`·`ESCALATION_WAIT`(대기), `ASSIGNED`, `RUNNING`, `CANCEL_REQUESTED`.
 - 종료 상태(10개, 이후 바뀌지 않음): `SUCCEEDED`, `FAILED_RUNTIME`, `FAILED_ENV`, `FAILED_OOM_CONFIRMED`, `FAILED_OOM_SUSPECT`, `TIMED_OUT`, `CANCELLED`, `KILLED_BY_ADMIN`, `FAILED_SUBMISSION`, `UPLOAD_FAILED`.
-- `SUCCEEDED`가 아니면 `last_error_code`와 `last_error_message`(콘솔의 "실패 사유")를 사람에게 전하고 stderr 로그를 읽어 원인을 설명한다. 준비 단계에서 실패한 작업(`FAILED_ENV` 등)은 로그가 없을 수 있다(404 `NO_ATTEMPT`) → `last_error_message`만 전한다.
+- `SUCCEEDED`가 아니면 `last_error_code`·`last_error_message`를 전하고 stderr 로그로 원인을 설명한다. 준비 단계 실패(`FAILED_ENV` 등)는 로그가 없을 수 있다(404 `NO_ATTEMPT`) → `last_error_message`만 전한다.
 - GPU 메모리 부족이 확정되면 한 단계 큰 GPU 서버로 자동 재투입된다(`events`의 `JOB_OOM_REQUEUED`). 시도마다 `timeout_seconds`가 다시 적용되므로, 메모리가 계속 새는 코드면 사람에게 알리고 취소할지 묻는다.
 
 ### 5단계 — 로그와 결과
