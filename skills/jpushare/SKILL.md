@@ -78,7 +78,7 @@ UPLOAD_TAGGING=$(jq -r '.headers["x-amz-tagging"]' upload.json)
 curl --fail-with-body -X PUT "$UPLOAD_URL" -H "x-amz-tagging: $UPLOAD_TAGGING" --data-binary @sample.csv
 ```
 
-헤더를 빠뜨리면 저장소가 XML 403으로 거절한다.
+헤더를 빠뜨리면 XML 403이다.
 
 <!-- doc-exec: C05 expect=403 -->
 
@@ -114,7 +114,7 @@ JOB_ID=$(jq -r .job_id job.json)
 
 - `description`(작업 목적, 500자 이내)은 필수다. 사람이 말한 목적을 한 줄로 적는다.
 - `args`·`channels`는 JSON 문자열이다. 채널은 `/data/in/<name>`에 붙고 코드는 `JOB_CHANNEL_<NAME>`으로 읽는다(`val-a` → `JOB_CHANNEL_VAL_A`, 정확한 이름은 상세의 `channels[].env_name`). 잘못 읽어도 코드가 0으로 끝나면 `SUCCEEDED`이므로, 제출 전에 사람 코드가 읽는 변수 이름이 채널 이름과 맞는지 확인한다. 작업 안 환경 변수 전체는 [references/api.md](references/api.md)에 있다.
-- `args`를 비우면 `command` 한 줄을 작업 안의 bash가 해석한다(`a && b`, `VAR=1 cmd`). `args`를 주면 셸 없이 실행한다. 작업 안에서는 인터넷이 안 되므로 `pip install`·`git clone`·모델 내려받기를 넣지 않는다. 패키지가 실행 환경에 없으면 사람에게 알린다.
+- `args`가 비면 `command` 한 줄을 bash가 해석하고(`a && b`), 있으면 셸 없이 실행한다. 작업 안에서는 인터넷이 안 되므로 `pip install`·`git clone`·모델 내려받기를 넣지 않는다. 패키지가 실행 환경에 없으면 사람에게 알린다.
 - `result_location`은 `shared` 또는 `private`다. 코드는 결과를 `/output` 아래에 써야 회수된다.
 - `timeout_seconds`는 60~604800(최대 7일)이다. GPU 수는 GPU 서버가 정한다.
 - 작업 안의 `/tmp`와 `~`는 작업마다 새로 만들어지는 빈 공간이고 실행 서버 디스크 위에 있다. 도구 캐시는 플랫폼이 `TMPDIR=/scratch/tmp`, `XDG_CACHE_HOME=/scratch/.cache` 등으로 돌려 둔다. `/tmp`·`~`·`/scratch`는 작업이 끝나면 지워지므로 남길 결과는 `/output`에 쓰게 한다.
