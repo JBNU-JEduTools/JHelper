@@ -204,16 +204,9 @@ curl --fail-with-body --get "https://share.jedutools.io/v1/storage/objects/train
 
 화면에서 제출하는 방법은 [학습 작업 실행](/JPUShare/1Web/3Jobs)을 참고하세요.
 
-### 실행 환경 (platform:read)
+### 실행 환경 고르기 (platform:read)
 
-실행 환경(이미지)은 고르지 않습니다. 플랫폼이 작업의 GPU 서버 세대에 맞는 기본 환경을 붙이고, 작업 상세의 `runtime`(`profile`, `versions`)에 실제로 붙은 환경이 나옵니다. GPU 메모리 부족으로 더 큰 서버로 옮겨 가면 그 서버에 맞는 환경이 다시 붙습니다.
-
-| 실행 환경 | 붙는 GPU 서버 | 들어 있는 것 |
-| --- | --- | --- |
-| `gpu-cu126` | TITAN Xp(GPU 세대 6.1) | Python 3.12, PyTorch 2.14.1(CUDA 12.6), torchvision 0.29.1, torchaudio 2.11.0, numpy 2.5.3, Pillow, g++ 13.3, nvcc 12.6, ninja |
-| `gpu-cu130` | 그 밖의 서버(GPU 세대 7.5 이상) | Python 3.12, PyTorch 2.14.1(CUDA 13.0), torchvision 0.29.1, torchaudio 2.11.0, numpy 2.5.3, Pillow, g++ 13.3, nvcc 13.0, ninja |
-
-실행 환경 목록은 아래로 볼 수 있습니다.
+작업에는 실행 환경의 스냅샷 ID(`workspace_snapshot_id`)를 지정합니다. 값은 실행 환경 목록의 `current_snapshot_id`입니다.
 
 <!-- doc-exec: C02 expect=200 -->
 
@@ -222,8 +215,8 @@ curl --fail-with-body 'https://share.jedutools.io/v1/workspace-profiles' \
   -H "Authorization: Bearer $JPUSHARE_API_KEY"
 ```
 
-각 항목은 `id`, `name`, `current_snapshot_id`, `supported_compute_caps`(이미지가 지원하는 GPU 세대, 예: `["8.0","8.6","9.0"]`)를 가집니다. GPU 서버의 세대는 `GET /v1/tiers` 항목의 `compute_capability`(예: `"8.6"`)입니다. 이 목록은 어떤 환경이 있는지 확인하는 용도이고, 제출할 때 맞춰 고를 필요는 없습니다. 예전 환경(`pytorch-default` 등)도 목록에 남아 있지만 새 작업에는 붙지 않습니다.
-제출에 `workspace_snapshot_id`를 넣으면 무시되고 응답 `warnings`에 `workspace_snapshot_id is ignored: the platform picks the runtime image for the GPU tier` 한 줄이 붙습니다. 고른 GPU 서버에 붙일 실행 환경이 없으면 409 `NO_RUNTIME_FOR_TIER`입니다.
+각 항목은 `id`, `name`, `current_snapshot_id`, `supported_compute_caps`(이미지가 지원하는 GPU 세대, 예: `["8.0","8.6","9.0"]`)를 가집니다. GPU 서버의 세대는 `GET /v1/tiers` 항목의 `compute_capability`(예: `"8.6"`)입니다.
+**호환 규칙**: `supported_compute_caps` 중 점 앞 숫자가 GPU와 같고 점 뒤 숫자가 GPU 이하인 값이 하나라도 있으면 호환입니다. 둘 중 하나라도 `null`이면 서버가 판정하지 않고 받아 줍니다. 호환되지 않는 조합으로 제출하면 400 `VALIDATION_FAILED`의 `errors[].code`가 `WORKSPACE_GPU_INCOMPATIBLE`입니다.
 
 ### 제출 (jobs:submit)
 
@@ -241,6 +234,7 @@ curl --fail-with-body 'https://share.jedutools.io/v1/jobs' \
   -F 'work_type=training' \
   -F 'description=API 사용법 예제' \
   -F 'tier=jpu-60' \
+  -F "workspace_snapshot_id=$SNAPSHOT_ID" \
   -F 'timeout_seconds=3600' \
   -F 'result_location=private' \
   -F 'channels=[{"name":"train","scope":"shared","folder":"data","prefix":"train/","size_gb":1}]' \
@@ -256,8 +250,6 @@ JOB_ID=$(jq -r .job_id job.json)
 - `tier`는 `GET /v1/tiers`로 현재 선택 가능한 값을 확인합니다. GPU 수는 GPU 서버(`tier`)가 정하며 `num_gpus`는 무시됩니다.
 - `timeout_seconds`는 60~604800초(최대 7일)입니다. 화면은 시간 단위 1~168로만 받습니다.
 - 작업 안의 `/tmp`와 홈(`~`)은 작업마다 새로 만들어지는 빈 공간이고 실행 서버 디스크 위에 있습니다. 작업이 끝나면 지워집니다. 임시 파일·도구 캐시는 `TMPDIR=/scratch/tmp`, `XDG_CACHE_HOME=/scratch/.cache`(pip·Hugging Face·torch hub), `TRITON_CACHE_DIR=/scratch/.cache/triton`, `CUDA_CACHE_PATH=/scratch/.cache/nv`, `KERAS_HOME=/scratch/.cache/keras`로 미리 돌려 둡니다. 제출 필드 `env`(JSON 객체 문자열)에 같은 이름을 주면 그 값이 쓰입니다. 남겨야 할 결과는 `/output` 아래에 씁니다.
-- 실행 환경에 없는 Python 패키지는 내 PC에서 `pip download --python-version 3.12 --platform manylinux_2_28_x86_64 --platform manylinux2014_x86_64 --only-binary=:all: -d wheels <패키지>`로 wheel을 받아 코드 ZIP에 넣고, 명령 앞에 `pip install --no-index --break-system-packages --find-links wheels <패키지> &&`를 붙입니다. wheel은 Python 3.12·linux x86_64용이어야 합니다.
-- C++·CUDA 확장(`torch.utils.cpp_extension`)은 작업 안에서 빌드할 수 있습니다(g++·nvcc·ninja가 들어 있습니다).
 - 응답은 `job_id`, `state`, `priority`, `tier`, `queue_position`, `warnings`를 포함합니다.
 - 연구실 소속이 없으면 본문 검사 전에 403 `NO_LAB`이 반환됩니다.
 
@@ -307,7 +299,7 @@ curl --fail-with-body "https://share.jedutools.io/v1/jobs/$JOB_ID" \
 
 종료 상태 10개 중 하나가 되면 더 바뀌지 않습니다. `SUCCEEDED` 외의 종료 상태면 상세 응답의 `last_error_code`(예: `RUNTIME_EXIT_NONZERO`)와 `last_error_message`(화면의 **실패 사유** 한 줄과 같은 문장)를 보고, 로그의 stderr를 확인합니다. 두 필드는 성공한 작업에서 `null`입니다.
 
-GPU 메모리 부족으로 확정된 시도(`attempts[].oom_classification`이 `CONFIRMED`)는 실패로 끝나지 않고 한 단계 큰 GPU 서버로 자동으로 다시 대기열에 들어갑니다. 서버를 통째로 쓰므로 GPU 수도 그 서버를 따릅니다. 올라간 서버의 GPU 세대에 맞는 실행 환경이 다시 붙고, 더 큰 서버가 없으면 `FAILED_OOM_CONFIRMED`로 끝납니다. `timeout_seconds`는 시도마다 따로 적용됩니다. 다시 들어갈 때마다 `events`에 `JOB_OOM_REQUEUED`(`failed_tier`, `new_tier`, `attempt_no`, `escalation_count`)가 남고 `escalation_count`가 1씩 늘어납니다. 메모리 부족으로 끝난 작업은 사용량에 넣지 않습니다.
+GPU 메모리 부족으로 확정된 시도(`attempts[].oom_classification`이 `CONFIRMED`)는 실패로 끝나지 않고 한 단계 큰 GPU 서버로 자동으로 다시 대기열에 들어갑니다. 서버를 통째로 쓰므로 GPU 수도 그 서버를 따릅니다. 더 큰 서버 가운데 실행 환경이 지원하는 GPU 세대의 서버로만 올라가며(예: `pytorch-default`로 낸 작업은 Blackwell 서버 `jpu-192`로 가지 않습니다), 그런 서버가 더 없으면 `FAILED_OOM_CONFIRMED`로 끝납니다. `timeout_seconds`는 시도마다 따로 적용됩니다. 다시 들어갈 때마다 `events`에 `JOB_OOM_REQUEUED`(`failed_tier`, `new_tier`, `attempt_no`, `escalation_count`)가 남고 `escalation_count`가 1씩 늘어납니다. 메모리 부족으로 끝난 작업은 사용량에 넣지 않습니다.
 
 ### 로그와 결과 (jobs:read)
 
@@ -356,7 +348,7 @@ curl --fail-with-body -X POST "https://share.jedutools.io/v1/jobs/$JOB_ID/cancel
 | 403 `SignatureDoesNotMatch` / `AccessDenied` (XML) | 업로드 주소로 PUT 할 때 발급 응답의 `headers`를 빠뜨렸습니다. |
 | 400 `INVALID_LOCATION` | `scope`/`folder` 조합이 잘못되었습니다. 네 가지 조합만 허용됩니다. |
 | 400 `MUST_USE_MULTIPART` / `USE_SINGLE_PUT` | 파일 크기에 맞지 않는 업로드 방식입니다. 256 MiB 초과는 멀티파트, 이하는 단일 PUT. |
-| 409 `NO_RUNTIME_FOR_TIER` | 그 GPU 서버(`tier`)에 붙일 실행 환경이 없습니다. 다른 GPU 서버로 내고, 계속되면 담당자에게 알립니다. |
+| 400 `VALIDATION_FAILED` / `WORKSPACE_GPU_INCOMPATIBLE` | 실행 환경이 그 GPU 서버(`tier`)의 GPU 세대를 지원하지 않습니다. 호환 규칙(6절)에 맞는 환경이나 GPU 서버를 고릅니다. |
 | 400 `VALIDATION_FAILED` / `WORKER_ACCOUNT_MISSING` | 그 GPU 서버에 실행 계정이 아직 없습니다(가입 직후 준비 일부 실패). 다른 GPU 서버로 내거나 잠시 뒤 재시도하고, 계속되면 담당자에게 알립니다. |
 | 400·422 (그 밖) | 응답의 `code`, `errors`, `detail`을 보고 요청 값을 고칩니다. |
 | 429 | 요청이 너무 잦습니다. 전역 제한은 **평문 본문 + `Retry-After` 헤더**이고(JSON으로 파싱하지 마세요), `JOIN_RATE_LIMITED`·`LOG_STREAM_LIMIT`은 JSON 봉투입니다. 표시된 시간만큼 쉬고 재시도합니다. |
