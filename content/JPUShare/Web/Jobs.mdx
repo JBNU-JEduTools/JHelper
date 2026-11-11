@@ -129,6 +129,16 @@ pip download --python-version 3.12 --platform manylinux_2_28_x86_64 --platform m
 pip install --no-index --break-system-packages --find-links wheels einops && python train.py
 ```
 
+TensorFlow처럼 큰 패키지(GPU용 약 3.3 GB)는 코드 ZIP(500 MiB 한도)에 들어가지 않습니다. wheel 폴더를 [데이터 관리](/JPUShare/1Web/2Datasets)에 올리고 이름을 `wheels`로 지정한 입력으로 연결한 뒤, 그 경로에서 설치합니다. 버전은 `2.20`으로 고정합니다. 2.21.0은 GPU를 찾지 못하고 CPU로만 돕니다.
+
+```bash
+pip download --python-version 3.12 --platform manylinux_2_28_x86_64 --platform manylinux2014_x86_64 --only-binary=:all: -d wheels "tensorflow[and-cuda]==2.20.*"
+```
+
+```bash
+pip install --no-index --break-system-packages --find-links "$JOB_CHANNEL_WHEELS" "tensorflow[and-cuda]==2.20.*" && python train.py
+```
+
 ## 6. 제출과 확인
 
 **제출**을 누르면 작업 목록으로 이동합니다. 작업을 열어 **대기 중 → 배정됨 → 실행 중 → 완료**로 진행하는지 확인합니다.

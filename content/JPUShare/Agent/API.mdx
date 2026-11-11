@@ -256,7 +256,7 @@ JOB_ID=$(jq -r .job_id job.json)
 - `tier`는 `GET /v1/tiers`로 현재 선택 가능한 값을 확인합니다. GPU 수는 GPU 서버(`tier`)가 정하며 `num_gpus`는 무시됩니다.
 - `timeout_seconds`는 60~604800초(최대 7일)입니다. 화면은 시간 단위 1~168로만 받습니다.
 - 작업 안의 `/tmp`와 홈(`~`)은 작업마다 새로 만들어지는 빈 공간이고 실행 서버 디스크 위에 있습니다. 작업이 끝나면 지워집니다. 임시 파일·도구 캐시는 `TMPDIR=/scratch/tmp`, `XDG_CACHE_HOME=/scratch/.cache`(pip·Hugging Face·torch hub), `TRITON_CACHE_DIR=/scratch/.cache/triton`, `CUDA_CACHE_PATH=/scratch/.cache/nv`, `KERAS_HOME=/scratch/.cache/keras`로 미리 돌려 둡니다. 제출 필드 `env`(JSON 객체 문자열)에 같은 이름을 주면 그 값이 쓰입니다. 남겨야 할 결과는 `/output` 아래에 씁니다.
-- 실행 환경에 없는 Python 패키지는 내 PC에서 `pip download --python-version 3.12 --platform manylinux_2_28_x86_64 --platform manylinux2014_x86_64 --only-binary=:all: -d wheels <패키지>`로 wheel을 받아 코드 ZIP에 넣고, 명령 앞에 `pip install --no-index --break-system-packages --find-links wheels <패키지> &&`를 붙입니다. wheel은 Python 3.12·linux x86_64용이어야 합니다.
+- 실행 환경에 없는 Python 패키지는 내 PC에서 `pip download --python-version 3.12 --platform manylinux_2_28_x86_64 --platform manylinux2014_x86_64 --only-binary=:all: -d wheels <패키지>`로 wheel을 받아 코드 ZIP에 넣고, 명령 앞에 `pip install --no-index --break-system-packages --find-links wheels <패키지> &&`를 붙입니다. wheel은 Python 3.12·linux x86_64용이어야 합니다. ZIP(500 MiB)에 안 들어가는 큰 wheel(TensorFlow GPU 약 3.3 GB)은 입력 채널 `wheels`로 붙이고 `--find-links "$JOB_CHANNEL_WHEELS"`로 설치합니다. TensorFlow는 `"tensorflow[and-cuda]==2.20.*"`로 고정합니다(2.21.0은 GPU를 찾지 못하고 CPU로만 돕니다).
 - C++·CUDA 확장(`torch.utils.cpp_extension`)은 작업 안에서 빌드할 수 있습니다(g++·nvcc·ninja가 들어 있습니다).
 - 응답은 `job_id`, `state`, `priority`, `tier`, `queue_position`, `warnings`를 포함합니다.
 - 연구실 소속이 없으면 본문 검사 전에 403 `NO_LAB`이 반환됩니다.
