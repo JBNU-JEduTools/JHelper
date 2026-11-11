@@ -87,7 +87,6 @@ done | jq -s --arg id "$UPLOAD_ID" '{upload_id:$id, parts:.}' > complete.json
 | `command`, `args` | 실행 명령과 인수(`args`는 JSON 배열 문자열). `args`가 비면 `command` 한 줄을 작업 안의 `bash -c`가 해석하고, 있으면 셸 없이 실행한다. 작업 안에서는 인터넷이 안 된다 |
 | `name`, `work_type`, `description` | 작업 이름, 종류(`training` 등), 목적(필수, 500자 이내) |
 | `tier` | GPU 서버 이름(`GET /v1/tiers`). GPU 수는 GPU 서버가 정하며 `num_gpus`는 무시된다 |
-| `workspace_snapshot_id` | 실행 환경의 `current_snapshot_id` |
 | `timeout_seconds` | 60~604800(최대 7일) |
 | `env` | 작업에 넣을 환경 변수(JSON 객체 문자열). 플랫폼이 미리 넣는 `TMPDIR`·`XDG_CACHE_HOME`·`TRITON_CACHE_DIR`·`CUDA_CACHE_PATH`·`KERAS_HOME`(모두 `/scratch` 아래)과 이름이 같으면 이 값이 쓰인다. 예약 이름(`PATH`·`HOME`·`USER`·`LD_PRELOAD`·`LD_LIBRARY_PATH`·`CUDA_VISIBLE_DEVICES`, `JOB_`·`EXECUTION_`·`WORKSPACE_`·`APPTAINER_`·`SLURM_`로 시작하는 이름)이나 토큰처럼 보이는 값은 400 `INVALID_ENV`다 |
 | `result_location` | `shared` 또는 `private`. 생략하면 `private` 채널이 하나라도 있을 때 `private`, 아니면 `shared` |
@@ -95,7 +94,9 @@ done | jq -s --arg id "$UPLOAD_ID" '{upload_id:$id, parts:.}' > complete.json
 
 작업 평가: 끝난 작업에 별점을 남길 수 있다. `PUT /v1/jobs/{id}/feedback` 본문 `{"rating":1~5,"comment":"…"}`(1000자 이내). 끝나지 않은 작업은 409 `JOB_NOT_FINISHED`다. 이 경로는 `jobs:cancel` 범위가 필요하므로 사람이 별점을 남겨 달라고 했을 때만 그 범위를 요청한다.
 
-응답은 `job_id`, `state`, `priority`, `tier`, `queue_position`, `warnings`다. 상세(`GET /v1/jobs/{id}`)에는 `created_at`·`started_at`·`finished_at`(UTC, 아직 없으면 `null`), `escalation_count`, `channels[].env_name`, `attempts`, `events`가 있다. 메모리 부족이 확정된 시도는 실행 환경이 지원하는 한 단계 큰 GPU 서버로 자동 재투입되고(`JOB_OOM_REQUEUED`, `escalation_count` +1), 더 큰 서버가 없으면 `FAILED_OOM_CONFIRMED`다. `timeout_seconds`는 시도마다 적용된다. 로그를 따라가려면 `GET /v1/jobs/{id}/log?stream=stdout&follow=1`(SSE, 한 연결 15분)을 쓴다. 아직 시작하지 않은 작업의 로그는 404 `NO_ATTEMPT`다.
+실행 환경은 제출 필드가 아니다. 플랫폼이 GPU 서버 세대에 맞는 기본 환경을 고른다(6.1 = `gpu-cu126`, 7.5 이상 = `gpu-cu130`). `workspace_snapshot_id`를 보내면 무시되고 `warnings`에 `workspace_snapshot_id is ignored: the platform picks the runtime image for the GPU tier`가 붙는다.
+
+응답은 `job_id`, `state`, `priority`, `tier`, `queue_position`, `warnings`다. 상세(`GET /v1/jobs/{id}`)에는 실제로 붙은 실행 환경 `runtime`(`profile`, `versions` — python·framework·cuda 등, 모르면 `null`), `created_at`·`started_at`·`finished_at`(UTC, 아직 없으면 `null`), `escalation_count`, `channels[].env_name`, `attempts`, `events`가 있다. 메모리 부족이 확정된 시도는 한 단계 큰 GPU 서버로 자동 재투입되고 실행 환경도 그 서버에 맞게 다시 붙는다(`JOB_OOM_REQUEUED`, `escalation_count` +1), 더 큰 서버가 없으면 `FAILED_OOM_CONFIRMED`다. `timeout_seconds`는 시도마다 적용된다. 로그를 따라가려면 `GET /v1/jobs/{id}/log?stream=stdout&follow=1`(SSE, 한 연결 15분)을 쓴다. 아직 시작하지 않은 작업의 로그는 404 `NO_ATTEMPT`다.
 
 ## 작업 안 환경 변수
 
@@ -131,7 +132,7 @@ done | jq -s --arg id "$UPLOAD_ID" '{upload_id:$id, parts:.}' > complete.json
 | 403 (그 밖) | 그 작업·저장 공간에 접근할 권한이 없다 |
 | 400 `INVALID_LOCATION` | scope/folder 조합 오류 |
 | 400 `MUST_USE_MULTIPART` / `USE_SINGLE_PUT` | 크기와 업로드 방식이 맞지 않는다(경계 256 MiB) |
-| 400 `VALIDATION_FAILED` + `WORKSPACE_GPU_INCOMPATIBLE` | 실행 환경이 그 GPU 서버의 GPU 세대를 지원하지 않는다 → 같은 조합으로 다시 내지 않는다 |
+| 409 `NO_RUNTIME_FOR_TIER` | 그 GPU 서버 세대에 붙일 실행 환경이 없다 → 다른 GPU 서버로 내고, 반복되면 운영자에게 알린다 |
 | 400 `VALIDATION_FAILED` + `WORKER_ACCOUNT_MISSING` | 그 GPU 서버에 사용자 실행 계정이 아직 없다(가입 직후 준비 일부 실패) → 다른 GPU 서버나 잠시 뒤 재시도 |
 | 400 `DESCRIPTION_REQUIRED` | `description`이 비었다 |
 | 400 `VALIDATION_FAILED` 기타 | `errors[].code`·`field`로 고친다 |
