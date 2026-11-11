@@ -1,13 +1,14 @@
 ---
 name: jpushare
-description: JPUShare(share.jedutools.io)에 사용자 대신 GPU 작업을 제출하고 상태·로그·결과를 받으며, 연구실 저장 공간에 파일을 올리고 내려받는다. 키 발급·연구실 가입·관리자 기능은 다루지 않는다. 사용자가 "JPUShare에 작업 올려줘", "GPU 작업 결과 받아줘", "JPUShare 저장 공간에 업로드해 줘", "GPU 서버 상황 알려줘"처럼 JPUShare 작업·저장 공간·GPU 서버·대기열을 부탁할 때 쓴다. 사용자가 웹에서 발급한 API 키(환경 변수 JPUSHARE_API_KEY)가 필요하다.
+description: JPUShare(share.jedutools.io)에 사용자 대신 GPU 작업을 제출하고 상태·로그·결과를 받으며, 연구실 저장 공간에 파일을 올리고 내려받고 옮긴다. "JPUShare에 작업 올려줘", "GPU 작업 결과 받아줘", "저장 공간에 업로드해 줘", "GPU 서버·대기열 상황 알려줘"처럼 부탁할 때 쓴다. 키 발급·연구실 가입·관리자 기능은 다루지 않는다. 사용자가 웹에서 발급한 API 키(환경 변수 JPUSHARE_API_KEY)가 필요하다.
 ---
 
 # JPUShare
 
-JPUShare는 여러 연구실이 GPU 서버를 함께 쓰는 서비스다. 연구실마다 구성원과 저장 공간을 따로 두고, GPU 서버와 실행 순서는 모든 연구실이 함께 쓴다. 제출한 작업은 다른 연구실의 작업과 함께 순서를 기다린다.
+JPUShare는 여러 연구실이 GPU 서버를 함께 쓰는 서비스다. 저장 공간은 연구실마다 따로 있고, 작업은 모든 연구실의 작업과 함께 순서를 기다린다.
 
-- 허용 범위별 경로, 저장 위치 조합, 멀티파트 업로드, 전체 오류 표: [references/api.md](references/api.md)
+- 허용 범위별 경로, 저장 위치 조합, 멀티파트 업로드, 이동·복사·삭제 진행 확인, 작업 안 환경 변수, 전체 오류 표: [references/api.md](references/api.md)
+- 이 스킬과 실제 응답이 다르면(모르는 오류 코드, 없는 필드) 사람에게 `npx skills update`로 스킬을 갱신하고 에이전트를 다시 시작하라고 안내한다. 직접 실행하지 않는다.
 - 사람용 안내(이 스킬과 어긋나면 이쪽이 맞다): 에이전트 연결하기 https://jhelper.jedutools.io/JPUShare/2Agent/1Connect , API 사용법 https://jhelper.jedutools.io/JPUShare/2Agent/2API
 
 ## 1. 시작 전 확인
@@ -22,7 +23,7 @@ export BASE=https://share.jedutools.io
 1. JPUShare(https://share.jedutools.io) → **내 정보/설정** → **API 키 발급**에서 필요한 허용 범위만 골라 발급한다. 연결 확인에는 `account:read`, 작업 제출·결과 받기에는 `platform:read`·`jobs:read`·`jobs:submit`이 필요하다. 권한이 큰 범위는 **키 허용 범위 확인** 창에서 **확인 후 발급**을 누른다.
 2. 터미널에서 `export JPUSHARE_API_KEY='jpk_...'`를 실행하고 **그 터미널에서 에이전트를 다시 시작**한다.
 
-키는 에이전트가 만들 수 없다(`/v1/api-keys`는 웹 로그인 전용). 사람이 키를 채팅에 붙여 넣으면 "대화 기록에 남으니 export 뒤 다시 시작하는 편이 안전합니다"라고 한 번 권하고, 그대로 진행하라고 하면 명령에만 넣어 쓴다.
+키는 에이전트가 만들 수 없다(웹 로그인 전용). 사람이 키를 채팅에 붙여 넣으면 "대화 기록에 남으니 export 뒤 다시 시작하는 편이 안전합니다"라고 한 번 권하고, 그래도 진행하라면 명령에만 넣어 쓴다.
 
 연결을 확인한다. 모든 호출에 `Authorization: Bearer $JPUSHARE_API_KEY`를 붙인다.
 
@@ -32,7 +33,7 @@ export BASE=https://share.jedutools.io
 curl --fail-with-body "$BASE/v1/me" -H "Authorization: Bearer $JPUSHARE_API_KEY"
 ```
 
-- 200: `username`, `lab`, `actions`(이 키로 할 수 있는 동작)를 사람에게 짧게 알린다. `lab`이 비어 있으면 연구실 소속이 없어 작업을 낼 수 없다 → 웹에서 참가를 신청하고 책임교수 또는 연구실 관리자의 승인을 받게 한다.
+- 200: `username`, `lab`, `actions`(이 키로 할 수 있는 동작)를 짧게 알린다. `lab`이 비어 있으면 연구실 소속이 없어 작업을 낼 수 없다 → 웹에서 참가를 신청하고 책임교수 또는 연구실 관리자의 승인을 받게 한다.
 - 401: 키가 만료·폐기됐거나 잘못 복사됐다 → 새 키를 요청한다.
 - 403 `API_KEY_SCOPE_REQUIRED`: `account:read`가 없다 → 그 범위를 넣은 새 키를 요청한다.
 
@@ -77,7 +78,7 @@ UPLOAD_TAGGING=$(jq -r '.headers["x-amz-tagging"]' upload.json)
 curl --fail-with-body -X PUT "$UPLOAD_URL" -H "x-amz-tagging: $UPLOAD_TAGGING" --data-binary @sample.csv
 ```
 
-헤더를 빠뜨리면 저장소가 XML 403으로 거절한다.
+헤더를 빠뜨리면 XML 403이다.
 
 <!-- doc-exec: C05 expect=403 -->
 
@@ -112,14 +113,15 @@ JOB_ID=$(jq -r .job_id job.json)
 ```
 
 - `description`(작업 목적, 500자 이내)은 필수다. 사람이 말한 목적을 한 줄로 적는다.
-- `args`·`channels`는 JSON 문자열이다. 채널은 `/data/in/<name>`에 붙고, 코드는 `JOB_CHANNEL_<NAME>`으로 읽는다 — 이름은 대문자, `-`는 `_`(`train` → `JOB_CHANNEL_TRAIN`, `val-a` → `JOB_CHANNEL_VAL_A`). 정확한 이름은 작업 상세의 `channels[].env_name`이다. 잘못 읽어도 코드가 0으로 끝나면 `SUCCEEDED`이므로 사람 코드의 변수 이름을 먼저 맞춘다.
-- `args`를 비우면 `command` 한 줄을 작업 안의 bash가 해석한다(`a && b`, `VAR=1 cmd`). `args`를 주면 셸 없이 실행한다. 작업 안에서는 인터넷이 안 되므로 `pip install`·`git clone`·모델 내려받기를 명령에 넣지 않는다. 필요한 패키지가 실행 환경에 없으면 사람에게 알린다.
+- `args`·`channels`는 JSON 문자열이다. 채널은 `/data/in/<name>`에 붙고 코드는 `JOB_CHANNEL_<NAME>`으로 읽는다(`val-a` → `JOB_CHANNEL_VAL_A`, 정확한 이름은 상세의 `channels[].env_name`). 잘못 읽어도 코드가 0으로 끝나면 `SUCCEEDED`이므로, 제출 전에 사람 코드가 읽는 변수 이름이 채널 이름과 맞는지 확인한다. 작업 안 환경 변수 전체는 [references/api.md](references/api.md)에 있다.
+- `args`가 비면 `command` 한 줄을 bash가 해석하고(`a && b`), 있으면 셸 없이 실행한다. 작업 안에서는 인터넷이 안 되므로 `pip install`·`git clone`·모델 내려받기를 넣지 않는다. 패키지가 실행 환경에 없으면 사람에게 알린다.
 - `result_location`은 `shared` 또는 `private`다. 코드는 결과를 `/output` 아래에 써야 회수된다.
-- `timeout_seconds`는 60~259200이다. GPU 수는 GPU 서버가 정한다.
+- `timeout_seconds`는 60~604800(최대 7일)이다. GPU 수는 GPU 서버가 정한다.
+- 작업 안의 `/tmp`와 `~`는 작업마다 새로 만들어지는 빈 공간이고 실행 서버 디스크 위에 있다. 도구 캐시는 플랫폼이 `TMPDIR=/scratch/tmp`, `XDG_CACHE_HOME=/scratch/.cache` 등으로 돌려 둔다. `/tmp`·`~`·`/scratch`는 작업이 끝나면 지워지므로 남길 결과는 `/output`에 쓰게 한다.
 
 ### 4단계 — 종료 상태까지 기다리기 (jobs:read)
 
-`GET /v1/jobs/{id}`를 5~10초 간격으로 불러 `state`를 본다. 대기가 길어도 실패가 아니다 — 다른 연구실의 작업과 함께 순서를 기다리는 중이다.
+`GET /v1/jobs/{id}`를 5~10초 간격으로 불러 `state`를 본다. 대기가 길어도 실패가 아니다(다른 연구실 작업과 순서를 기다린다).
 
 <!-- doc-exec: C08 expect=200 -->
 
@@ -129,8 +131,8 @@ curl --fail-with-body "$BASE/v1/jobs/$JOB_ID" -H "Authorization: Bearer $JPUSHAR
 
 - 진행 중: `USER_QUEUE_WAIT`·`GLOBAL_QUEUE_WAIT`·`ESCALATION_WAIT`(대기), `ASSIGNED`, `RUNNING`, `CANCEL_REQUESTED`.
 - 종료 상태(10개, 이후 바뀌지 않음): `SUCCEEDED`, `FAILED_RUNTIME`, `FAILED_ENV`, `FAILED_OOM_CONFIRMED`, `FAILED_OOM_SUSPECT`, `TIMED_OUT`, `CANCELLED`, `KILLED_BY_ADMIN`, `FAILED_SUBMISSION`, `UPLOAD_FAILED`.
-- `SUCCEEDED`가 아니면 `last_error_code`와 `last_error_message`(콘솔의 "실패 사유")를 사람에게 전하고 stderr 로그를 읽어 원인을 설명한다. 준비 단계에서 실패한 작업(`FAILED_ENV` 등)은 로그가 없을 수 있다(404 `NO_ATTEMPT`) → `last_error_message`만 전한다.
-- GPU 메모리 부족이 확정되면 작업은 실행 환경이 지원하는 한 단계 큰 GPU 서버로 자동 재투입된다(`events`의 `JOB_OOM_REQUEUED`, `escalation_count` 증가). 가장 큰 서버까지 반복되고 `timeout_seconds`는 시도마다 다시 적용되므로, 메모리가 계속 새는 코드면 사람에게 알리고 취소할지 묻는다.
+- `SUCCEEDED`가 아니면 `last_error_code`·`last_error_message`를 전하고 stderr 로그로 원인을 설명한다. 준비 단계 실패(`FAILED_ENV` 등)는 로그가 없을 수 있다(404 `NO_ATTEMPT`) → `last_error_message`만 전한다.
+- GPU 메모리 부족이 확정되면 한 단계 큰 GPU 서버로 자동 재투입된다(`events`의 `JOB_OOM_REQUEUED`). 시도마다 `timeout_seconds`가 다시 적용되므로, 메모리가 계속 새는 코드면 사람에게 알리고 취소할지 묻는다.
 
 ### 5단계 — 로그와 결과
 
@@ -150,7 +152,8 @@ curl --fail-with-body "$BASE/v1/jobs/$JOB_ID/log?stream=stderr" -H "Authorizatio
 ## 3. 그 밖의 호출
 
 - GPU 서버 현황: `GET /v1/tiers`, `GET /v1/workers`. 내 대기열: `GET /v1/queue`(`queue:read`). 점검 상태: `GET /v1/maintenance/status`(인증 불필요).
-- 파일 목록: `GET /v1/storage/objects?scope=…&folder=…&prefix=…`. 다운로드 주소: `GET /v1/storage/objects/{key}/url?scope=…&folder=…`(둘 다 `storage:read`).
+- 파일 목록: `GET /v1/storage/objects?scope=…&folder=…&prefix=…`. 다운로드 주소: `GET /v1/storage/objects/{key}/url?scope=…&folder=…`. 폴더 크기: `GET /v1/storage/usage`(모두 `storage:read`).
+- 폴더·여러 항목의 이동·복사·삭제는 `task_id`를 받고 뒤에서 돈다 → 끝날 때까지 상태를 확인한다([references/api.md](references/api.md)).
 - 취소: `POST /v1/jobs/{id}/cancel`(`jobs:cancel`) — 사람이 확인한 뒤에만 부른다.
 
 ## 4. 오류가 나면
