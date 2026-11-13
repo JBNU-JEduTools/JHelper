@@ -42,18 +42,18 @@ curl --fail-with-body "$BASE/v1/me" -H "Authorization: Bearer $JPUSHARE_API_KEY"
 아래 체크리스트를 응답에 옮겨 적고 단계마다 표시한다.
 
 ```
-- [ ] 1. GPU 서버와 실행 환경 고르기
+- [ ] 1. GPU 서버 고르기
 - [ ] 2. 입력 데이터 올리기(필요할 때만)
 - [ ] 3. 코드 ZIP 만들고 제출하기
 - [ ] 4. 종료 상태까지 기다리기
 - [ ] 5. 로그와 결과 받기
 ```
 
-### 1단계 — GPU 서버와 실행 환경
+### 1단계 — GPU 서버
 
-`GET /v1/tiers`로 GPU 서버(`name`, `compute_capability`)를, `GET /v1/workspace-profiles`로 실행 환경(`current_snapshot_id`, `supported_compute_caps`)을 받는다. `supported_compute_caps` 중 GPU 서버의 `compute_capability`와 점 앞 숫자가 같고 점 뒤 숫자가 그 이하인 값이 있는 환경만 쓴다. 둘 중 하나라도 `null`이면 서버가 판정하지 않고 받아 준다.
+`GET /v1/tiers`로 GPU 서버(`name`, `compute_capability`)를 받는다. 실행 환경(이미지)은 고르지 않는다 — 플랫폼이 GPU 서버 세대에 맞는 기본 환경(Python 3.12, PyTorch 2.14.1, g++·nvcc·ninja)을 붙인다.
 
-출력: `TIER`(고른 GPU 서버의 `name`), `SNAPSHOT_ID`(그 환경의 `current_snapshot_id`). 3단계 예제의 `jpu-60`·`$SNAPSHOT_ID` 자리에 이 값을 넣는다.
+출력: `TIER`(고른 GPU 서버의 `name`). 3단계 예제의 `jpu-60` 자리에 이 값을 넣는다.
 
 ### 2단계 — 입력 데이터 업로드 (storage:write)
 
@@ -104,7 +104,6 @@ curl --fail-with-body "$BASE/v1/jobs" \
   -F 'work_type=training' \
   -F 'description=jpushare 스킬 예제' \
   -F 'tier=jpu-60' \
-  -F "workspace_snapshot_id=$SNAPSHOT_ID" \
   -F 'timeout_seconds=3600' \
   -F 'result_location=private' \
   -F 'channels=[{"name":"train","scope":"shared","folder":"data","prefix":"train/","size_gb":1}]' \
@@ -114,7 +113,7 @@ JOB_ID=$(jq -r .job_id job.json)
 
 - `description`(작업 목적, 500자 이내)은 필수다. 사람이 말한 목적을 한 줄로 적는다.
 - `args`·`channels`는 JSON 문자열이다. 채널은 `/data/in/<name>`에 붙고 코드는 `JOB_CHANNEL_<NAME>`으로 읽는다(`val-a` → `JOB_CHANNEL_VAL_A`, 정확한 이름은 상세의 `channels[].env_name`). 잘못 읽어도 코드가 0으로 끝나면 `SUCCEEDED`이므로, 제출 전에 사람 코드가 읽는 변수 이름이 채널 이름과 맞는지 확인한다. 작업 안 환경 변수 전체는 [references/api.md](references/api.md)에 있다.
-- `args`가 비면 `command` 한 줄을 bash가 해석하고(`a && b`), 있으면 셸 없이 실행한다. 작업 안에서는 인터넷이 안 되므로 `pip install`·`git clone`·모델 내려받기를 넣지 않는다. 패키지가 실행 환경에 없으면 사람에게 알린다.
+- `args`가 비면 `command` 한 줄을 bash가 해석하고(`a && b`), 있으면 셸 없이 실행한다. 작업 안에서는 인터넷이 안 되므로 `git clone`·모델 내려받기·인터넷 `pip install`을 넣지 않는다. 실행 환경에 없는 패키지는 사람 PC에서 `pip download --python-version 3.12 --platform manylinux_2_28_x86_64 --platform manylinux2014_x86_64 --only-binary=:all: -d wheels <패키지>`로 받아 코드 ZIP에 넣고, 명령 앞에 `pip install --no-index --break-system-packages --find-links wheels <패키지> &&`를 붙인다. ZIP(500 MiB)에 안 들어가는 큰 wheel(TensorFlow GPU 약 3.3 GB)은 입력 채널 `wheels`로 붙이고 `--find-links "$JOB_CHANNEL_WHEELS"`로 설치한다. TensorFlow는 `"tensorflow[and-cuda]==2.20.*"`로 고정한다(2.21.0은 GPU를 못 찾고 CPU로 돈다). C++·CUDA 확장은 작업 안에서 빌드할 수 있다.
 - `result_location`은 `shared` 또는 `private`다. 코드는 결과를 `/output` 아래에 써야 회수된다.
 - `timeout_seconds`는 60~604800(최대 7일)이다. GPU 수는 GPU 서버가 정한다.
 - 작업 안의 `/tmp`와 `~`는 작업마다 새로 만들어지는 빈 공간이고 실행 서버 디스크 위에 있다. 도구 캐시는 플랫폼이 `TMPDIR=/scratch/tmp`, `XDG_CACHE_HOME=/scratch/.cache` 등으로 돌려 둔다. `/tmp`·`~`·`/scratch`는 작업이 끝나면 지워지므로 남길 결과는 `/output`에 쓰게 한다.
@@ -132,7 +131,7 @@ curl --fail-with-body "$BASE/v1/jobs/$JOB_ID" -H "Authorization: Bearer $JPUSHAR
 - 진행 중: `USER_QUEUE_WAIT`·`GLOBAL_QUEUE_WAIT`·`ESCALATION_WAIT`(대기), `ASSIGNED`, `RUNNING`, `CANCEL_REQUESTED`.
 - 종료 상태(10개, 이후 바뀌지 않음): `SUCCEEDED`, `FAILED_RUNTIME`, `FAILED_ENV`, `FAILED_OOM_CONFIRMED`, `FAILED_OOM_SUSPECT`, `TIMED_OUT`, `CANCELLED`, `KILLED_BY_ADMIN`, `FAILED_SUBMISSION`, `UPLOAD_FAILED`.
 - `SUCCEEDED`가 아니면 `last_error_code`·`last_error_message`를 전하고 stderr 로그로 원인을 설명한다. 준비 단계 실패(`FAILED_ENV` 등)는 로그가 없을 수 있다(404 `NO_ATTEMPT`) → `last_error_message`만 전한다.
-- GPU 메모리 부족이 확정되면 한 단계 큰 GPU 서버로 자동 재투입된다(`events`의 `JOB_OOM_REQUEUED`). 시도마다 `timeout_seconds`가 다시 적용되므로, 메모리가 계속 새는 코드면 사람에게 알리고 취소할지 묻는다.
+- GPU 메모리 부족이 확정되면 한 단계 큰 GPU 서버로 자동 재투입되고 실행 환경도 그 서버에 맞게 다시 붙는다(`events`의 `JOB_OOM_REQUEUED`). 시도마다 `timeout_seconds`가 다시 적용되므로, 메모리가 계속 새는 코드면 사람에게 알리고 취소할지 묻는다.
 
 ### 5단계 — 로그와 결과
 
@@ -166,7 +165,7 @@ HTTP 상태와 본문을 함께 보고 분기한다. 일반 오류는 `code`, �
 | 403 `API_KEY_SCOPE_REQUIRED` | 필요한 범위를 넣은 새 키를 요청한다 |
 | 403 `JWT_REQUIRED` | 키로 부를 수 없는 경로다. 키로 다시 시도하지 않는다 |
 | 403 `NO_LAB` | 연구실 소속이 없다 → 웹에서 참가 승인부터 받게 한다 |
-| 400 `VALIDATION_FAILED` + `WORKSPACE_GPU_INCOMPATIBLE` | 1단계 호환 조건에 맞는 실행 환경이나 GPU 서버로 바꾼다 |
+| 409 `NO_RUNTIME_FOR_TIER` | 그 GPU 서버에 붙일 실행 환경이 없다 → 다른 GPU 서버로 내고, 반복되면 운영자 확인을 요청한다 |
 | 400 `VALIDATION_FAILED` + `WORKER_ACCOUNT_MISSING` | 다른 GPU 서버로 내거나 잠시 뒤 다시 낸다. 반복되면 운영자 확인을 요청한다 |
 | 400 `DESCRIPTION_REQUIRED` | 작업 목적을 `description`에 적어 다시 낸다 |
 | 429 | `Retry-After` 헤더만큼 기다린다. 전역 제한의 본문은 평문이라 JSON으로 파싱하지 않는다 |

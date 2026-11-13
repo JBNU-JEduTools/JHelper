@@ -1,6 +1,6 @@
 ---
 title: '학습 작업 실행'
-description: '코드 ZIP과 입력 데이터, GPU 서버와 호환되는 실행 환경을 골라 JPUShare 작업을 제출하는 방법입니다.'
+description: '코드 ZIP과 입력 데이터, GPU 서버를 골라 JPUShare 작업을 제출하는 방법입니다. 실행 환경은 GPU 서버에 맞춰 붙습니다.'
 slug: 'JPUShare/1Web/3Jobs'
 ---
 
@@ -84,12 +84,17 @@ print("saved summary.json", flush=True)
 
 고르지 않으면 입력 데이터의 자리를 따라갑니다(내 폴더 입력이 있으면 내 폴더).
 
-## 5. 실행 환경과 GPU 호환, 명령, 시간 제한
+## 5. 실행 환경, 명령, 시간 제한
 
-![실행 판 — 실행 환경, 시간 제한, 실행 명령을 채운 모습](../images/job-execution.png)
+실행 환경은 고르지 않습니다. 고른 GPU 서버에 맞는 기본 환경이 붙고, 작업 상세의 **실행 환경**에 이름과 버전이 나옵니다.
 
-1. **실행 환경**에서 코드에 필요한 Python·라이브러리가 든 환경을 고릅니다.
-2. 고른 GPU 서버의 GPU 세대를 지원하지 않는 환경은 "(이 GPU 미지원)"으로 표시되고 선택할 수 없습니다. 예를 들어 TITAN Xp 서버(`jpu-48-edu`)에서는 `pytorch-blackwell`을 고를 수 없고, 칸 아래에 그 이유가 나옵니다. GPU 서버를 바꾸면 고를 수 있는 첫 환경으로 바뀌므로 제출 전에 다시 확인합니다.
+| 실행 환경 | 붙는 GPU 서버 | 들어 있는 것 |
+| --- | --- | --- |
+| `gpu-cu126` | TITAN Xp(GPU 세대 6.1) | Python 3.12, PyTorch 2.14.1(CUDA 12.6), torchvision 0.29.1, torchaudio 2.11.0, numpy 2.5.3, Pillow, g++ 13.3, nvcc 12.6, ninja |
+| `gpu-cu130` | 그 밖의 서버(GPU 세대 7.5 이상) | Python 3.12, PyTorch 2.14.1(CUDA 13.0), torchvision 0.29.1, torchaudio 2.11.0, numpy 2.5.3, Pillow, g++ 13.3, nvcc 13.0, ninja |
+
+1. 실행 환경에 없는 Python 패키지는 아래 "인터넷 없이 패키지 쓰기"처럼 wheel로 가져옵니다.
+2. C++·CUDA 확장(`torch.utils.cpp_extension`)은 작업 안에서 빌드할 수 있습니다.
 3. **시간 제한**에 1~168시간(최대 7일) 사이의 정수를 적습니다. 범위를 벗어나면 입력 칸 아래에 오류가 뜨고 **제출** 버튼이 비활성화됩니다.
 4. 예제라면 **실행 명령**에 다음을 입력합니다.
 
@@ -106,9 +111,33 @@ python preprocess.py && python train.py --epochs 10
 CUDA_VISIBLE_DEVICES=0 python train.py
 ```
 
-- 작업 안에서는 인터넷에 연결되지 않습니다. `pip install`, `git clone`, 모델 내려받기는 실패합니다. 패키지는 실행 환경에 든 것을 쓰고, 데이터와 모델 가중치는 [데이터 관리](/JPUShare/1Web/2Datasets)에서 올려 입력으로 연결합니다.
+- 작업 안에서는 인터넷에 연결되지 않습니다. `pip install`, `git clone`, 모델 내려받기는 실패합니다. 데이터와 모델 가중치는 [데이터 관리](/JPUShare/1Web/2Datasets)에서 올려 입력으로 연결합니다.
 - `&`로 여러 프로그램을 함께 돌리고 `wait`로 기다리면, 그중 하나가 오류로 끝나도 작업은 **완료**로 표시됩니다. 로그에서 각각 끝까지 돌았는지 확인합니다.
 - `2>&1`처럼 오류 출력을 다른 곳으로 보내면 **오류 출력** 로그가 비고, GPU 메모리 부족도 가려내지 못합니다.
+
+### 인터넷 없이 패키지 쓰기
+
+내 PC에서 실행 환경과 같은 Python 3.12·linux x86_64용 wheel을 받아 코드 ZIP에 넣습니다.
+
+```bash
+pip download --python-version 3.12 --platform manylinux_2_28_x86_64 --platform manylinux2014_x86_64 --only-binary=:all: -d wheels einops
+```
+
+실행 명령 앞에서 그 폴더로 설치합니다. 실행 환경의 Python은 시스템 패키지로 표시되어 있어 `--break-system-packages`가 있어야 설치됩니다(작업마다 새 홈에 깔리므로 다른 작업에는 영향이 없습니다).
+
+```bash
+pip install --no-index --break-system-packages --find-links wheels einops && python train.py
+```
+
+TensorFlow처럼 큰 패키지(GPU용 약 3.3 GB)는 코드 ZIP(500 MiB 한도)에 들어가지 않습니다. wheel 폴더를 [데이터 관리](/JPUShare/1Web/2Datasets)에 올리고 이름을 `wheels`로 지정한 입력으로 연결한 뒤, 그 경로에서 설치합니다. 버전은 `2.20`으로 고정합니다. 2.21.0은 GPU를 찾지 못하고 CPU로만 돕니다.
+
+```bash
+pip download --python-version 3.12 --platform manylinux_2_28_x86_64 --platform manylinux2014_x86_64 --only-binary=:all: -d wheels "tensorflow[and-cuda]==2.20.*"
+```
+
+```bash
+pip install --no-index --break-system-packages --find-links "$JOB_CHANNEL_WHEELS" "tensorflow[and-cuda]==2.20.*" && python train.py
+```
 
 ## 6. 제출과 확인
 
