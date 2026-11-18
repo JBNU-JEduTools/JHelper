@@ -32,6 +32,7 @@ SKILL.md의 절차에서 세부가 필요할 때 읽는다. 기본 주소는 `ht
 | `storage:organize` | `POST /v1/storage/move`, `POST /v1/storage/move-preview`, `POST /v1/storage/multi-move`, `POST /v1/storage/multi-move-preview`, `POST /v1/storage/rename`, `POST /v1/storage/rename-preview`, `GET /v1/storage/{move,multi-move,rename}/{task_id}` |
 | `storage:delete` | `DELETE /v1/storage/objects/{key}`, `POST /v1/storage/folders/delete`, `POST /v1/storage/folders/delete-preview`, `POST /v1/storage/multi-delete`, `POST /v1/storage/multi-delete-preview`, `GET /v1/storage/folders/delete/{task_id}`, `GET /v1/storage/multi-delete/{task_id}` |
 | `lab:read` | `GET /v1/labs/me`, `GET /v1/labs/me/members`, `GET /v1/labs/me/jobs`, `GET /v1/labs/me/jobs/{id}`, `GET /v1/labs/me/usage` |
+| `llm:invoke` | `GET /v1/llm/models`, `GET /v1/llm/models/{model}/health`, `POST /v1/llm/chat/completions`, `POST /v1/llm/models/{model}/chat/completions` |
 
 ## 저장 위치(scope/folder)
 
@@ -145,4 +146,10 @@ done | jq -s --arg id "$UPLOAD_ID" '{upload_id:$id, parts:.}' > complete.json
 | 400 `RESULTS_TOO_LARGE` | 결과가 2 GiB를 넘어 ZIP으로 못 받는다 → `GET /v1/jobs/{id}/results`의 파일별 주소를 쓴다 |
 | 429 | 전역 제한은 평문 본문 + `Retry-After` 헤더, `JOIN_RATE_LIMITED`·`LOG_STREAM_LIMIT`은 JSON 봉투. 표시된 시간만큼 기다린다 |
 | 503 `SERVICE_MAINTENANCE` | 점검 중 — `GET /v1/maintenance/status`로 끝난 것을 확인한다 |
-| 503 `LLM_DISABLED` | LLM 기능은 제공하지 않는다 |
+| 403 `API_KEY_SCOPE_REQUIRED` (`/v1/llm/*`) | 키에 `llm:invoke`가 없다 → 사람에게 웹의 **LLM 사용** 켜기를 요청한다 |
+| 403 `LLM_LAB_REQUIRED` | 연구실 구성원이 아니다 |
+| 404 `LLM_MODEL_UNKNOWN` | 없는 모델 이름 → 응답의 `models` 목록에서 고른다 |
+| 403 `JWT_REQUIRED` (`/v1/llm/*`) | v1 키다 → 사람에게 새 키 발급을 요청한다 |
+| 503 `LLM_MODEL_UNAVAILABLE` | 그 모델이 떠 있지 않다(연구 작업에 자리를 비켰거나 올라오는 중) → `model`을 `auto`로 바꾸거나 잠시 뒤 다시 보낸다. `auto`로도 503이면 잠시 뒤 다시 보낸다 |
+| 502 `LLM_UPSTREAM_REJECTED` | LLM 서버 설정 문제 → 사람에게 알린다 |
+| 503 `LLM_DISABLED` | LLM 서비스가 꺼져 있다 → 사람에게 알린다 |

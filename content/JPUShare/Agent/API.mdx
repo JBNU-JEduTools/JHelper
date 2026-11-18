@@ -45,6 +45,7 @@ API 기본 주소는 `https://share.jedutools.io`입니다. 먼저 [시작하기
 | `storage:organize` | 파일·폴더 이동·이름 변경 | `POST /v1/storage/move`, `POST /v1/storage/rename` 등 |
 | `storage:delete` | 파일·폴더 삭제 | `DELETE /v1/storage/objects/{key}`, `POST /v1/storage/folders/delete` 등 |
 | `lab:read` | 소속 연구실·구성원·연구실 작업·사용량 조회 | `GET /v1/labs/me`, `GET /v1/labs/me/members`, `GET /v1/labs/me/jobs`, `GET /v1/labs/me/usage` |
+| `llm:invoke` | LLM 모델 목록 조회·채팅 | `GET /v1/llm/models`, `GET /v1/llm/models/{model}/health`, `POST /v1/llm/chat/completions`, `POST /v1/llm/models/{model}/chat/completions` |
 
 인증 없이 호출할 수 있는 공개 경로는 `GET /v1/auth/config`와 `GET /v1/maintenance/status`뿐입니다.
 
@@ -349,7 +350,7 @@ curl --fail-with-body -X POST "https://share.jedutools.io/v1/jobs/$JOB_ID/cancel
 | --- | --- |
 | 401 | 키가 없거나 만료·폐기됨. `Authorization: Bearer jpk_...` 형식과 키 상태를 확인합니다. |
 | 403 `JWT_REQUIRED` | 그 경로는 API 키로 호출할 수 없습니다(2절 표 밖). 브라우저 로그인 토큰이 필요합니다. |
-| 403 `API_KEY_SCOPE_REQUIRED` | 키에 그 경로의 범위가 없습니다. 필요한 범위를 포함해 새 키를 발급받습니다. |
+| 403 `API_KEY_SCOPE_REQUIRED` | 키에 그 경로의 범위가 없습니다. 필요한 범위를 포함해 새 키를 발급받습니다. `llm:invoke`는 있는 키에서 켤 수 있습니다([LLM 시작하기](/JPUShare/3LLM/1Start)). |
 | 403 `API_KEY_ROUTE_FORBIDDEN` | 분류되지 않은 경로입니다. 호출 경로와 메서드를 확인합니다. |
 | 403 (그 밖) | 해당 작업·저장 공간에 접근할 권한이 있는지 확인합니다. |
 | 403 `NO_LAB` | 연구실 소속이 없어 작업 제출이 거절되었습니다. 계정의 연구실 참가 상태를 확인합니다. |
@@ -386,7 +387,7 @@ curl -sS 'https://share.jedutools.io/v1/api-keys' \
 
 ## 8. 주의할 것
 
-- **LLM 기능은 현재 제공하지 않습니다.** `/v1/llm/*` 경로는 503 `LLM_DISABLED`입니다.
+- **LLM은 `llm:invoke` 범위가 든 키로 부릅니다.** 키에 LLM을 켜는 법, 모델 이름, 오류(503 `LLM_MODEL_UNAVAILABLE` 등)는 [LLM 사용하기](/JPUShare/3LLM)를 보세요. 모델이 떠 있는지는 `health`보다 실제 요청의 응답으로 판단합니다.
 - **파괴적 동작(삭제·취소·순서 변경)은 사람의 확인을 받은 뒤 실행하세요.**
 - **`/docs`·`/redoc`·`/openapi.json`은 API 문서 공개가 설정된 환경에서만 열립니다.** 이 주소의 404만으로 서비스 장애라고 판단하지 마세요.
 - **만료를 미리 확인하세요.** 키는 최대 90일까지 유효하며 만료되면 401이 반환됩니다. 오래 도는 자동화는 만료 전 재발급 절차를 운영자와 맞춰 두세요.
