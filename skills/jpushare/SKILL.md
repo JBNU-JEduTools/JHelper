@@ -186,4 +186,4 @@ curl -sS "$BASE/v1/jobs" -H "Authorization: Bearer $READONLY_API_KEY" -F 'comman
 - 필요한 범위만 요청한다. 읽기만 할 거면 쓰기 범위를 달라고 하지 않는다.
 - 삭제·취소·대기열 순서 변경은 사람이 확인한 뒤에만 한다. 삭제·이동·복사 전에는 짝이 되는 `*-preview` 경로([references/api.md](references/api.md)의 범위 표)로 영향 범위를 먼저 보여 준다.
 - 키 원문을 파일·로그·보고·커밋에 쓰지 않는다.
-- `/v1/llm/*`는 부르지 않는다(503 `LLM_DISABLED`).
+- `/v1/llm/*`(LLM 호출)는 사람이 LLM 사용을 요청할 때만 부른다. 키에 `llm:invoke`가 있어야 한다. 503 `LLM_MODEL_UNAVAILABLE`이면 그 모델이 연구 작업에 자리를 비킨 것이니 `model`을 `auto`로 바꾸거나 잠시 뒤 다시 보낸다. 모델이 떠 있는지는 `health` 결과보다 실제 요청의 응답으로 판단한다. 짧은 답이면 본문에 `"chat_template_kwargs": {"enable_thinking": false}`를 넣는다. 넣지 않으면 답이 `reasoning_content`로만 오고 `content`가 빌 수 있다.

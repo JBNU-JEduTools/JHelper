@@ -14,9 +14,15 @@
 - [에이전트 연결하기](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/content/JPUShare/Agent/Connect.mdx): 사람이 따라 하는 설치·키 넣기 안내(설치 명령과 복사용 프롬프트). 키를 넣는 `export` 명령은 사람이 실행합니다 — `JPUSHARE_API_KEY`가 이미 있으면 에이전트는 덮어쓰지 않습니다
 - [API 사용법](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/content/JPUShare/Agent/API.mdx): 인증, 허용 범위별 경로, 저장 위치, 업로드, 작업 제출·조회·취소, 오류 코드 참조
 
+## JPUShare — LLM
+
+- [LLM 사용하기](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/content/JPUShare/LLM.mdx): API 키(jpk_)에 llm:invoke 범위를 켜고 OpenAI 호환 주소 https://share.jedutools.io/v1/llm 으로 부르는 방법의 목차
+- [LLM 시작하기](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/content/JPUShare/LLM/Start.mdx): 새 키 발급 때 LLM 사용 체크, 이미 있는 키에 LLM 켜기, 연결 확인(GET /v1/llm/models), curl·Python 예시
+- [LLM 모델과 사용 규칙](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/content/JPUShare/LLM/Models.mdx): 모델 이름과 auto, 연구 작업 우선(503 LLM_MODEL_UNAVAILABLE), 생각 모드(enable_thinking), 오류 표
+
 ## JPUShare — 웹 사용 안내
 
-- [JPUShare 소개](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/content/JPUShare.mdx): 서비스 개요, 웹·에이전트 두 가지 사용 방법, 주요 용어(연구실, GPU 서버, 참가 코드, 연구실 공유·내 폴더, 실행 환경, 작업, 결과 파일)
+- [JPUShare 소개](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/content/JPUShare.mdx): 서비스 개요, 웹·에이전트·LLM 세 가지 사용 방법, 주요 용어(연구실, GPU 서버, 참가 코드, 연구실 공유·내 폴더, 실행 환경, 작업, 결과 파일)
 - [시작하기](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/content/JPUShare/Web/GettingStarted.mdx): 회원가입, 이메일 인증, 참가 코드로 연구실 참가, 책임교수·연구실 관리자의 참가 코드 재발급, 첫 작업 준비
 - [데이터 관리](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/content/JPUShare/Web/Datasets.mdx): 연구실 공유와 내 폴더, 파일 업로드·찾기·다운로드, 작업 입력으로 연결, 파일과 폴더 삭제
 - [학습 작업 실행](https://raw.githubusercontent.com/JBNU-JEduTools/JHelper/main/content/JPUShare/Web/Jobs.mdx): 코드와 데이터 경로 준비, Python 예제, 작업 제출 화면, 입력 데이터와 결과 위치, 실행 환경과 GPU 호환, 명령, 시간 제한
